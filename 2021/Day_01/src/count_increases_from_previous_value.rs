@@ -11,6 +11,7 @@ pub fn using_simple_for_loop(values: &Vec<u64>) -> u64 {
     return number_of_increases;
 }
 
+#[allow(dead_code)] // Don't complain about alternative implementation not being used.
 pub fn using_window_slices(values: &Vec<u64>) -> u64 {
     // Trying out how windows work.
     // let mut number_of_increases: u64 = 0;
