@@ -14,11 +14,14 @@ fn main(){
         260,
         263
     ];
-    let count = count_increases_from_previous_value(example_values);
+    let count = count_increases_from_previous_value(&example_values);
     println!("Count is: \"{}\"", count);
+    println!("Running second thingy.");
+    let c2 = count_increases_using_window_slices(&example_values);
+    println!("Count2 is: \"{}\"", c2);
 }
 
-fn count_increases_from_previous_value(values: Vec<u64>) -> u64 {
+fn count_increases_from_previous_value(values: &Vec<u64>) -> u64 {
     let mut number_of_increases: u64 = 0;
     let number_of_values = values.len().try_into().unwrap();
     // Skip first element by iterating from 1 instead of 0.
@@ -27,8 +30,33 @@ fn count_increases_from_previous_value(values: Vec<u64>) -> u64 {
             number_of_increases += 1;
         }
     }
-    // for value in values.skip(1) {
-
-    // }
     return number_of_increases;
+}
+
+// fn count_increases_using_fold(values: Vec<u64>) -> u64 {
+//     let mut number_of_increases: u64 = 0;
+//     values.iter().fold(0, )
+// }
+
+fn count_increases_using_window_slices(values: &Vec<u64>) -> u64 {
+    // let mut number_of_increases: u64 = 0;
+    // // values.windows(2).all(|window: [u64; 2]| -> () { if window[0] < window[1] { number_of_increases += 1; } });
+    // let mut iter = values.windows(2);
+    // for elem in iter {
+    //     println!("first: {}, second: {}", elem[0], elem[1]);
+    // }
+    // return number_of_increases;
+
+    // return values.windows(2).fold(0u64, |number_of_increases: u64, next_window| {
+    //     number_of_increases + next_window[0] + next_window[1]
+    // });
+
+    return values.windows(2).fold(0u64, |number_of_increases: u64, next_window| {
+        if next_window[0] < next_window[1] {
+            return number_of_increases + 1u64;
+        }
+        else {
+            return number_of_increases + 0u64;
+        }
+    });
 }
