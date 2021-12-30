@@ -33,12 +33,8 @@ fn count_increases_from_previous_value(values: &Vec<u64>) -> u64 {
     return number_of_increases;
 }
 
-// fn count_increases_using_fold(values: Vec<u64>) -> u64 {
-//     let mut number_of_increases: u64 = 0;
-//     values.iter().fold(0, )
-// }
-
 fn count_increases_using_window_slices(values: &Vec<u64>) -> u64 {
+    // Trying out how windows work.
     // let mut number_of_increases: u64 = 0;
     // // values.windows(2).all(|window: [u64; 2]| -> () { if window[0] < window[1] { number_of_increases += 1; } });
     // let mut iter = values.windows(2);
@@ -47,16 +43,17 @@ fn count_increases_using_window_slices(values: &Vec<u64>) -> u64 {
     // }
     // return number_of_increases;
 
+    // Verify that source of error E0308 expected `u64`, found `()` is not me misunderstanding something very basic.
     // return values.windows(2).fold(0u64, |number_of_increases: u64, next_window| {
     //     number_of_increases + next_window[0] + next_window[1]
     // });
 
-    return values.windows(2).fold(0u64, |number_of_increases: u64, next_window| {
+    return values.windows(2).fold(0, |number_of_increases, next_window| {
         if next_window[0] < next_window[1] {
-            return number_of_increases + 1u64;
+            return number_of_increases + 1;
         }
         else {
-            return number_of_increases + 0u64;
+            return number_of_increases;
         }
     });
 }
