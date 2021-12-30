@@ -48,6 +48,10 @@ fn count_increases_using_window_slices(values: &Vec<u64>) -> u64 {
     //     number_of_increases + next_window[0] + next_window[1]
     // });
 
+    // Brief explanation:
+    // `windows(2)`, splits vector into slices, called windows, of lenght 2.
+    // Example `vec![1, 2, 3, 4].windows(2)` yields `[1, 2], [2, 3], [3, 4]`.
+    // The returns are neccessary, because fold seems to expect the comprehension to return the next value to be added to the accumulation variable.
     return values.windows(2).fold(0, |number_of_increases, next_window| {
         if next_window[0] < next_window[1] {
             return number_of_increases + 1;
