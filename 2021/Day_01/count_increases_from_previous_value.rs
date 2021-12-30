@@ -1,25 +1,4 @@
-fn main(){
-    println!("hello world!!");
-    let example_values: Vec<u64> = vec![
-        199,
-        200,
-        208,
-        210,
-        200,
-        207,
-        240,
-        269,
-        260,
-        263
-    ];
-    let count = count_increases_from_previous_value(&example_values);
-    println!("Count is: \"{}\"", count);
-    println!("Running second thingy.");
-    let c2 = count_increases_using_window_slices(&example_values);
-    println!("Count2 is: \"{}\"", c2);
-}
-
-fn count_increases_from_previous_value(values: &Vec<u64>) -> u64 {
+pub fn using_simple_for_loop(values: &Vec<u64>) -> u64 {
     let mut number_of_increases: u64 = 0;
     use std::convert::TryInto;
     let number_of_values = values.len().try_into().unwrap();
@@ -32,7 +11,7 @@ fn count_increases_from_previous_value(values: &Vec<u64>) -> u64 {
     return number_of_increases;
 }
 
-fn count_increases_using_window_slices(values: &Vec<u64>) -> u64 {
+pub fn using_window_slices(values: &Vec<u64>) -> u64 {
     // Trying out how windows work.
     // let mut number_of_increases: u64 = 0;
     // // values.windows(2).all(|window: [u64; 2]| -> () { if window[0] < window[1] { number_of_increases += 1; } });
