@@ -9,7 +9,7 @@ fn main(){
 
 fn read_input_from_file(filename: &str) -> Vec<u64> {
     let contents = std::fs::read_to_string(filename).expect("Failed to read from file");
-    let mut lines = contents.lines();
+    let lines = contents.lines();
     let numbers: Vec<u64> = lines.map(|s| s.parse().expect("Failed to parse line")).collect();
     return numbers;
 }
