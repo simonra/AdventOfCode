@@ -1,4 +1,5 @@
 mod count_increases_from_previous_value;
+mod sliding_window_count_increases;
 
 fn main(){
     let values = read_input_from_file("./src/input.txt");
