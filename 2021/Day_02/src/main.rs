@@ -1,5 +1,9 @@
 fn main() {
-    println!("Hello, world!");
+    let commands = read_input_from_file("./src/input.txt");
+    let final_position = calculate_position(&commands);
+    let product = final_position.horizontal * final_position.depth;
+    println!("Product of final position depth and horizontal position is:");
+    println!("{}", product);
 }
 
 fn calculate_position(commands: &Vec<Command>) -> Position {
