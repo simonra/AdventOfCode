@@ -2,12 +2,25 @@ fn main() {
     println!("Hello, world!");
 }
 
+fn calculate_position(commands: &Vec<Command>) -> Position {
+    let mut position_depth = 0;
+    let mut position_horizontal = 0;
+    for command in commands {
+        match command.action {
+            Action::Forward => position_horizontal += command.value,
+            Action::Down => position_depth += command.value,
+            Action::Up => position_depth -= command.value,
+            _ => unimplemented!(),
+        }
+    }
+
+    return Position { horizontal: position_horizontal, depth: position_depth, };
+}
+
 fn read_input_from_file(filename: &str) -> Vec<Command> {
     let content = std::fs::read_to_string(filename)
         .expect("Failed to read from file");
-    let lines = content.lines();
-    let commands = lines.map(|s| make_command(s));
-    return commands.collect();
+    return parse_all_commands(&content);
 }
 
 fn parse_all_commands(input: &str) -> Vec<Command> {
@@ -31,6 +44,11 @@ fn parse_action(input: &str) -> Action {
         // _ => panic!("Received \"{}\", which is not a recognized command.", _),
         _ => panic!("Received a not recognized command."),
     }
+}
+
+struct Position {
+    horizontal: u64,
+    depth: u64,
 }
 
 struct Command {
@@ -103,5 +121,15 @@ mod tests {
 
         assert_eq!(result[3].value, 3);
         assert!(matches!(result[3].action, Action::Up));
+    }
+
+    #[test]
+    fn test_calculate_position() {
+        let testinput = get_test_input();
+        let commands = parse_all_commands(testinput);
+        let result = calculate_position(&commands);
+
+        assert_eq!(result.horizontal, 15);
+        assert_eq!(result.depth, 10);
     }
 }
