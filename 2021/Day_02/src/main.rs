@@ -10,7 +10,6 @@ fn calculate_position(commands: &Vec<Command>) -> Position {
             Action::Forward => position_horizontal += command.value,
             Action::Down => position_depth += command.value,
             Action::Up => position_depth -= command.value,
-            _ => unimplemented!(),
         }
     }
 
@@ -37,13 +36,10 @@ fn make_command(input: &str) -> Command {
 }
 
 fn parse_action(input: &str) -> Action {
-    match input {
-        "forward" => Action::Forward,
-        "down" => Action:: Down,
-        "up" => Action::Up,
-        // _ => panic!("Received \"{}\", which is not a recognized command.", _),
-        _ => panic!("Received a not recognized command."),
-    }
+    if input == "forward" { return Action::Forward }
+    if input == "down" { return Action:: Down }
+    if input == "up" { return Action::Up }
+    panic!("Received \"{}\", which is not a recognized command.", input);
 }
 
 struct Position {
@@ -101,7 +97,7 @@ mod tests {
     #[should_panic]
     fn test_parse_action_fail() {
         let testinput = "";
-        let result = parse_action(testinput);
+        let _result = parse_action(testinput);
     }
 
     #[test]
