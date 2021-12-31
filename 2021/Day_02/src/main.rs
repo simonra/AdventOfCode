@@ -36,10 +36,12 @@ fn make_command(input: &str) -> Command {
 }
 
 fn parse_action(input: &str) -> Action {
-    if input == "forward" { return Action::Forward }
-    if input == "down" { return Action:: Down }
-    if input == "up" { return Action::Up }
-    panic!("Received \"{}\", which is not a recognized command.", input);
+    match input {
+        "forward" => Action::Forward,
+        "down" => Action:: Down,
+        "up" => Action::Up,
+        _ => panic!("Received \"{}\", which is not a recognized command.", input),
+    }
 }
 
 struct Position {
