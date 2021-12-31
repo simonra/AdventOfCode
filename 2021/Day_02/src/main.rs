@@ -8,12 +8,6 @@ fn read_input_from_file(filename: &str) -> Vec<Command> {
     let lines = content.lines();
     let commands = lines.map(|s| make_command(s));
     return commands.collect();
-
-    // return std::fs::read_to_string(filename)
-    //     .expect("Failed to read from file")
-    //     .lines()
-    //     .map(|s| make_command(s))
-    //     .collect();
 }
 
 fn parse_all_commands(input: &str) -> Vec<Command> {
@@ -64,12 +58,11 @@ mod tests {
     }
 
     const EXPECTED_RESULT: u64 = 150;
-
     #[test]
-    fn test_parse_action_up() {
-        let testinput = "up";
+    fn test_parse_action_forward() {
+        let testinput = "forward";
         let result = parse_action(testinput);
-        assert!(matches!(result, Action::Up));
+        assert!(matches!(result, Action::Forward));
     }
 
     #[test]
@@ -80,10 +73,10 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_action_forward() {
-        let testinput = "forward";
+    fn test_parse_action_up() {
+        let testinput = "up";
         let result = parse_action(testinput);
-        assert!(matches!(result, Action::Forward));
+        assert!(matches!(result, Action::Up));
     }
 
     #[test]
@@ -93,13 +86,22 @@ mod tests {
         let result = parse_action(testinput);
     }
 
-    // #[test]
-    // fn test_window_slices() {
-    //     // let input = EXAMPLE_VALUES.to_vec();
-    //     // let result = using_window_slices(&input);
-    //     // assert_eq!(result, EXPECTED_RESULT);
-    // }
+    #[test]
+    fn test_make_command() {
+        let testinput = "forward 5";
+        let result = make_command(testinput);
+        assert_eq!(result.value, 5);
+        assert!(matches!(result.action, Action::Forward));
+    }
+
+    #[test]
+    fn test_parse_all_commands() {
+        let testinput = get_test_input();
+        let result = parse_all_commands(testinput);
+
+        assert_eq!(result.len(), 6);
+
+        assert_eq!(result[3].value, 3);
+        assert!(matches!(result[3].action, Action::Up));
+    }
 }
-
-
-// read input -> split to lines -> map each line to tuple (where the last substring is mapped/parsed to int -> collect to liar of tuples.)
