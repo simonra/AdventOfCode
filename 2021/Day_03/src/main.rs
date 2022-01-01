@@ -62,23 +62,52 @@ fn calculate_power_consumption(report: &Vec<String>) -> u64 {
 
 fn calculate_life_support_rating(report: &Vec<String>) -> u64 {
     let report_as_binary_characters: Vec<&[u8]> = report.iter().map(|s| s.as_bytes()).collect();
-    unimplemented!();
+    let item_size = report_as_binary_characters[0].len();
+    let oxygen_generator_rating = calculate_oxygen_generator_rating(&report_as_binary_characters, item_size);
+    let co2_scrubber_rating = calculate_co2_scrubber_rating(&report_as_binary_characters, item_size);
+    let life_support_rating = oxygen_generator_rating * co2_scrubber_rating;
+    return life_support_rating;
 }
 
-fn calculate_oxygen_generator_rating(report_items: &Vec<&[u8]>, item_size: u8) -> u64 {
+fn calculate_oxygen_generator_rating(report_items: &Vec<&[u8]>, item_size: usize) -> u64 {
     // return report_items.iter();
     // let mut oxygen_level_measurements = report_items.;
     let mut oxygen_level_measurements = report_items.to_vec();
-    for column in 0..item_size.into() {
+    for column in 0..item_size {
         if oxygen_level_measurements.len() == 1 {
             break;
         }
-        let msb = find_most_common_bit_in_column(&oxygen_level_measurements, column, '1');
-        if msb == '1' {
+        let mcb = find_most_common_bit_in_column(&oxygen_level_measurements, column, '1');
+        if mcb == '1' {
             oxygen_level_measurements = oxygen_level_measurements.into_iter().filter(|item| item[column] == b'1').collect();
         }
         else {
             oxygen_level_measurements = oxygen_level_measurements.into_iter().filter(|item| item[column] == b'0').collect();
+        }
+    }
+    if oxygen_level_measurements.len() != 1 {
+        panic!("Expected to only have 1 oxygen reading left after filtering, now I don't know what to do :(");
+    }
+
+    let oxygen_level_measurements_string = String::from_utf8_lossy(oxygen_level_measurements[0]);
+
+    return u64::from_str_radix(&oxygen_level_measurements_string, 2).unwrap();
+}
+
+fn calculate_co2_scrubber_rating(report_items: &Vec<&[u8]>, item_size: usize) -> u64 {
+    // return report_items.iter();
+    // let mut oxygen_level_measurements = report_items.;
+    let mut oxygen_level_measurements = report_items.to_vec();
+    for column in 0..item_size {
+        if oxygen_level_measurements.len() == 1 {
+            break;
+        }
+        let mcb = find_most_common_bit_in_column(&oxygen_level_measurements, column, '1');
+        if mcb == '1' {
+            oxygen_level_measurements = oxygen_level_measurements.into_iter().filter(|item| item[column] == b'0').collect();
+        }
+        else {
+            oxygen_level_measurements = oxygen_level_measurements.into_iter().filter(|item| item[column] == b'1').collect();
         }
     }
     if oxygen_level_measurements.len() != 1 {
@@ -164,7 +193,7 @@ mod tests {
                 "00010",
                 "01010",
             ].iter().map(|&s| s.into()).collect();
-        let result = calculate_power_consumption(&input);
+        let result = calculate_life_support_rating(&input);
         assert_eq!(result, 230);
     }
 
@@ -187,6 +216,27 @@ mod tests {
             ].iter().map(|&s| s.as_bytes()).collect::<Vec<&[u8]>>();
         let result = calculate_oxygen_generator_rating(&input, 5);
         assert_eq!(result, 23);
+    }
+
+    #[test]
+    fn test_calculate_co2_scrubber_rating() {
+        let input =
+            vec![
+                "00100",
+                "11110",
+                "10110",
+                "10111",
+                "10101",
+                "01111",
+                "00111",
+                "11100",
+                "10000",
+                "11001",
+                "00010",
+                "01010",
+            ].iter().map(|&s| s.as_bytes()).collect::<Vec<&[u8]>>();
+        let result = calculate_co2_scrubber_rating(&input, 5);
+        assert_eq!(result, 10);
     }
 
     #[test]
