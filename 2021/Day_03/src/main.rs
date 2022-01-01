@@ -3,6 +3,9 @@ fn main() {
     let result = calculate_power_consumption(&input);
     println!("Result was:");
     println!("{}", result);
+    let life_support_rating = calculate_life_support_rating(&input);
+    println!("Found life support rating to be:");
+    println!("{}", life_support_rating);
 }
 
 fn read_input_from_file(filename: &str) -> Vec<String> {
@@ -70,8 +73,6 @@ fn calculate_life_support_rating(report: &Vec<String>) -> u64 {
 }
 
 fn calculate_oxygen_generator_rating(report_items: &Vec<&[u8]>, item_size: usize) -> u64 {
-    // return report_items.iter();
-    // let mut oxygen_level_measurements = report_items.;
     let mut oxygen_level_measurements = report_items.to_vec();
     for column in 0..item_size {
         if oxygen_level_measurements.len() == 1 {
@@ -95,8 +96,6 @@ fn calculate_oxygen_generator_rating(report_items: &Vec<&[u8]>, item_size: usize
 }
 
 fn calculate_co2_scrubber_rating(report_items: &Vec<&[u8]>, item_size: usize) -> u64 {
-    // return report_items.iter();
-    // let mut oxygen_level_measurements = report_items.;
     let mut oxygen_level_measurements = report_items.to_vec();
     for column in 0..item_size {
         if oxygen_level_measurements.len() == 1 {
@@ -139,17 +138,6 @@ fn find_most_common_bit_in_column(report_items: &Vec<&[u8]>, column: usize, tieb
 
     return tiebreaker;
 }
-
-// fn notes() {
-//     ones = reports.filter(|r| -> r[current] == 1);
-//     zeroes = reports.filter(|r| -> r[current] == 0);
-//     if(ones.len > zeroes)
-//         msb = 1;
-//     else if(zeroes > ones)
-//         msb = 0;
-//     else
-//         msb = 1;
-// }
 
 #[cfg(test)]
 mod tests {
