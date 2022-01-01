@@ -5,7 +5,6 @@ pub fn using_simple_for_loop(values: &Vec<u64>) -> u64 {
     let number_of_values: usize = values.len().try_into().unwrap();
     let sliding_window_size = 3;
     let last_index: usize = number_of_values - sliding_window_size;
-    // Skip first element by iterating from 1 instead of 0.
     for n in 0..last_index {
         let sum_first_window = values[n+0] + values[n+1] + values[n+2];
         let sum_second_window = values[n+1] + values[n+2] + values[n+3];
