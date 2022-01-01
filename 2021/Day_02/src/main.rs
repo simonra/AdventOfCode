@@ -4,7 +4,6 @@ fn main() {
     let product = final_position.horizontal * final_position.depth;
     println!("Product of final position depth and horizontal position is:");
     println!("{}", product);
-    let discard = calculate_position_using_filter(&commands);
 }
 
 fn calculate_position(commands: &Vec<Command>) -> Position {
@@ -22,28 +21,56 @@ fn calculate_position(commands: &Vec<Command>) -> Position {
 }
 
 #[allow(dead_code)] // Don't complain about alternative implementation not being used.
-fn calculate_position_using_filter(commands: &Vec<Command>) -> Position {
+fn calculate_position_using_filter_compact(commands: &Vec<Command>) -> Position {
+    // Make vector into imutable slice so that it can safely be iterated over several times.
+    let commands_slice = commands.as_slice();
+
+    let sum_forwards: u64 = commands_slice
+        .iter()
+        .filter(|command| matches!(command.action, Action::Forward))
+        .map(|command| command.value)
+        .sum();
+
+    let sum_downs: u64 = commands_slice
+        .iter()
+        .filter(|command| matches!(command.action, Action::Down))
+        .map(|command| command.value)
+        .sum();
+
+    let sum_ups: u64 = commands_slice
+        .iter()
+        .filter(|command| matches!(command.action, Action::Up))
+        .map(|command| command.value)
+        .sum();
+
+    let position_depth = sum_downs - sum_ups;
+
+    return Position { horizontal: sum_forwards, depth: position_depth, };
+}
+
+#[allow(dead_code)] // Don't complain about alternative implementation not being used.
+fn calculate_position_using_filter_verbose(commands: &Vec<Command>) -> Position {
+    // Make vector into imutable slice so that it can safely be iterated over several times.
     let commands_slice = commands.as_slice();
 
     let forwards = commands_slice.iter().filter(|command| matches!(command.action, Action::Forward)).collect::<Vec<&Command>>();
+    // println!("{:?}", forwards);
 
-    for f in forwards {
-        println!("{:?}", f);
-    }
+    let ups = commands_slice.iter().filter(|command| matches!(command.action, Action::Up)).collect::<Vec<&Command>>();
 
-    let up = commands_slice.iter().filter(|command| matches!(command.action, Action::Up)).collect::<Vec<&Command>>();
+    let downs = commands_slice.iter().filter(|command| matches!(command.action, Action::Down)).collect::<Vec<&Command>>();
 
-    for c in up {
-        println!("{:?}", c);
-    }
+    let forwards_sum: u64 = forwards.iter().map(|command| command.value).sum();
+    // println!("forwards sum: {}", forwards_sum);
 
-    let down = commands_slice.iter().filter(|command| matches!(command.action, Action::Down)).collect::<Vec<&Command>>();
+    let downs_sum: u64 = downs.iter().map(|command| command.value).sum();
+    // println!("forwards sum: {}", forwards_sum);
 
-    for c in down {
-        println!("{:?}", c);
-    }
+    let ups_sum: u64 = ups.iter().map(|command| command.value).sum();
 
-    return Position { horizontal: 0, depth: 0, };
+    let position_depth = downs_sum - ups_sum;
+
+    return Position { horizontal: forwards_sum, depth: position_depth, };
 }
 
 fn read_input_from_file(filename: &str) -> Vec<Command> {
@@ -108,7 +135,12 @@ mod tests {
         forward 2\n";
     }
 
-    const EXPECTED_RESULT: u64 = 150;
+    fn assert_expected_position(position: Position) {
+        let expected = Position { horizontal: 15, depth: 10, };
+        assert_eq!(position.horizontal, expected.horizontal);
+        assert_eq!(position.depth, expected.depth);
+    }
+
     #[test]
     fn test_parse_action_forward() {
         let testinput = "forward";
@@ -162,7 +194,24 @@ mod tests {
         let commands = parse_all_commands(testinput);
         let result = calculate_position(&commands);
 
-        assert_eq!(result.horizontal, 15);
-        assert_eq!(result.depth, 10);
+        assert_expected_position(result);
+    }
+
+    #[test]
+    fn test_calculate_position_using_filter_compact() {
+        let testinput = get_test_input();
+        let commands = parse_all_commands(testinput);
+        let result = calculate_position_using_filter_compact(&commands);
+
+        assert_expected_position(result);
+    }
+
+    #[test]
+    fn test_calculate_position_using_filter_verbose() {
+        let testinput = get_test_input();
+        let commands = parse_all_commands(testinput);
+        let result = calculate_position_using_filter_verbose(&commands);
+
+        assert_expected_position(result);
     }
 }
