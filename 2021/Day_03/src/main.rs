@@ -145,7 +145,7 @@ mod tests {
 
     #[test]
     fn test_find_most_common_bit_in_column(){
-        let input: Vec<String> =
+        let input =
             vec![
                 "00100",
                 "11110",
@@ -159,21 +159,19 @@ mod tests {
                 "11001",
                 "00010",
                 "01010",
-            ].iter().map(|&s| s.into()).collect();
-        let bytilized = input.iter().map(|s| s.as_bytes()).collect::<Vec<&[u8]>>();
-        let result = find_most_common_bit_in_column(&bytilized, 0, '1');
+            ].iter().map(|&s| s.as_bytes()).collect::<Vec<&[u8]>>();
+        let result = find_most_common_bit_in_column(&input, 0, '1');
         assert_eq!(result, '1');
     }
 
     #[test]
     fn test_find_most_common_bit_in_column_with_tie(){
-        let input: Vec<String> =
+        let input =
             vec![
                 "10110",
                 "10111",
-            ].iter().map(|&s| s.into()).collect();
-        let bytilized = input.iter().map(|s| s.as_bytes()).collect::<Vec<&[u8]>>();
-        let result = find_most_common_bit_in_column(&bytilized, 4, '1');
+            ].iter().map(|&s| s.as_bytes()).collect::<Vec<&[u8]>>();
+        let result = find_most_common_bit_in_column(&input, 4, '1');
         assert_eq!(result, '1');
     }
 }
