@@ -1,3 +1,9 @@
+mod data_types;
+
+use crate::data_types::action::*;
+use crate::data_types::command::*;
+use crate::data_types::position::*;
+
 fn main() {
     let commands = read_input_from_file("./src/input.txt");
     let final_position = calculate_position(&commands);
@@ -99,27 +105,6 @@ fn parse_action(input: &str) -> Action {
         "up" => Action::Up,
         _ => panic!("Received \"{}\", which is not a recognized command.", input),
     }
-}
-
-// Derive attribute allows struct to be printed using fmt::Debug.
-#[derive(Debug)]
-struct Position {
-    horizontal: u64,
-    depth: u64,
-}
-
-#[derive(Debug)]
-struct Command {
-    action: Action,
-    value: u64,
-}
-
-// Derive attribute allows enum to be printed using fmt::Debug.
-#[derive(Debug)]
-enum Action {
-    Forward,
-    Down,
-    Up,
 }
 
 #[cfg(test)]
