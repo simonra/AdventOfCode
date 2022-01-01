@@ -4,6 +4,7 @@ fn main() {
     let product = final_position.horizontal * final_position.depth;
     println!("Product of final position depth and horizontal position is:");
     println!("{}", product);
+    let discard = calculate_position_using_filter(&commands);
 }
 
 fn calculate_position(commands: &Vec<Command>) -> Position {
@@ -18,6 +19,31 @@ fn calculate_position(commands: &Vec<Command>) -> Position {
     }
 
     return Position { horizontal: position_horizontal, depth: position_depth, };
+}
+
+#[allow(dead_code)] // Don't complain about alternative implementation not being used.
+fn calculate_position_using_filter(commands: &Vec<Command>) -> Position {
+    let commands_slice = commands.as_slice();
+
+    let forwards = commands_slice.iter().filter(|command| matches!(command.action, Action::Forward)).collect::<Vec<&Command>>();
+
+    for f in forwards {
+        println!("{:?}", f);
+    }
+
+    let up = commands_slice.iter().filter(|command| matches!(command.action, Action::Up)).collect::<Vec<&Command>>();
+
+    for c in up {
+        println!("{:?}", c);
+    }
+
+    let down = commands_slice.iter().filter(|command| matches!(command.action, Action::Down)).collect::<Vec<&Command>>();
+
+    for c in down {
+        println!("{:?}", c);
+    }
+
+    return Position { horizontal: 0, depth: 0, };
 }
 
 fn read_input_from_file(filename: &str) -> Vec<Command> {
@@ -48,16 +74,21 @@ fn parse_action(input: &str) -> Action {
     }
 }
 
+// Derive attribute allows struct to be printed using fmt::Debug.
+#[derive(Debug)]
 struct Position {
     horizontal: u64,
     depth: u64,
 }
 
+#[derive(Debug)]
 struct Command {
     action: Action,
     value: u64,
 }
 
+// Derive attribute allows enum to be printed using fmt::Debug.
+#[derive(Debug)]
 enum Action {
     Forward,
     Down,
