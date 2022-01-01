@@ -61,8 +61,41 @@ fn calculate_power_consumption(report: &Vec<String>) -> u64 {
 }
 
 fn calculate_life_support_rating(report: &Vec<String>) -> u64 {
+    let report_as_binary_characters: Vec<&[u8]> = report.iter().map(|s| s.as_bytes()).collect();
     unimplemented!();
 }
+
+fn find_most_common_bit_in_column(report_items: &Vec<&[u8]>, column: usize, tiebreaker: char) -> char {
+    let mut count_of_ones = 0;
+    let mut count_of_zeroes = 0;
+    for line in report_items {
+        if line[column] == b'0' {
+            count_of_zeroes += 1;
+        }
+        else {
+            count_of_ones += 1;
+        }
+    }
+    if count_of_zeroes < count_of_ones {
+        return '1';
+    }
+    else if count_of_zeroes > count_of_ones {
+        return '0'
+    }
+
+    return tiebreaker;
+}
+
+// fn notes() {
+//     ones = reports.filter(|r| -> r[current] == 1);
+//     zeroes = reports.filter(|r| -> r[current] == 0);
+//     if(ones.len > zeroes)
+//         msb = 1;
+//     else if(zeroes > ones)
+//         msb = 0;
+//     else
+//         msb = 1;
+// }
 
 #[cfg(test)]
 mod tests {
@@ -85,7 +118,6 @@ mod tests {
                 "00010",
                 "01010",
             ].iter().map(|&s| s.into()).collect();
-        // let input = string_values.iter().map(str::to_string).collect();
         let result = calculate_power_consumption(&input);
         assert_eq!(result, 198);
     }
@@ -107,8 +139,41 @@ mod tests {
                 "00010",
                 "01010",
             ].iter().map(|&s| s.into()).collect();
-        // let input = string_values.iter().map(str::to_string).collect();
         let result = calculate_power_consumption(&input);
         assert_eq!(result, 230);
+    }
+
+    #[test]
+    fn test_find_most_common_bit_in_column(){
+        let input: Vec<String> =
+            vec![
+                "00100",
+                "11110",
+                "10110",
+                "10111",
+                "10101",
+                "01111",
+                "00111",
+                "11100",
+                "10000",
+                "11001",
+                "00010",
+                "01010",
+            ].iter().map(|&s| s.into()).collect();
+        let bytilized = input.iter().map(|s| s.as_bytes()).collect::<Vec<&[u8]>>();
+        let result = find_most_common_bit_in_column(&bytilized, 0, '1');
+        assert_eq!(result, '1');
+    }
+
+    #[test]
+    fn test_find_most_common_bit_in_column_with_tie(){
+        let input: Vec<String> =
+            vec![
+                "10110",
+                "10111",
+            ].iter().map(|&s| s.into()).collect();
+        let bytilized = input.iter().map(|s| s.as_bytes()).collect::<Vec<&[u8]>>();
+        let result = find_most_common_bit_in_column(&bytilized, 4, '1');
+        assert_eq!(result, '1');
     }
 }
