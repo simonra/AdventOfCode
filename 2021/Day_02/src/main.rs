@@ -81,11 +81,11 @@ fn read_input_from_file(filename: &str) -> Vec<Command> {
 
 fn parse_all_commands(input: &str) -> Vec<Command> {
     let lines = input.lines();
-    let commands = lines.map(|s| make_command(s));
+    let commands = lines.map(|s| parse_command(s));
     return commands.collect();
 }
 
-fn make_command(input: &str) -> Command {
+fn parse_command(input: &str) -> Command {
     let split: Vec<&str> = input.split_whitespace().take(2).collect();
     let command_action = parse_action(split[0]);
     let command_value = split[1].parse().expect("Failed to parse value from command.");
@@ -170,9 +170,9 @@ mod tests {
     }
 
     #[test]
-    fn test_make_command() {
+    fn test_parse_command() {
         let testinput = "forward 5";
-        let result = make_command(testinput);
+        let result = parse_command(testinput);
         assert_eq!(result.value, 5);
         assert!(matches!(result.action, Action::Forward));
     }
