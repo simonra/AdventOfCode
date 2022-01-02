@@ -47,6 +47,8 @@ mod parse_puzzle {
                     board_id: board_id,
                     size_x: number_of_columns_in_board as u8,
                     size_y: number_of_lines_in_board as u8,
+                    is_won: false,
+                    score: 0,
                 };
 
                 boards.push(board);
@@ -179,53 +181,70 @@ r"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 }
 
 fn calculate_winning_score(board_entries: Vec<BoardEntry>, boards: Vec<Board>, drawn_numbers: Vec<DrawnNumber>) -> u64 {
-    // let entries: Vec<&mut BoardEntry> = board_entries.into_iter().collect();
-    // let mut entries: Vec<&BoardEntry> = Vec::new();
-    // for entry in board_entries {
-    //     entries.push(entry.copy());
-    // }
-    // let entires: Vec<&mut BoardEntry> = board_entries.into_iter().map(|entry| -> &mut BoardEntry { entry.Copy() } ).collect();
-
-    let mut board_entries = board_entries.to_owned().clone();
-
-    // let mut entries: &mut Vec<&mut BoardEntry> = &mut Vec::new();
-    // for entry in board_entries {
-    //     let mut mutable_entry = BoardEntry {
-    //         board_id: Some(BoardId{ value: entry.board_id.unwrap().value }),
-    //         x: entry.x,
-    //         y: entry.y,
-    //         value: entry.value,
-    //         marked: entry.marked,
-    //     };
-    //     // entries.push(mutable_entry);
-
-    //     // entries.push( &mut BoardEntry {
-    //     //     board_id: entry.board_id,
-    //     //     x: entry.x,
-    //     //     y: entry.y,
-    //     //     value: entry.value,
-    //     //     marked: entry.marked,
-    //     // });
-    //     // entries.push(&mut mutable_entry);
-    // }
-
-    // let entries = board_entries.into_iter().to_owned();
+    let mut board_entries = board_entries.to_owned();
+    let mut boards = boards.to_owned();
 
     for drawn_number in drawn_numbers {
         for entry in board_entries.iter_mut() {
             if entry.value == drawn_number.value {
-                // entry = &mut BoardEntry {
-                //     board_id: entry.board_id,
-                //     x: entry.x,
-                //     y: entry.y,
-                //     value: entry.value,
-                //     marked: true,
-                // };
                 entry.marked = true;
             }
         }
+
+        for entry in board_entries.clone() {
+            println!("{:?}", entry);
+        }
+
+        let marked_entries = board_entries.iter().filter(|entry| {entry.marked});
+        for board in boards.iter_mut() {
+            let marked_entries_in_board = marked_entries.clone().filter(|entry| {entry.board_id.value == board.board_id.value});
+            for line_number in 0..board.size_x {
+                let number_of_marked_entries_in_line = marked_entries_in_board.clone().filter(|entry| {entry.x == line_number }).count();
+                if number_of_marked_entries_in_line == board.size_x.into() {
+                    board.is_won = true;
+                    let all_entries_in_winning_board: Vec<&BoardEntry> = board_entries.iter().filter(|entry| {entry.board_id.value == board.board_id.value}).collect();
+                    let winning_score = calculate_score(all_entries_in_winning_board, drawn_number);
+                    board.score = winning_score;
+                    return winning_score;
+                    break;
+                }
+            }
+            if board.is_won {
+                break;
+            }
+            for column_number in 0..board.size_y {
+                let number_of_marked_entries_in_column = marked_entries_in_board.clone().filter(|entry| {entry.y == column_number }).count();
+                if number_of_marked_entries_in_column == board.size_y.into() {
+                    board.is_won = true;
+                    let all_entries_in_winning_board: Vec<&BoardEntry> = board_entries.iter().filter(|entry| {entry.board_id.value == board.board_id.value}).collect();
+                    let winning_score = calculate_score(all_entries_in_winning_board, drawn_number);
+                    board.score = winning_score;
+                    return winning_score;
+                    break;
+                }
+            }
+        }
+
+
     }
 
+    panic!("No boards were won. This is an unacceptable state of affairs.");
+}
+
+fn calculate_score(board_entries: Vec<&BoardEntry>, winning_number: DrawnNumber) -> u64 {
+    let sum = calculate_sum_of_unmarked_entries(board_entries);
+    let product = sum * winning_number.value as u64;
+    return product;
+}
+
+fn calculate_sum_of_unmarked_entries(board_entries: Vec<&BoardEntry>) -> u64{
+    let unmarked_entries = board_entries.iter().filter(|entry| {!entry.marked});
+    let sum = unmarked_entries.fold(0u64, |sum, nex_entry| { return sum + nex_entry.value as u64});
+    return sum;
+}
+
+fn check_if_board_is_won(board_entries: Vec<BoardEntry>) -> bool {
+    // board_entries.group_by(|entry_a, entry_b| entry_a.x == entry_b.x);
     unimplemented!();
 }
 
