@@ -131,7 +131,7 @@ mod parse_puzzle {
     }
 }
 
-fn calculate_winning_score(/*ToDo*/) -> u64 {
+fn calculate_winning_score(board_entries: Vec<BoardEntry>, boards: Vec<Board>, drawn_numbers: Vec<DrawnNumber>) -> u64 {
     unimplemented!();
 }
 
@@ -178,5 +178,12 @@ r"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
         assert_eq!(boards[0].size_y, 5);
 
         assert_eq!(entries.len(), 5 * 5 * 3);
+    }
+
+    #[test]
+    fn test_calculate_winning_score() {
+        let (entries, boards, input_numbers) = parse_puzzle::input(SAMPLE_INPUT);
+        let result = calculate_winning_score(entries, boards, input_numbers);
+        assert_eq!(result, 4512);
     }
 }
