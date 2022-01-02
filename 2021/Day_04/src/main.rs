@@ -5,6 +5,11 @@ use crate::data_types::drawn_number::*;
 
 fn main() {
     println!("Hello, world!");
+    let input_content = std::fs::read_to_string("./src/input.txt").expect("Failed to read from file");
+    let (entries, boards, input_numbers) = parse_puzzle::input(&input_content);
+    let winning_score = calculate_winning_score(entries, boards, input_numbers);
+    println!("Winning score is:");
+    println!("{}", winning_score);
 }
 
 mod parse_puzzle {
@@ -57,7 +62,6 @@ mod parse_puzzle {
         );
 
         return (board_entries, boards, drawn_numbers);
-        unimplemented!();
     }
 
     fn drawn_numbers(input: &str) -> Vec<DrawnNumber> {
