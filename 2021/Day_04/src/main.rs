@@ -163,11 +163,13 @@ r"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 
     #[test]
     fn test_parse_puzzle_input() {
-        let result = parse_puzzle::input(SAMPLE_INPUT);
+        // let result = parse_puzzle::input(SAMPLE_INPUT);
 
-        let entries = result.0;
-        let boards = result.1;
-        let input_numbers = result.2;
+        // let entries = result.0;
+        // let boards = result.1;
+        // let input_numbers = result.2;
+
+        let (entries, boards, input_numbers) = parse_puzzle::input(SAMPLE_INPUT);
 
         assert_eq!(input_numbers[0].value, 7);
         assert_eq!(input_numbers[26].value, 1);
