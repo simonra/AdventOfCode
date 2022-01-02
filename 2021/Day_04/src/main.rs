@@ -7,8 +7,6 @@ fn main() {
     println!("Hello, world!");
 }
 
-// fn parse_input(&str) ->
-
 mod parse_puzzle {
     use crate::data_types::board_entry::*;
     use crate::data_types::board::*;
@@ -89,9 +87,53 @@ mod parse_puzzle {
             .collect();
     }
 
+
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        static SAMPLE_INPUT: &str =
+r"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
+
+22 13 17 11  0
+ 8  2 23  4 24
+21  9 14 16  7
+ 6 10  3 18  5
+ 1 12 20 15 19
+
+ 3 15  0  2 22
+ 9 18 13 17  5
+19  8  7 25 23
+20 11 10 24  4
+14 21 16 12  6
+
+14 21 17 24  4
+10 16 15  9 19
+18  8 23 26 20
+22 11 13  6  5
+ 2  0 12  3  7
+";
+
+        #[test]
+        fn test_parse_puzzle_input() {
+            // let result = input(SAMPLE_INPUT);
+
+            // let entries = result.0;
+            // let boards = result.1;
+            // let input_numbers = result.2;
+
+            let (entries, boards, input_numbers) = input(SAMPLE_INPUT);
+
+            assert_eq!(input_numbers[0].value, 7);
+            assert_eq!(input_numbers[26].value, 1);
+
+            assert_eq!(boards[0].size_x, 5);
+            assert_eq!(boards[0].size_y, 5);
+
+            assert_eq!(entries.len(), 5 * 5 * 3);
+        }
+
         #[test]
         fn test_parse_drawn_numbers() {
             let input = "1,2,3,4";
@@ -160,25 +202,6 @@ r"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 22 11 13  6  5
  2  0 12  3  7
 ";
-
-    #[test]
-    fn test_parse_puzzle_input() {
-        // let result = parse_puzzle::input(SAMPLE_INPUT);
-
-        // let entries = result.0;
-        // let boards = result.1;
-        // let input_numbers = result.2;
-
-        let (entries, boards, input_numbers) = parse_puzzle::input(SAMPLE_INPUT);
-
-        assert_eq!(input_numbers[0].value, 7);
-        assert_eq!(input_numbers[26].value, 1);
-
-        assert_eq!(boards[0].size_x, 5);
-        assert_eq!(boards[0].size_y, 5);
-
-        assert_eq!(entries.len(), 5 * 5 * 3);
-    }
 
     #[test]
     fn test_calculate_winning_score() {
