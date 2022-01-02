@@ -1,6 +1,6 @@
 use super::board_id::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct BoardEntry {
     pub board_id: BoardId,
     pub x: u8,

@@ -2,6 +2,7 @@ mod data_types;
 use crate::data_types::board_entry::*;
 use crate::data_types::board::*;
 use crate::data_types::drawn_number::*;
+use crate::data_types::board_id::*;
 
 fn main() {
     println!("Hello, world!");
@@ -178,6 +179,53 @@ r"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
 }
 
 fn calculate_winning_score(board_entries: Vec<BoardEntry>, boards: Vec<Board>, drawn_numbers: Vec<DrawnNumber>) -> u64 {
+    // let entries: Vec<&mut BoardEntry> = board_entries.into_iter().collect();
+    // let mut entries: Vec<&BoardEntry> = Vec::new();
+    // for entry in board_entries {
+    //     entries.push(entry.copy());
+    // }
+    // let entires: Vec<&mut BoardEntry> = board_entries.into_iter().map(|entry| -> &mut BoardEntry { entry.Copy() } ).collect();
+
+    let mut board_entries = board_entries.to_owned().clone();
+
+    // let mut entries: &mut Vec<&mut BoardEntry> = &mut Vec::new();
+    // for entry in board_entries {
+    //     let mut mutable_entry = BoardEntry {
+    //         board_id: Some(BoardId{ value: entry.board_id.unwrap().value }),
+    //         x: entry.x,
+    //         y: entry.y,
+    //         value: entry.value,
+    //         marked: entry.marked,
+    //     };
+    //     // entries.push(mutable_entry);
+
+    //     // entries.push( &mut BoardEntry {
+    //     //     board_id: entry.board_id,
+    //     //     x: entry.x,
+    //     //     y: entry.y,
+    //     //     value: entry.value,
+    //     //     marked: entry.marked,
+    //     // });
+    //     // entries.push(&mut mutable_entry);
+    // }
+
+    // let entries = board_entries.into_iter().to_owned();
+
+    for drawn_number in drawn_numbers {
+        for entry in board_entries.iter_mut() {
+            if entry.value == drawn_number.value {
+                // entry = &mut BoardEntry {
+                //     board_id: entry.board_id,
+                //     x: entry.x,
+                //     y: entry.y,
+                //     value: entry.value,
+                //     marked: true,
+                // };
+                entry.marked = true;
+            }
+        }
+    }
+
     unimplemented!();
 }
 
