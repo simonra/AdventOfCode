@@ -15,7 +15,50 @@ mod parse_puzzle {
     use crate::data_types::drawn_number::*;
     use crate::data_types::board_id::*;
 
-    pub fn input(input: &str) -> (&Vec<BoardEntry>, &Vec<Board>, &Vec<DrawnNumber> ) {
+    pub fn input(input: &str) -> (Vec<BoardEntry>, Vec<Board>, Vec<DrawnNumber> ) {
+        let input_grouped: Vec<&str> = input.split("\n\n").collect();
+
+        let drawn_numbers = drawn_numbers(input_grouped[0]);
+
+        let board_strings = input_grouped.iter().skip(1);
+
+        let mut board_entries: Vec<BoardEntry> = Vec::new();
+        let mut boards: Vec<Board> = Vec::new();
+
+        board_strings
+            .clone()
+            .enumerate()
+            .for_each(|board_enumeration| {
+                let board_id = BoardId { value: board_enumeration.0 as u8 };
+                let lines_as_text: Vec<&str> = board_enumeration.1.lines().collect();
+                let parsed_lines: Vec<Vec<BoardEntry>> = lines_as_text
+                    .iter()
+                    .enumerate()
+                    .map(|line_enumeration| -> Vec<BoardEntry> { return board_line(line_enumeration.1, board_id, line_enumeration.0 as u8) } )
+                    .collect();
+                let number_of_lines_in_board = parsed_lines.len();
+                let number_of_columns_in_board = parsed_lines[0].len();
+
+                let board = Board {
+                    board_id: board_id,
+                    size_x: number_of_columns_in_board as u8,
+                    size_y: number_of_lines_in_board as u8,
+                };
+
+                boards.push(board);
+
+                // let mut flattened_list_of_lines: Vec<BoardEntry> = parsed_lines.into_iter().flatten().collect();
+                // board_entries.append(&mut flattened_list_of_lines);
+
+                // parsed_lines.into_iter().for_each(|mut line_with_entries| board_entries.append(&mut line_with_entries));
+
+                for mut line_with_entries in parsed_lines {
+                    board_entries.append(&mut line_with_entries);
+                }
+            }
+        );
+
+        return (board_entries, boards, drawn_numbers);
         unimplemented!();
     }
 
