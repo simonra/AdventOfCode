@@ -8,12 +8,69 @@ fn main() {
     println!("Hello, world!");
     let input_content = std::fs::read_to_string("./src/input.txt").expect("Failed to read from file");
     let (boards, input_numbers) = parse_puzzle::input(&input_content);
-    let winning_score = calculate_winning_score(boards, input_numbers);
+    let winning_score = calculate_winning_score_for_first_winner(boards.clone(), input_numbers.clone());
     println!("Winning score is:");
     println!("{}", winning_score);
+    let score_of_last_board_to_win = get_score_for_last_board_to_win(boards, input_numbers);
+    println!("Score of last board to win:");
+    println!("{}", score_of_last_board_to_win);
 }
 
-fn calculate_winning_score(boards: Vec<Board>, drawn_numbers: Vec<DrawnNumber>) -> u64 {
+fn get_score_for_last_board_to_win(boards: Vec<Board>, drawn_numbers: Vec<DrawnNumber>) -> u64 {
+    let mut boards = boards.to_owned();
+
+    for (iterator, drawn_number) in drawn_numbers.iter().enumerate() {
+
+        let mut won_boards = 0;
+
+        for board in boards.iter_mut() {
+            // println!("Processing board {} for draw {}",
+            //     board.board_id.value,
+            //     drawn_number.value,
+            // );
+
+            if board.is_won {
+                continue;
+            }
+            for row_of_entries in board.entries.iter_mut() {
+                for entry in row_of_entries {
+                    if entry.value == drawn_number.value {
+                        entry.marked = true;
+                    }
+                }
+            }
+
+            let board_won = check_if_board_is_won(&board);
+            if board_won {
+                // println!("{:?}", board);
+                board.is_won = true;
+                board.score = calculate_score(&board, *drawn_number);
+                board.won_on_turn = iterator as u64;
+
+                won_boards += 1;
+                // println!("Board {} was just marked won on draw of {}, which gave the board a score of {}",
+                //     board.board_id.value,
+                //     drawn_number.value,
+                //     board.score
+                // );
+            }
+        }
+
+        if won_boards == boards.len() {
+            break;
+        }
+    }
+
+    let mut won_boards: Vec<Board> = boards.into_iter().filter(|board| board.is_won).collect();
+    if won_boards.len() == 0 {
+        panic!("No boards were won, the concept of score of last board to win doesn't make any sense.");
+    }
+    won_boards.sort_by_key(|board| board.won_on_turn);
+    let last_board_to_win = won_boards.last().unwrap();
+    return last_board_to_win.score;
+}
+
+fn calculate_winning_score_for_first_winner(boards: Vec<Board>, drawn_numbers: Vec<DrawnNumber>) -> u64 {
     let mut boards = boards.to_owned();
 
     for drawn_number in drawn_numbers {
@@ -121,8 +178,15 @@ r"7,4,9,5,11,17,23,2,0,14,21,24,10,16,13,6,15,25,12,22,18,20,8,19,3,26,1
     #[test]
     fn test_calculate_winning_score() {
         let (boards, input_numbers) = parse_puzzle::input(SAMPLE_INPUT);
-        let result = calculate_winning_score(boards, input_numbers);
+        let result = calculate_winning_score_for_first_winner(boards, input_numbers);
         assert_eq!(result, 4512);
+    }
+
+    #[test]
+    fn test_get_score_for_last_board_to_win() {
+        let (boards, input_numbers) = parse_puzzle::input(SAMPLE_INPUT);
+        let result = get_score_for_last_board_to_win(boards, input_numbers);
+        assert_eq!(result, 1924);
     }
 
     #[test]

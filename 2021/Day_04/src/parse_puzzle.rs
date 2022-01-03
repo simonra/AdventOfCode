@@ -32,6 +32,7 @@ pub fn input(input: &str) -> (Vec<Board>, Vec<DrawnNumber> ) {
                 entries: parsed_lines.clone(),
                 is_won: false,
                 score: 0,
+                won_on_turn: std::u64::MAX,
             };
 
             boards.push(board);

@@ -9,4 +9,5 @@ pub struct Board {
     pub entries: Vec<Vec<BoardEntry>>,
     pub is_won: bool,
     pub score: u64,
+    pub won_on_turn: u64,
 }
