@@ -1,9 +1,16 @@
+use crate::data_types::*;
+
 fn main() {
     println!("Hello, world!");
 }
 
 fn number_of_overlapping_horizontal_and_vertical_lines(input: &str) -> u64 {
+
     unimplemented!();
+}
+
+fn parse_line_segments(input: &str) -> Vec<LineSegment> {
+    return input.lines().map(|s| LineSegment::parse(s)).collect();
 }
 
 mod data_types {
@@ -14,11 +21,10 @@ mod data_types {
     }
 
     impl LineSegment {
-        fn parse(input: &str) -> LineSegment {
-            let split = input.split(" -> ");
+        pub fn parse(input: &str) -> LineSegment {
             let default_point_value = Point {x: 0, y: 0};
             let mut line_segment = LineSegment { beginning: default_point_value, end: default_point_value };
-            let mut points = split.map(|s| Point::parse(s));
+            let mut points = input.split(" -> ").map(|s| Point::parse(s));
             line_segment.beginning = points.next().unwrap();
             line_segment.end = points.next().unwrap();
             return line_segment;
@@ -33,11 +39,11 @@ mod data_types {
 
     impl Point {
         fn parse(input: &str) -> Point {
-            let split = input.split(',');
+            // let split = input.split(',');
             // if split.clone().count() != 2 {
             //     panic!("Cannot parse point without exactly 2 coordinates.");
             // }
-            return split.map(|s| -> u16 {s.parse().unwrap()}).collect::<Point>();
+            return input.split(',').map(|s| -> u16 {s.parse().unwrap()}).collect::<Point>();
             // let numbers: &[u16; 2] = split.map(|s| s.parse()).collect();
             // return Point {x: numbers[0], y: ,}
             // unimplemented!();
@@ -89,16 +95,16 @@ mod tests {
     use super::*;
 
     static SAMPLE_INPUT: &str =
-        "0,9 -> 5,9\
-        8,0 -> 0,8\
-        9,4 -> 3,4\
-        2,2 -> 2,1\
-        7,0 -> 7,4\
-        6,4 -> 2,0\
-        0,9 -> 2,9\
-        3,4 -> 1,4\
-        0,0 -> 8,8\
-        5,5 -> 8,2";
+        "0,9 -> 5,9\n\
+        8,0 -> 0,8\n\
+        9,4 -> 3,4\n\
+        2,2 -> 2,1\n\
+        7,0 -> 7,4\n\
+        6,4 -> 2,0\n\
+        0,9 -> 2,9\n\
+        3,4 -> 1,4\n\
+        0,0 -> 8,8\n\
+        5,5 -> 8,2\n";
 
     #[test]
     fn test_calculate_winning_score() {
@@ -106,5 +112,20 @@ mod tests {
         assert_eq!(result, 5);
     }
 
+    #[test]
+    fn test_parse_line_segments() {
+        let result = parse_line_segments(SAMPLE_INPUT);
 
+        println!("{:?}", result);
+
+        assert_eq!(result.len(), 10);
+
+        assert_eq!(result[0].beginning.x, 0);
+        assert_eq!(result[0].beginning.y, 9);
+
+        assert_eq!(result[9].end.x, 8);
+        assert_eq!(result[9].end.y, 2);
+        // let expected_last_point = Point {x: 8, y: 2};
+        // assert_eq!(result.last().unwrap().end, expected_last_point)
+    }
 }
