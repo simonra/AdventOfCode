@@ -3,11 +3,16 @@ use crate::data_types::*;
 
 fn main() {
     println!("Hello, world!");
+    let ys = 20..10;
+    for i in ys {
+        println!("{:?}", i);
+    }
 }
 
 fn number_of_overlapping_horizontal_and_vertical_lines(input: &str) -> u64 {
     // let mut intersected_points: HashMap<Point, u16> = HashMap::new();
     let mut number_of_times_point_is_intersected: HashMap<Point, u16> = HashMap::new();
+    // parse_line_segments(input).foreach
     unimplemented!();
 }
 
@@ -17,6 +22,43 @@ fn parse_line_segments(input: &str) -> Vec<LineSegment> {
 
 fn line_segment_is_horizontal_or_vertical(line_segment: LineSegment) -> bool {
     return line_segment.beginning.x == line_segment.end.x || line_segment.beginning.y == line_segment.end.y;
+}
+
+fn get_points_on_line_segment(line_segment: LineSegment) -> Vec<Point> {
+    let xs = line_segment.beginning.x..line_segment.end.x;
+    let ys = line_segment.beginning.y..line_segment.end.y;
+    unimplemented!();
+}
+
+// fn get_values_between_inclusive<T: num::Integer>(a: T, b: T) -> Vec<T> {
+fn get_values_between_inclusive<T: std::ops::Add<Output=T> + std::ops::Sub<Output=T> + Ord + Copy /*+ std::ops::Div<Output = T>*/ + From<u8>>(a: T, b: T) -> Vec<T> {
+    if a == b {
+        return vec![a];
+    }
+
+    let start = if a < b {a} else {b};
+    let end = if a < b {b} else {a};
+
+    let mut result: Vec<T> = Vec::new();
+    // let zero = a - a;
+    // let mut tmp = a;
+    // if a == zero {
+    //     // b cannot be zero here because it would then be equal to a, and returned at the beginning of the funtion.
+    //     tmp = b;
+    // }
+    // let tmp = tmp/tmp;
+    // if tmp < zero {
+    //     tmp = zero - tmp;
+    // }
+    // let one = tmp;
+    // let mut counter: T = zero;
+    let mut counter = T::from(0);
+    let one = T::from(1);
+    while start + counter <= end {
+        result.push(start + counter);
+        counter = counter + one;
+    }
+    return result;
 }
 
 mod data_types {
@@ -155,5 +197,37 @@ mod tests {
         let input = LineSegment { beginning: Point { x: 0, y: 0, }, end: Point { x: 1, y: 1, },};
         let result = line_segment_is_horizontal_or_vertical(input);
         assert!(!result);
+    }
+
+    #[test]
+    fn test_get_points_on_line_segment() {
+        let xs = (0..10).enumerate();
+        let ys = 20..10;
+        for i in ys {
+            println!("{:?}", i);
+        }
+        // ys.foreach(|i| println!("{:?}", y));
+        // println!("{:?}", xs);
+        // println!("{:?}", ys);
+        let input = LineSegment { beginning: Point { x: 0, y: 0, }, end: Point { x: 1, y: 1, },};
+        let result = get_points_on_line_segment(input);
+        unimplemented!();
+    }
+
+    #[test]
+    fn test_get_values_between_inclusive() {
+        let result: Vec<u64> = get_values_between_inclusive(0, 10);
+
+        assert_eq!(result.len(), 11);
+        for (index, value) in result.iter().enumerate() {
+            assert_eq!(index as u64, *value);
+        }
+
+        let result_2: Vec<u64> = get_values_between_inclusive(5, 0);
+
+        assert_eq!(result_2.len(), 6);
+        for (index, value) in result_2.iter().enumerate() {
+            assert_eq!(index as u64, *value);
+        }
     }
 }
