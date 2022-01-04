@@ -9,8 +9,28 @@ fn number_of_overlapping_horizontal_and_vertical_lines(input: &str) -> u64 {
     // let mut intersected_points: HashMap<Point, u16> = HashMap::new();
     let mut number_of_times_point_is_intersected: HashMap<Point, u16> = HashMap::new();
     // parse_line_segments(input).foreach
-    let lines = parse_line_segments(input).iter().filter(|line| line_segment_is_horizontal_or_vertical(**line));
-    unimplemented!();
+    // let parsed_lines = parse_line_segments(input);
+    // let lines = parsed_lines.iter().filter(|line| line_segment_is_horizontal_or_vertical(**line));
+    // lines.for_each(|line| {
+    //     let points = get_points_on_line_segment(*line);
+
+    // });
+
+    parse_line_segments(input)
+        .iter()
+        .filter(|line| line_segment_is_horizontal_or_vertical(**line))
+        .flat_map(|line| -> Vec<Point> {get_points_on_line_segment(*line)})
+        .for_each(|point| {
+            *number_of_times_point_is_intersected.entry(point).or_insert(0) += 1
+        })
+        ;
+
+    return number_of_times_point_is_intersected
+        .iter()
+        .filter(|(_key, value)| **value > 1)
+        .count()
+        .try_into()
+        .unwrap();
 }
 
 fn parse_line_segments(input: &str) -> Vec<LineSegment> {
@@ -92,7 +112,7 @@ mod data_types {
         }
     }
 
-    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
+    #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
     pub struct Point {
         pub x: u16,
         pub y: u16,
@@ -266,5 +286,17 @@ mod tests {
         for (index, value) in result_2.iter().enumerate() {
             assert_eq!(index as u64, *value);
         }
+    }
+
+    #[test]
+    fn test_insert_into_hashmap() {
+        let mut map: HashMap<Point, u16> = HashMap::new();
+        let key_point = Point {x: 0, y: 0};
+
+        *map.entry(key_point).or_insert(0) += 1;
+        assert_eq!(map[&key_point], 1);
+
+        *map.entry(key_point).or_insert(0) += 1;
+        assert_eq!(map[&key_point], 2);
     }
 }
