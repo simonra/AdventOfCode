@@ -31,7 +31,7 @@ mod data_types {
         }
     }
 
-    #[derive(Debug, Copy, Clone)]
+    #[derive(Debug, Copy, Clone, Eq, PartialEq)]
     pub struct Point {
         pub x: u16,
         pub y: u16,
@@ -125,7 +125,8 @@ mod tests {
 
         assert_eq!(result[9].end.x, 8);
         assert_eq!(result[9].end.y, 2);
-        // let expected_last_point = Point {x: 8, y: 2};
-        // assert_eq!(result.last().unwrap().end, expected_last_point)
+
+        let expected_last_point = Point {x: 8, y: 2};
+        assert_eq!(result.last().unwrap().end, expected_last_point)
     }
 }
