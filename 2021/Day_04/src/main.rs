@@ -5,7 +5,6 @@ use crate::data_types::drawn_number::*;
 mod parse_puzzle;
 
 fn main() {
-    println!("Hello, world!");
     let input_content = std::fs::read_to_string("./src/input.txt").expect("Failed to read from file");
     let (boards, input_numbers) = parse_puzzle::input(&input_content);
     let winning_score = calculate_winning_score_for_first_winner(boards.clone(), input_numbers.clone());
