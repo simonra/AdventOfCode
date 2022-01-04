@@ -2,7 +2,29 @@ use std::collections::HashMap;
 use crate::data_types::*;
 
 fn main() {
-    println!("Hello, world!");
+    let input_content = std::fs::read_to_string("./src/input.txt").expect("Failed to read from file");
+    let overlap_basic = number_of_overlapping_horizontal_and_vertical_lines(&input_content);
+    println!("Number of overlapping horizontal and vertical lintes:");
+    println!("{}",overlap_basic);
+}
+
+fn number_of_overlapping_lines_with_diagonals(input: &str) -> u64 {
+    let mut number_of_times_point_is_intersected: HashMap<Point, u16> = HashMap::new();
+
+    parse_line_segments(input)
+        .iter()
+        .flat_map(|line| -> Vec<Point> {get_points_on_line_segment(*line)})
+        .for_each(|point| {
+            *number_of_times_point_is_intersected.entry(point).or_insert(0) += 1
+        })
+        ;
+
+    return number_of_times_point_is_intersected
+        .values()
+        .filter(|value| **value > 1)
+        .count()
+        .try_into()
+        .unwrap();
 }
 
 fn number_of_overlapping_horizontal_and_vertical_lines(input: &str) -> u64 {
@@ -26,8 +48,8 @@ fn number_of_overlapping_horizontal_and_vertical_lines(input: &str) -> u64 {
         ;
 
     return number_of_times_point_is_intersected
-        .iter()
-        .filter(|(_key, value)| **value > 1)
+        .values()
+        .filter(|value| **value > 1)
         .count()
         .try_into()
         .unwrap();
@@ -69,27 +91,21 @@ fn get_values_between_inclusive<T: std::ops::Add<Output=T> + std::ops::Sub<Outpu
         return vec![a];
     }
 
+    let mut result: Vec<T> = Vec::new();
+
     let start = if a < b {a} else {b};
     let end = if a < b {b} else {a};
 
-    let mut result: Vec<T> = Vec::new();
-    // let zero = a - a;
-    // let mut tmp = a;
-    // if a == zero {
-    //     // b cannot be zero here because it would then be equal to a, and returned at the beginning of the funtion.
-    //     tmp = b;
-    // }
-    // let tmp = tmp/tmp;
-    // if tmp < zero {
-    //     tmp = zero - tmp;
-    // }
-    // let one = tmp;
-    // let mut counter: T = zero;
     let mut counter = T::from(0);
     let one = T::from(1);
+
     while start + counter <= end {
         result.push(start + counter);
         counter = counter + one;
+    }
+
+    if b < a {
+        result.reverse();
     }
     return result;
 }
@@ -188,9 +204,15 @@ mod tests {
         5,5 -> 8,2\n";
 
     #[test]
-    fn test_calculate_winning_score() {
+    fn test_number_of_overlapping_horizontal_and_vertical_lines() {
         let result = number_of_overlapping_horizontal_and_vertical_lines(SAMPLE_INPUT);
         assert_eq!(result, 5);
+    }
+
+    #[test]
+    fn test_number_of_overlapping_lines_with_diagonals() {
+        let result = number_of_overlapping_lines_with_diagonals(SAMPLE_INPUT);
+        assert_eq!(result, 12);
     }
 
     #[test]
@@ -253,13 +275,43 @@ mod tests {
     }
 
     #[test]
-    fn test_get_points_on_line_segment_diagonal() {
+    fn test_get_points_on_line_segment_diagonal_down_right() {
         let input = LineSegment { beginning: Point { x: 0, y: 0, }, end: Point { x: 2, y: 2, },};
         let result = get_points_on_line_segment(input);
         assert_eq!(result.len(), 3);
         assert!(result.contains(&Point { x: 0, y: 0, }));
         assert!(result.contains(&Point { x: 1, y: 1, }));
         assert!(result.contains(&Point { x: 2, y: 2, }));
+    }
+
+    #[test]
+    fn test_get_points_on_line_segment_diagonal_up_right() {
+        let input = LineSegment { beginning: Point { x: 0, y: 2, }, end: Point { x: 2, y: 0, },};
+        let result = get_points_on_line_segment(input);
+        assert_eq!(result.len(), 3);
+        assert!(result.contains(&Point { x: 0, y: 2, }));
+        assert!(result.contains(&Point { x: 1, y: 1, }));
+        assert!(result.contains(&Point { x: 2, y: 0, }));
+    }
+
+    #[test]
+    fn test_get_points_on_line_segment_diagonal_down_left() {
+        let input = LineSegment { beginning: Point { x: 2, y: 0, }, end: Point { x: 0, y: 2, },};
+        let result = get_points_on_line_segment(input);
+        assert_eq!(result.len(), 3);
+        assert!(result.contains(&Point { x: 2, y: 0, }));
+        assert!(result.contains(&Point { x: 1, y: 1, }));
+        assert!(result.contains(&Point { x: 0, y: 2, }));
+    }
+
+    #[test]
+    fn test_get_points_on_line_segment_diagonal_up_left() {
+        let input = LineSegment { beginning: Point { x: 2, y: 2, }, end: Point { x: 0, y: 0, },};
+        let result = get_points_on_line_segment(input);
+        assert_eq!(result.len(), 3);
+        assert!(result.contains(&Point { x: 2, y: 2, }));
+        assert!(result.contains(&Point { x: 1, y: 1, }));
+        assert!(result.contains(&Point { x: 0, y: 0, }));
     }
 
     #[test]
@@ -284,7 +336,7 @@ mod tests {
 
         assert_eq!(result_2.len(), 6);
         for (index, value) in result_2.iter().enumerate() {
-            assert_eq!(index as u64, *value);
+            assert_eq!(5 - index as u64, *value);
         }
     }
 
