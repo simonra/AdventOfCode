@@ -3,16 +3,13 @@ use crate::data_types::*;
 
 fn main() {
     println!("Hello, world!");
-    let ys = 20..10;
-    for i in ys {
-        println!("{:?}", i);
-    }
 }
 
 fn number_of_overlapping_horizontal_and_vertical_lines(input: &str) -> u64 {
     // let mut intersected_points: HashMap<Point, u16> = HashMap::new();
     let mut number_of_times_point_is_intersected: HashMap<Point, u16> = HashMap::new();
     // parse_line_segments(input).foreach
+    let lines = parse_line_segments(input).iter().filter(|line| line_segment_is_horizontal_or_vertical(**line));
     unimplemented!();
 }
 
@@ -25,12 +22,28 @@ fn line_segment_is_horizontal_or_vertical(line_segment: LineSegment) -> bool {
 }
 
 fn get_points_on_line_segment(line_segment: LineSegment) -> Vec<Point> {
-    let xs = line_segment.beginning.x..line_segment.end.x;
-    let ys = line_segment.beginning.y..line_segment.end.y;
-    unimplemented!();
+    let xs = get_values_between_inclusive(line_segment.beginning.x, line_segment.end.x);
+    let ys = get_values_between_inclusive(line_segment.beginning.y, line_segment.end.y);
+    let mut result: Vec<Point> = Vec::new();
+    if xs.len() == 1 {
+        for y in ys {
+            result.push(Point {x: xs[0], y: y});
+        }
+    }
+    else if ys.len() == 1 {
+        for x in xs {
+            result.push(Point {x: x, y: ys[0]});
+        }
+    }
+    else if xs.len() == ys.len() {
+        xs.iter().zip(ys).for_each(|(x, y)| result.push(Point {x: *x, y: y}));
+    }
+    else {
+        panic!("Dealing with non-perfectly angled line segments is out of scope for this.");
+    }
+    return result;
 }
 
-// fn get_values_between_inclusive<T: num::Integer>(a: T, b: T) -> Vec<T> {
 fn get_values_between_inclusive<T: std::ops::Add<Output=T> + std::ops::Sub<Output=T> + Ord + Copy /*+ std::ops::Div<Output = T>*/ + From<u8>>(a: T, b: T) -> Vec<T> {
     if a == b {
         return vec![a];
@@ -200,18 +213,42 @@ mod tests {
     }
 
     #[test]
-    fn test_get_points_on_line_segment() {
-        let xs = (0..10).enumerate();
-        let ys = 20..10;
-        for i in ys {
-            println!("{:?}", i);
-        }
-        // ys.foreach(|i| println!("{:?}", y));
-        // println!("{:?}", xs);
-        // println!("{:?}", ys);
-        let input = LineSegment { beginning: Point { x: 0, y: 0, }, end: Point { x: 1, y: 1, },};
+    fn test_get_points_on_line_segment_horizontal() {
+        let input = LineSegment { beginning: Point { x: 0, y: 0, }, end: Point { x: 0, y: 2, },};
         let result = get_points_on_line_segment(input);
-        unimplemented!();
+        assert_eq!(result.len(), 3);
+        assert!(result.contains(&Point { x: 0, y: 0, }));
+        assert!(result.contains(&Point { x: 0, y: 1, }));
+        assert!(result.contains(&Point { x: 0, y: 2, }));
+    }
+
+    #[test]
+    fn test_get_points_on_line_segment_vertical() {
+        let input = LineSegment { beginning: Point { x: 0, y: 0, }, end: Point { x: 2, y: 0, },};
+        let result = get_points_on_line_segment(input);
+        assert_eq!(result.len(), 3);
+        assert!(result.contains(&Point { x: 0, y: 0, }));
+        assert!(result.contains(&Point { x: 1, y: 0, }));
+        assert!(result.contains(&Point { x: 2, y: 0, }));
+    }
+
+    #[test]
+    fn test_get_points_on_line_segment_diagonal() {
+        let input = LineSegment { beginning: Point { x: 0, y: 0, }, end: Point { x: 2, y: 2, },};
+        let result = get_points_on_line_segment(input);
+        assert_eq!(result.len(), 3);
+        assert!(result.contains(&Point { x: 0, y: 0, }));
+        assert!(result.contains(&Point { x: 1, y: 1, }));
+        assert!(result.contains(&Point { x: 2, y: 2, }));
+    }
+
+    #[test]
+    fn test_get_points_on_line_segment_backwards() {
+        let input = LineSegment { beginning: Point { x: 0, y: 1, }, end: Point { x: 0, y: 0, },};
+        let result = get_points_on_line_segment(input);
+        assert_eq!(result.len(), 2);
+        assert!(result.contains(&Point { x: 0, y: 0, }));
+        assert!(result.contains(&Point { x: 0, y: 1, }));
     }
 
     #[test]
