@@ -6,6 +6,10 @@ fn main() {
     let overlap_basic = number_of_overlapping_horizontal_and_vertical_lines(&input_content);
     println!("Number of overlapping horizontal and vertical lintes:");
     println!("{}",overlap_basic);
+
+    let overlap_advanced = number_of_overlapping_lines_with_diagonals(&input_content);
+    println!("Number of overlapping horizontal and vertical and diagonal lintes:");
+    println!("{}",overlap_advanced);
 }
 
 fn number_of_overlapping_lines_with_diagonals(input: &str) -> u64 {
