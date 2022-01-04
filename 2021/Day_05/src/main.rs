@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use crate::data_types::*;
 
 fn main() {
@@ -5,12 +6,17 @@ fn main() {
 }
 
 fn number_of_overlapping_horizontal_and_vertical_lines(input: &str) -> u64 {
-
+    // let mut intersected_points: HashMap<Point, u16> = HashMap::new();
+    let mut number_of_times_point_is_intersected: HashMap<Point, u16> = HashMap::new();
     unimplemented!();
 }
 
 fn parse_line_segments(input: &str) -> Vec<LineSegment> {
     return input.lines().map(|s| LineSegment::parse(s)).collect();
+}
+
+fn line_segment_is_horizontal_or_vertical(line_segment: LineSegment) -> bool {
+    return line_segment.beginning.x == line_segment.end.x || line_segment.beginning.y == line_segment.end.y;
 }
 
 mod data_types {
@@ -128,5 +134,26 @@ mod tests {
 
         let expected_last_point = Point {x: 8, y: 2};
         assert_eq!(result.last().unwrap().end, expected_last_point)
+    }
+
+    #[test]
+    fn test_line_segment_is_horizontal_or_vertical_gives_true_when_horizontal() {
+        let input = LineSegment { beginning: Point { x: 0, y: 0, }, end: Point { x: 0, y: 1, },};
+        let result = line_segment_is_horizontal_or_vertical(input);
+        assert!(result);
+    }
+
+    #[test]
+    fn test_line_segment_is_horizontal_or_vertical_gives_true_when_vertical() {
+        let input = LineSegment { beginning: Point { x: 1, y: 1, }, end: Point { x: 0, y: 1, },};
+        let result = line_segment_is_horizontal_or_vertical(input);
+        assert!(result);
+    }
+
+    #[test]
+    fn test_test_line_segment_is_horizontal_or_vertical_false_when_diagonal() {
+        let input = LineSegment { beginning: Point { x: 0, y: 0, }, end: Point { x: 1, y: 1, },};
+        let result = line_segment_is_horizontal_or_vertical(input);
+        assert!(!result);
     }
 }
