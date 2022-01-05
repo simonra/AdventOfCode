@@ -1,5 +1,9 @@
 fn main() {
-    println!("Hello, world!");
+    let initial_population = "3,4,3,1,2".split(',').map(|s| s.parse().unwrap()).collect();
+    let iterations = 80;
+    let population_size = population_size(initial_population, iterations);
+    println!("Population size after {} days is:", iterations);
+    println!("{}", population_size);
 }
 
 static ITERATIONS_BETWEEN_GROWTH: u8 = 6;
@@ -9,6 +13,7 @@ static INITIAL_TIME_UNTILL_GROWTH: u8 = 8;
 fn population_size(initial_population: Vec<u8>, iterations: u8) -> u64 {
     let mut population_size: u64 = initial_population.len().try_into().unwrap();
     for individual in initial_population {
+        // std::thread::Builder::new().stack_size(100000 *0xFF).spawn(move || println!("Number of children is {}", number_of_children_for_individual(individual, iterations))).unwrap().join();;
         population_size += number_of_children_for_individual(individual, iterations);
     }
     return population_size;
@@ -22,7 +27,7 @@ fn number_of_children_for_individual(iterations_until_split: u8, remaining_itera
     let mut number_of_sub_children: u64 = 0;
 
     for child_spawn_day in days_new_children_are_grown {
-        let sub_children_of_child = number_of_children_for_individual(8, child_spawn_day);
+        let sub_children_of_child = number_of_children_for_individual(INITIAL_TIME_UNTILL_GROWTH, child_spawn_day);
         number_of_sub_children += sub_children_of_child;
     }
 
