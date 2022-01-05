@@ -15,11 +15,19 @@ fn main() {
 
     // print_upto_n();
 
-    let new_s = population_size_contribution_of_individuals_per_day(81);
-    println!("{:?}", new_s);
+    // let new_s = population_size_contribution_of_individuals_per_day(81);
+    // println!("{:?}", new_s);
     // let final_contributions_for_individual = final_population_sizes_given_single_individual(80);
-    let sum = initial_population.clone().iter().fold(0u64, |sum, starting_individual| sum + new_s[&80][starting_individual]);
-    println!("New sum {}", sum);
+    // let sum = initial_population.clone().iter().fold(0u64, |sum, starting_individual| sum + new_s[&80][starting_individual]);
+    // println!("New sum {}", sum);
+
+    let population_map = population_size_contribution_of_individuals_per_day(257);
+    // println!("{:?}", new_s);
+    // let final_contributions_for_individual = final_population_sizes_given_single_individual(80);
+    let new_population_size = initial_population.clone().iter().fold(0u64, |sum, starting_individual| sum + population_map[&256][starting_individual]);
+    println!("Population size after {} days is:", 256);
+    println!("{}", new_population_size);
+    // println!("New sum {}", sum);
 
     // let new_iterations = 256;
     // let experimental_population = "0".split(',').map(|s| s.parse().unwrap()).collect::<Vec<u8>>();
@@ -59,7 +67,7 @@ fn population_size_contribution_of_individuals_per_day(number_of_days: u16) -> H
     let mut population_contribution_for_counter_per_day = initialize_map();
     for day_number in 1..number_of_days {
         for counter_for_individual in 0..9 {
-            let growth_days = get_days_individual_grows(counter_for_individual, day_number.try_into().unwrap());
+            let growth_days = get_days_individual_grows(counter_for_individual.try_into().unwrap(), day_number);
             let mut number_of_children = 0;
             for child_spawn_day in growth_days {
                 number_of_children += population_contribution_for_counter_per_day[&(day_number - child_spawn_day as u16)][&8];
@@ -198,35 +206,54 @@ fn initialize_map() -> HashMap<u16, HashMap<u8, u64>> {
     return population_contribution_for_counter_per_day;
 }
 
-static ITERATIONS_BETWEEN_GROWTH: u8 = 6;
-static INITIAL_TIME_UNTILL_GROWTH: u8 = 8;
+// static ITERATIONS_BETWEEN_GROWTH: u8 = 6;
+// static INITIAL_TIME_UNTILL_GROWTH: u8 = 8;
 
 
-fn population_size(initial_population: Vec<u8>, iterations: u8) -> u64 {
-    let mut population_size: u64 = initial_population.len().try_into().unwrap();
-    for individual in initial_population {
-        // std::thread::Builder::new().stack_size(100000 *0xFF).spawn(move || println!("Number of children is {}", number_of_children_for_individual(individual, iterations))).unwrap().join();;
-        population_size += number_of_children_for_individual(individual, iterations);
-    }
-    return population_size;
-}
+// fn population_size(initial_population: Vec<u8>, iterations: u8) -> u64 {
+//     let mut population_size: u64 = initial_population.len().try_into().unwrap();
+//     for individual in initial_population {
+//         // std::thread::Builder::new().stack_size(100000 *0xFF).spawn(move || println!("Number of children is {}", number_of_children_for_individual(individual, iterations))).unwrap().join();;
+//         population_size += number_of_children_for_individual(individual, iterations);
+//     }
+//     return population_size;
+// }
 
-fn number_of_children_for_individual(iterations_until_split: u8, remaining_iterations: u8) -> u64 {
-    let days_new_children_are_grown = get_days_individual_grows(iterations_until_split, remaining_iterations);
+// fn number_of_children_for_individual(iterations_until_split: u8, remaining_iterations: u8) -> u64 {
+//     let days_new_children_are_grown = get_days_individual_grows(iterations_until_split, remaining_iterations);
 
-    let number_of_children: u64 = days_new_children_are_grown.len().try_into().unwrap();
+//     let number_of_children: u64 = days_new_children_are_grown.len().try_into().unwrap();
 
-    let mut number_of_sub_children: u64 = 0;
+//     let mut number_of_sub_children: u64 = 0;
 
-    for child_spawn_day in days_new_children_are_grown {
-        let sub_children_of_child = number_of_children_for_individual(INITIAL_TIME_UNTILL_GROWTH, child_spawn_day);
-        number_of_sub_children += sub_children_of_child;
-    }
+//     for child_spawn_day in days_new_children_are_grown {
+//         let sub_children_of_child = number_of_children_for_individual(INITIAL_TIME_UNTILL_GROWTH, child_spawn_day);
+//         number_of_sub_children += sub_children_of_child;
+//     }
 
-    return number_of_children + number_of_sub_children;
-}
+//     return number_of_children + number_of_sub_children;
+// }
 
-fn get_days_individual_grows(iterations_until_next_split: u8, remaining_iterations: u8) -> Vec<u8> {
+// fn get_days_individual_grows(iterations_until_next_split: u8, remaining_iterations: u16) -> Vec<u8> {
+//     if remaining_iterations < iterations_until_next_split {
+//         return Vec::new();
+//     }
+//     let remaining_after_first = remaining_iterations - (iterations_until_next_split);
+//     // let mut counter = 0;
+//     let mut days_with_growth = Vec::new();
+//     for i in 0..remaining_after_first {
+//         if i % (ITERATIONS_BETWEEN_GROWTH + 1) == 0 {
+//             // counter += 1;
+//             days_with_growth.push(i + iterations_until_next_split + 1);
+//         }
+//     }
+//     return days_with_growth;
+//     // return ((remaining_after_first - 0) / (ITERATIONS_BETWEEN_GROWTH + 1)) as u64;
+//     // unimplemented!();
+// }
+
+static ITERATIONS_BETWEEN_GROWTH: u16 = 6;
+fn get_days_individual_grows(iterations_until_next_split: u16, remaining_iterations: u16) -> Vec<u16> {
     if remaining_iterations < iterations_until_next_split {
         return Vec::new();
     }
@@ -303,13 +330,13 @@ mod tests {
     //     assert_eq!(result, 5);
     // }
 
-    #[test]
-    fn test_population_size_two_individual() {
-        let initial_population = "0,0".split(',').map(|s| s.parse().unwrap()).collect();
-        let iterations = 1;
-        let result = population_size(initial_population, iterations);
-        assert_eq!(result, 4);
-    }
+    // #[test]
+    // fn test_population_size_two_individual() {
+    //     let initial_population = "0,0".split(',').map(|s| s.parse().unwrap()).collect();
+    //     let iterations = 1;
+    //     let result = population_size(initial_population, iterations);
+    //     assert_eq!(result, 4);
+    // }
 
     #[test]
     fn test_get_days_individual_grows_case_0() {
@@ -403,6 +430,13 @@ mod tests {
     fn test_population_size_contribution_of_individuals_per_day() {
         let result = population_size_contribution_of_individuals_per_day(81);
         assert_eq!(result.len(), 81);
+        assert_eq!(result[&80][&0], 1421);
+    }
+
+    #[test]
+    fn test_population_size_contribution_of_individuals_per_day_bigger() {
+        let result = population_size_contribution_of_individuals_per_day(257);
+        assert_eq!(result.len(), 257);
         assert_eq!(result[&80][&0], 1421);
     }
 }
