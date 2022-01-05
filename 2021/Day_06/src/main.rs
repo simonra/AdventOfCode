@@ -30,7 +30,7 @@ fn calculate_number_of_divisions(iterations_until_next_split: u8, remaining_iter
         }
     }
     return counter;
-    // return (remaining_after_first / ITERATIONS_BETWEEN_GROWTH) as u64;
+    // return ((remaining_after_first - 0) / (ITERATIONS_BETWEEN_GROWTH + 1)) as u64;
     // unimplemented!();
 }
 
@@ -141,6 +141,18 @@ mod tests {
     fn test_calculate_number_of_divisions_case_7() {
         let result = calculate_number_of_divisions(0, 15);
         assert_eq!(result, 3, "Expected there to be 3 growths after 15 days when starting at 0.");
+    }
+
+    #[test]
+    fn test_calculate_number_of_divisions_starting_at_6_case_0() {
+        let result = calculate_number_of_divisions(6, 6);
+        assert_eq!(result, 0, "Expected there to be 0 growths after 6 days when starting at 6.");
+    }
+
+    #[test]
+    fn test_calculate_number_of_divisions_starting_at_6_case_1() {
+        let result = calculate_number_of_divisions(6, 7);
+        assert_eq!(result, 1, "Expected there to be 1 growths after 7 days when starting at 6.");
     }
 
     #[test]
