@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 mod un_recursive_attempt;
 
 fn main() {
@@ -7,11 +9,27 @@ fn main() {
     println!("Population size after {} days is:", iterations);
     println!("{}", population_size);
 
-    let new_iterations = 256;
-    let new_population_size = un_recursive_attempt::queued_population_calculation(initial_population, new_iterations);
+    let final_contributions_for_individual = final_population_sizes_given_single_individual(80);
+    let sum = initial_population.clone().iter().fold(0, |sum, starting_individual| sum + final_contributions_for_individual[starting_individual]);
+    println!("New sum {}", sum);
 
-    println!("Population size after {} days is:", new_iterations);
-    println!("{}", new_population_size);
+    // let new_iterations = 256;
+    // let experimental_population = "0".split(',').map(|s| s.parse().unwrap()).collect::<Vec<u8>>();
+    // let new_population_size = un_recursive_attempt::brute_force_population_size(experimental_population, new_iterations);
+
+    // println!("Population size after {} days is:", new_iterations);
+    // println!("{}", new_population_size);
+}
+
+fn final_population_sizes_given_single_individual(remaining_iterations: u16) -> HashMap<u8, u64> {
+    let mut map: HashMap<u8, u64> = HashMap::new();
+    for i in 0..7 {
+        let population_size = un_recursive_attempt::queued_population_calculation(vec![i], remaining_iterations);
+        map.insert(i, population_size);
+
+        println!("Found that population size after {} days when starting with an indivudual with couter {} will be {}.", remaining_iterations, i, population_size);
+    }
+    return map;
 }
 
 static ITERATIONS_BETWEEN_GROWTH: u8 = 6;
