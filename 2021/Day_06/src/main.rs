@@ -7,32 +7,51 @@ static INITIAL_TIME_UNTILL_GROWTH: u8 = 8;
 
 
 fn population_size(initial_population: Vec<u8>, iterations: u8) -> u64 {
-    unimplemented!();
+    let mut population_size: u64 = initial_population.len().try_into().unwrap();
+    for individual in initial_population {
+        population_size += number_of_children_for_individual(individual, iterations);
+    }
+    return population_size;
 }
 
 fn number_of_children_for_individual(iterations_until_split: u8, remaining_iterations: u8) -> u64 {
-    let number_of_iterations_before_first_split = remaining_iterations - iterations_until_split;
-    let remaining_regular_iterations_after_first_split = remaining_iterations - number_of_iterations_before_first_split;
-    let number_of_divisions_in_this_individuals_lifetime = remaining_regular_iterations_after_first_split / ITERATIONS_BETWEEN_GROWTH;
+    let days_new_children_are_grown = get_days_individual_grows(iterations_until_split, remaining_iterations);
 
-    unimplemented!();
+    let number_of_children: u64 = days_new_children_are_grown.len().try_into().unwrap();
+
+    let mut number_of_sub_children: u64 = 0;
+
+    for child_spawn_day in days_new_children_are_grown {
+        let sub_children_of_child = number_of_children_for_individual(8, child_spawn_day);
+        number_of_sub_children += sub_children_of_child;
+    }
+
+    return number_of_children + number_of_sub_children;
 }
 
-fn calculate_number_of_divisions(iterations_until_next_split: u8, remaining_iterations: u8) -> u64 {
+fn get_days_individual_grows(iterations_until_next_split: u8, remaining_iterations: u8) -> Vec<u8> {
     if remaining_iterations < iterations_until_next_split {
-        return 0;
+        return Vec::new();
     }
     let remaining_after_first = remaining_iterations - (iterations_until_next_split);
-    let mut counter = 0;
+    // let mut counter = 0;
+    let mut days_with_growth = Vec::new();
     for i in 0..remaining_after_first {
         if i % (ITERATIONS_BETWEEN_GROWTH + 1) == 0 {
-            counter += 1;
+            // counter += 1;
+            days_with_growth.push(i + iterations_until_next_split + 1);
         }
     }
-    return counter;
+    return days_with_growth;
     // return ((remaining_after_first - 0) / (ITERATIONS_BETWEEN_GROWTH + 1)) as u64;
     // unimplemented!();
 }
+
+// mod data_types {
+//     pub struct Growth {
+//         pub day: u8,
+//     }
+// }
 
 
 #[cfg(test)]
@@ -96,63 +115,74 @@ mod tests {
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_case_0() {
-        let result = calculate_number_of_divisions(0, 0);
-        assert_eq!(result, 0);
+    fn test_get_days_individual_grows_case_0() {
+        let result = get_days_individual_grows(0, 0);
+        assert_eq!(result.len(), 0);
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_case_1() {
-        let result = calculate_number_of_divisions(0, 1);
-        assert_eq!(result, 1, "Expected there to be 1 growth after 1 day when starting at 0.");
+    fn test_get_days_individual_grows_case_1() {
+        let result = get_days_individual_grows(0, 1);
+        assert_eq!(result.len(), 1, "Expected there to be 1 growth after 1 day when starting at 0.");
+        assert_eq!(result[0], 1);
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_case_2() {
-        let result = calculate_number_of_divisions(0, 6);
-        assert_eq!(result, 1, "Expected there to be 1 growth after 6 days when starting at 0.");
+    fn test_get_days_individual_grows_case_2() {
+        let result = get_days_individual_grows(0, 6);
+        assert_eq!(result.len(), 1, "Expected there to be 1 growth after 6 days when starting at 0.");
+        assert_eq!(result[0], 1);
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_case_3() {
-        let result = calculate_number_of_divisions(0, 7);
-        assert_eq!(result, 1, "Expected there to be 1 growth after 7 days when starting at 0.");
+    fn test_get_days_individual_grows_case_3() {
+        let result = get_days_individual_grows(0, 7);
+        assert_eq!(result.len(), 1, "Expected there to be 1 growth after 7 days when starting at 0.");
+        assert_eq!(result[0], 1);
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_case_4() {
-        let result = calculate_number_of_divisions(12, 2);
-        assert_eq!(result, 0);
+    fn test_get_days_individual_grows_case_4() {
+        let result = get_days_individual_grows(12, 2);
+        assert_eq!(result.len(), 0);
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_case_5() {
-        let result = calculate_number_of_divisions(0, 8);
-        assert_eq!(result, 2, "Expected there to be 2 growths after 8 days when starting at 0.");
+    fn test_get_days_individual_grows_case_5() {
+        let result = get_days_individual_grows(0, 8);
+        assert_eq!(result.len(), 2, "Expected there to be 2 growths after 8 days when starting at 0.");
+        assert_eq!(result[0], 1);
+        assert_eq!(result[1], 8);
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_case_6() {
-        let result = calculate_number_of_divisions(0, 9);
-        assert_eq!(result, 2, "Expected there to be 2 growths after 9 days when starting at 0.");
+    fn test_get_days_individual_grows_case_6() {
+        let result = get_days_individual_grows(0, 9);
+        assert_eq!(result.len(), 2, "Expected there to be 2 growths after 9 days when starting at 0.");
+        assert_eq!(result[0], 1);
+        assert_eq!(result[1], 8);
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_case_7() {
-        let result = calculate_number_of_divisions(0, 15);
-        assert_eq!(result, 3, "Expected there to be 3 growths after 15 days when starting at 0.");
+    fn test_get_days_individual_grows_case_7() {
+        let result = get_days_individual_grows(0, 15);
+        assert_eq!(result.len(), 3, "Expected there to be 3 growths after 15 days when starting at 0.");
+        assert_eq!(result[0], 1);
+        assert_eq!(result[1], 8);
+        assert_eq!(result[2], 15);
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_starting_at_6_case_0() {
-        let result = calculate_number_of_divisions(6, 6);
-        assert_eq!(result, 0, "Expected there to be 0 growths after 6 days when starting at 6.");
+    fn test_get_days_individual_grows_starting_at_6_case_0() {
+        let result = get_days_individual_grows(6, 6);
+        assert_eq!(result.len(), 0, "Expected there to be 0 growths after 6 days when starting at 6.");
     }
 
     #[test]
-    fn test_calculate_number_of_divisions_starting_at_6_case_1() {
-        let result = calculate_number_of_divisions(6, 7);
-        assert_eq!(result, 1, "Expected there to be 1 growths after 7 days when starting at 6.");
+    fn test_get_days_individual_grows_starting_at_6_case_1() {
+        let result = get_days_individual_grows(6, 7);
+        assert_eq!(result.len(), 1, "Expected there to be 1 growths after 7 days when starting at 6.");
+        assert_eq!(result[0], 7);
     }
 
     #[test]
