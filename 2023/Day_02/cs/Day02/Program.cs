@@ -10,8 +10,6 @@ using ILoggerFactory factory = LoggerFactory.Create(
     });
 ILogger logger = factory.CreateLogger("Day02");
 
-
-// var sampleLine = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green";
 var part1Constraint = new Dictionary<string, uint>() {
     {"red", 12},
     {"green", 13},
@@ -45,7 +43,7 @@ var sampleDataParsedGames = ParseGameLines(part1SampleDataFilePath);
 var part2SampleSum = SumOfPowersOfAllGames(sampleDataParsedGames);
 var part2ExpectedSum = 2286;
 
-if(part2SampleSum == part2ExpectedSum)
+if (part2SampleSum == part2ExpectedSum)
 {
     logger.LogInformation("Part 2 sample data successfully processed!");
 }
@@ -68,7 +66,6 @@ uint SumOfPowersOfAllGames(List<Game> games)
         result += power;
     }
     return result;
-    // throw new NotImplementedException();
 }
 
 uint PowerOfFewestPossible(Game game)
@@ -174,7 +171,6 @@ Game ParseGameLine(string gameLine)
         DrawSet = drawSet,
     };
     return result;
-    // throw new NotImplementedException();
 }
 
 List<Dictionary<string, uint>> ParseDrawSet(string drawSet)
@@ -186,7 +182,6 @@ List<Dictionary<string, uint>> ParseDrawSet(string drawSet)
         result.Add(ParseDraw(draw));
     }
     return result;
-    // throw new NotImplementedException();
 }
 
 Dictionary<string, uint> ParseDraw(string draw)
@@ -204,13 +199,5 @@ Dictionary<string, uint> ParseDraw(string draw)
 public record Game
 {
     public required uint Id { get; init; }
-    // public required List<DrawSet> Draws { get; set; } = new List<DrawSet>();
-    public required List<Dictionary<string, uint>> DrawSet { get; init; } // = new List<Dictionary<string, uint>>();
+    public required List<Dictionary<string, uint>> DrawSet { get; init; }
 }
-
-// public record DrawSet
-// {
-//     public required uint Reds { get; set; } = 0;
-//     public required uint Greens { get; set; } = 0;
-//     public required uint Blues { get; set; } = 0;
-// }
