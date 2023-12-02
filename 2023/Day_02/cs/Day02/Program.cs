@@ -41,6 +41,66 @@ var part1DataFilePath = "input-part-1.txt";
 var part1Sum = SumOfIdsOfPossibleGames(part1DataFilePath, part1Constraint);
 logger.LogInformation($"Part 1 result is: {part1Sum}");
 
+var sampleDataParsedGames = ParseGameLines(part1SampleDataFilePath);
+var part2SampleSum = SumOfPowersOfAllGames(sampleDataParsedGames);
+var part2ExpectedSum = 2286;
+
+if(part2SampleSum == part2ExpectedSum)
+{
+    logger.LogInformation("Part 2 sample data successfully processed!");
+}
+else
+{
+    logger.LogError($"Part 2 sample data processing failed. Got {part2SampleSum}, expected {part2ExpectedSum}");
+}
+
+var part2Games = ParseGameLines(part1DataFilePath);
+var part2Sum = SumOfPowersOfAllGames(part2Games);
+logger.LogInformation($"Part 2 result is: {part2Sum}");
+
+
+uint SumOfPowersOfAllGames(List<Game> games)
+{
+    uint result = 0;
+    foreach (var game in games)
+    {
+        var power = PowerOfFewestPossible(game);
+        result += power;
+    }
+    return result;
+    // throw new NotImplementedException();
+}
+
+uint PowerOfFewestPossible(Game game)
+{
+    var fewestPossible = FewestPossibleCubes(game);
+    uint result = 1;
+    foreach (KeyValuePair<string, uint> entry in fewestPossible)
+    {
+        result *= entry.Value;
+    }
+    return result;
+}
+
+Dictionary<string, uint> FewestPossibleCubes(Game game)
+{
+    var result = new Dictionary<string, uint>();
+    foreach (var drawSet in game.DrawSet)
+    {
+        foreach (KeyValuePair<string, uint> entry in drawSet)
+        {
+            if (!result.ContainsKey(entry.Key))
+            {
+                result.Add(entry.Key, entry.Value);
+            }
+            else if (result[entry.Key] < entry.Value)
+            {
+                result[entry.Key] = entry.Value;
+            }
+        }
+    }
+    return result;
+}
 
 uint SumOfIdsOfPossibleGames(string filePath, Dictionary<string, uint> constraints)
 {
