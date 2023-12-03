@@ -42,17 +42,16 @@ logger.LogInformation($"Part 1 result is {part1Sum}");
 uint AllPartNumbersSum(string filePath)
 {
     uint sum = 0;
-    // string previousLine = string.Empty;
     var previousSchematicLine = new EngineSchematicLine()
     {
         LineNumber = uint.MaxValue,
         PartNumbers = new List<PartNumber>(),
         Symbols = new List<Symbol>(),
     };
-    uint lineNumber = 0;
-    var lines = File.ReadLines(filePath);
     var uncountedPartNumbersPrevious = new List<PartNumber>();
     var uncountedPartNumbersCurrent = new List<PartNumber>();
+    uint lineNumber = 0;
+    var lines = File.ReadLines(filePath);
     foreach (var line in lines)
     {
         var currentSchematicLine = ParseEngineSchematicLine(line, lineNumber);
@@ -92,11 +91,6 @@ uint AllPartNumbersSum(string filePath)
                 break;
             }
         }
-        // ToDo: The actual work
-        // For each symbol in current
-        //    check adjacency to number in current and previous
-        // For each number
-        //    check adjacency to symbol in previous
         previousSchematicLine = currentSchematicLine;
         uncountedPartNumbersPrevious.Clear();
         uncountedPartNumbersPrevious.AddRange(uncountedPartNumbersCurrent);
@@ -157,14 +151,12 @@ EngineSchematicLine ParseEngineSchematicLine(string input, uint lineNumber)
         {
             if (previousIsDigit)
             {
-                // currentNumberLastOffset = i - 1;
                 partNumbers.Add(
                     new PartNumber()
                     {
                         Value = UInt16.Parse(currentNumberUnparsed),
                         OffsetBegin = currentNumberFirstOffset,
                         OffsetEnd = (uint)i - 1,
-                        // OffsetEnd = currentNumberLastOffset
                     });
             }
             if (input[i] != '.')
@@ -176,14 +168,12 @@ EngineSchematicLine ParseEngineSchematicLine(string input, uint lineNumber)
     }
     if (previousIsDigit)
     {
-        // currentNumberLastOffset = i - 1;
         partNumbers.Add(
             new PartNumber()
             {
                 Value = UInt16.Parse(currentNumberUnparsed),
                 OffsetBegin = currentNumberFirstOffset,
                 OffsetEnd = (uint)input.Length - 1,
-                // OffsetEnd = currentNumberLastOffset
             });
     }
 
@@ -213,23 +203,6 @@ static class ExtensionMethods
         return false;
     }
 }
-
-
-// bool IsSymbol(char c)
-// {
-//     return !Char.IsDigit(c) && c != '.';
-// }
-
-// line
-// {
-//     numbers [
-//         {value, offsetStart, offsetEnd},
-//         { value, offsetStart, offsetEnd}
-//     ]
-//     symbols[
-//         { offset, (value)}
-//     ]
-// }
 
 public record EngineSchematicLine
 {
