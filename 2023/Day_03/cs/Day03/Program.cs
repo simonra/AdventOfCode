@@ -98,7 +98,6 @@ uint GearRatiosSum(string filePath)
     sum += CalculateGearRatioSum(previousSchematicLine, currentSchematicLine, nextSchematicLine);
 
     return sum;
-    // throw new NotImplementedException();
 }
 
 uint CalculateGearRatioSum(EngineSchematicLine previous, EngineSchematicLine current, EngineSchematicLine next)
@@ -233,13 +232,11 @@ EngineSchematicLine ParseEngineSchematicLine(string input, uint lineNumber)
     bool previousIsDigit = false;
     string currentNumberUnparsed = string.Empty;
     uint currentNumberFirstOffset = 0;
-    // uint currentNumberLastOffset = 0;
 
     for (int i = 0; i < input.Length; i++)
     {
         if (input[i].CharIsDigit())
         {
-            // ToDo
             if (previousIsDigit)
             {
                 currentNumberUnparsed += input[i];
