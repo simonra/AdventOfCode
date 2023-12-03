@@ -24,6 +24,10 @@ else
 
 }
 
+var part1InputDataFilePath = "input-part-1.txt";
+var part1Sum = AllPartNumbersSum(part1InputDataFilePath);
+logger.LogInformation($"Part 1 result is {part1Sum}");
+
 uint AllPartNumbersSum(string filePath)
 {
     uint sum = 0;
@@ -61,27 +65,20 @@ uint AllPartNumbersSum(string filePath)
                     uncountedPartNumbersCurrent.RemoveAt(i);
                 }
             }
-            // if(!uncountedPartNumbersPrevious.Any())
-            // {
-            //     break;
-            // }
         }
-        if (uncountedPartNumbersCurrent.Count > 0)
+        foreach (var symbol in previousSchematicLine.Symbols)
         {
             for (int i = uncountedPartNumbersCurrent.Count - 1; i >= 0; i--)
             {
-                foreach (var symbol in previousSchematicLine.Symbols)
+                if (IsAdjacent(symbol, uncountedPartNumbersCurrent[i]))
                 {
-                    if (IsAdjacent(symbol, uncountedPartNumbersCurrent[i]))
-                    {
-                        sum += uncountedPartNumbersCurrent[i].Value;
-                        uncountedPartNumbersCurrent.RemoveAt(i);
-                        if (uncountedPartNumbersCurrent.Count == 0)
-                        {
-                            break;
-                        }
-                    }
+                    sum += uncountedPartNumbersCurrent[i].Value;
+                    uncountedPartNumbersCurrent.RemoveAt(i);
                 }
+            }
+            if (uncountedPartNumbersCurrent.Count == 0)
+            {
+                break;
             }
         }
         // ToDo: The actual work
@@ -131,7 +128,7 @@ EngineSchematicLine ParseEngineSchematicLine(string input, uint lineNumber)
 
     for (int i = 0; i < input.Length; i++)
     {
-        if (Char.IsDigit(input[i]))
+        if (input[i].CharIsDigit())
         {
             // ToDo
             if (previousIsDigit)
@@ -165,14 +162,18 @@ EngineSchematicLine ParseEngineSchematicLine(string input, uint lineNumber)
             }
             previousIsDigit = false;
         }
-        // if (input[i] != '.')
-        // {
-        //     // ToDo
-        // }
-        // if (!Char.IsDigit(input[i]) && input[i] != '.')
-        // {
-        //     // Handle symbol;
-        // }
+    }
+    if (previousIsDigit)
+    {
+        // currentNumberLastOffset = i - 1;
+        partNumbers.Add(
+            new PartNumber()
+            {
+                Value = UInt16.Parse(currentNumberUnparsed),
+                OffsetBegin = currentNumberFirstOffset,
+                OffsetEnd = (uint)input.Length - 1,
+                // OffsetEnd = currentNumberLastOffset
+            });
     }
 
     var result = new EngineSchematicLine()
@@ -182,6 +183,24 @@ EngineSchematicLine ParseEngineSchematicLine(string input, uint lineNumber)
         Symbols = symbols,
     };
     return result;
+}
+
+static class ExtensionMethods
+{
+    public static bool CharIsDigit(this char c)
+    {
+        if (c == '0') return true;
+        if (c == '1') return true;
+        if (c == '2') return true;
+        if (c == '3') return true;
+        if (c == '4') return true;
+        if (c == '5') return true;
+        if (c == '6') return true;
+        if (c == '7') return true;
+        if (c == '8') return true;
+        if (c == '9') return true;
+        return false;
+    }
 }
 
 
