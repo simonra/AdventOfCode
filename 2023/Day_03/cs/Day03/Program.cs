@@ -5,87 +5,98 @@ using ILoggerFactory factory = LoggerFactory.Create(
     builder =>
     {
         builder.SetMinimumLevel(LogLevel.Information);
-        builder.SetMinimumLevel(LogLevel.Debug);
+        // builder.SetMinimumLevel(LogLevel.Debug);
         builder.AddConsole();
     });
 ILogger logger = factory.CreateLogger("Day03");
 var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
 var part1SampleDataFilePath = "sample_input-part_1.txt";
-var part1SampleDataExpectedResult = 4361;
+uint part1SampleDataExpectedResult = 4361;
+var part1SampleDataSum = AllPartNumbersSum(part1SampleDataFilePath);
+if (part1SampleDataSum == part1SampleDataExpectedResult)
+{
+    logger.LogInformation("Processing sample data yielded expected result!");
+}
+else
+{
+    logger.LogError($"Processing sample data failed. Sum is {part1SampleDataSum}, expected {part1SampleDataExpectedResult}");
 
-uint sum = 0;
-// string previousLine = string.Empty;
-var previousSchematicLine = new EngineSchematicLine()
+}
+
+uint AllPartNumbersSum(string filePath)
 {
-    LineNumber = uint.MaxValue,
-    PartNumbers = new List<PartNumber>(),
-    Symbols = new List<Symbol>(),
-};
-uint lineNumber = 0;
-var lines = File.ReadLines(part1SampleDataFilePath);
-var uncountedPartNumbersPrevious = new List<PartNumber>();
-var uncountedPartNumbersCurrent = new List<PartNumber>();
-foreach (var line in lines)
-{
-    var currentSchematicLine = ParseEngineSchematicLine(line, lineNumber);
-    logger.LogDebug($"Parsing line {line} yields {JsonSerializer.Serialize(currentSchematicLine, serializerOptions)}");
-    uncountedPartNumbersCurrent.AddRange(currentSchematicLine.PartNumbers);
-    foreach (var symbol in currentSchematicLine.Symbols)
+    uint sum = 0;
+    // string previousLine = string.Empty;
+    var previousSchematicLine = new EngineSchematicLine()
     {
-        for (int i = uncountedPartNumbersPrevious.Count - 1; i >= 0; i--)
-        {
-            if (IsAdjacent(symbol, uncountedPartNumbersPrevious[i]))
-            {
-                sum += uncountedPartNumbersPrevious[i].Value;
-                uncountedPartNumbersPrevious.RemoveAt(i);
-            }
-        }
-        for (int i = uncountedPartNumbersCurrent.Count - 1; i >= 0; i--)
-        {
-            if (IsAdjacent(symbol, uncountedPartNumbersCurrent[i]))
-            {
-                sum += uncountedPartNumbersCurrent[i].Value;
-                uncountedPartNumbersCurrent.RemoveAt(i);
-            }
-        }
-        // if(!uncountedPartNumbersPrevious.Any())
-        // {
-        //     break;
-        // }
-    }
-    if (uncountedPartNumbersCurrent.Count > 0)
+        LineNumber = uint.MaxValue,
+        PartNumbers = new List<PartNumber>(),
+        Symbols = new List<Symbol>(),
+    };
+    uint lineNumber = 0;
+    var lines = File.ReadLines(filePath);
+    var uncountedPartNumbersPrevious = new List<PartNumber>();
+    var uncountedPartNumbersCurrent = new List<PartNumber>();
+    foreach (var line in lines)
     {
-        for (int i = uncountedPartNumbersCurrent.Count - 1; i >= 0; i--)
+        var currentSchematicLine = ParseEngineSchematicLine(line, lineNumber);
+        logger.LogDebug($"Parsing line {line} yields {JsonSerializer.Serialize(currentSchematicLine, serializerOptions)}");
+        uncountedPartNumbersCurrent.AddRange(currentSchematicLine.PartNumbers);
+        foreach (var symbol in currentSchematicLine.Symbols)
         {
-            foreach (var symbol in previousSchematicLine.Symbols)
+            for (int i = uncountedPartNumbersPrevious.Count - 1; i >= 0; i--)
+            {
+                if (IsAdjacent(symbol, uncountedPartNumbersPrevious[i]))
+                {
+                    sum += uncountedPartNumbersPrevious[i].Value;
+                    uncountedPartNumbersPrevious.RemoveAt(i);
+                }
+            }
+            for (int i = uncountedPartNumbersCurrent.Count - 1; i >= 0; i--)
             {
                 if (IsAdjacent(symbol, uncountedPartNumbersCurrent[i]))
                 {
                     sum += uncountedPartNumbersCurrent[i].Value;
                     uncountedPartNumbersCurrent.RemoveAt(i);
-                    if (uncountedPartNumbersCurrent.Count == 0)
+                }
+            }
+            // if(!uncountedPartNumbersPrevious.Any())
+            // {
+            //     break;
+            // }
+        }
+        if (uncountedPartNumbersCurrent.Count > 0)
+        {
+            for (int i = uncountedPartNumbersCurrent.Count - 1; i >= 0; i--)
+            {
+                foreach (var symbol in previousSchematicLine.Symbols)
+                {
+                    if (IsAdjacent(symbol, uncountedPartNumbersCurrent[i]))
                     {
-                        break;
+                        sum += uncountedPartNumbersCurrent[i].Value;
+                        uncountedPartNumbersCurrent.RemoveAt(i);
+                        if (uncountedPartNumbersCurrent.Count == 0)
+                        {
+                            break;
+                        }
                     }
                 }
             }
         }
-
+        // ToDo: The actual work
+        // For each symbol in current
+        //    check adjacency to number in current and previous
+        // For each number
+        //    check adjacency to symbol in previous
+        previousSchematicLine = currentSchematicLine;
+        uncountedPartNumbersPrevious.Clear();
+        uncountedPartNumbersPrevious.AddRange(uncountedPartNumbersCurrent);
+        uncountedPartNumbersCurrent.Clear();
+        lineNumber++;
     }
-    // ToDo: The actual work
-    // For each symbol in current
-    //    check adjacency to number in current and previous
-    // For each number
-    //    check adjacency to symbol in previous
-    previousSchematicLine = currentSchematicLine;
-    uncountedPartNumbersPrevious.Clear();
-    uncountedPartNumbersPrevious.AddRange(uncountedPartNumbersCurrent);
-    uncountedPartNumbersCurrent.Clear();
-    lineNumber++;
+    return sum;
 }
-
-logger.LogInformation($"Sum is {sum}, expected {part1SampleDataExpectedResult}");
 
 // Checks if number is adjacent on line above, below, or current
 bool IsAdjacent(Symbol symbol, PartNumber partNumber)
