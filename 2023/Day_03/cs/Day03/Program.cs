@@ -261,7 +261,7 @@ EngineSchematicLine ParseEngineSchematicLine(string input, uint lineNumber)
 
     for (int i = 0; i < input.Length; i++)
     {
-        if (input[i].CharIsDigit())
+        if (input[i].IsDigit())
         {
             if (previousIsDigit)
             {
@@ -315,7 +315,7 @@ EngineSchematicLine ParseEngineSchematicLine(string input, uint lineNumber)
 
 static class ExtensionMethods
 {
-    public static bool CharIsDigit(this char c)
+    public static bool IsDigit(this char c)
     {
         if (c == '0') return true;
         if (c == '1') return true;
