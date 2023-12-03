@@ -13,9 +13,11 @@ var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
 TestPart1();
 TestPart1SimplerData();
+
 RunPart1();
 
 TestPart2();
+
 RunPart2();
 
 void TestPart1()
