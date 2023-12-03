@@ -19,7 +19,7 @@ void RunPart1()
     logger.LogInformation("Running part 1");
     var sampleInputFile = "input-part-1.txt";
     var sum = GetSum(sampleInputFile);
-    logger.LogInformation($"Part 1 gave result \"{sum}\"");
+    logger.LogInformation($"Part 1 gave result \"{sum}\" Expected 54916");
 }
 
 void RunPart2()
@@ -27,7 +27,7 @@ void RunPart2()
     logger.LogInformation("Running part 2");
     var sampleInputFile = "input-part-1.txt";
     var sum = GetSumPart2(sampleInputFile);
-    logger.LogInformation($"Part 2 gave result \"{sum}\"");
+    logger.LogInformation($"Part 2 gave result \"{sum}\" Expected 54728");
 }
 
 bool TestPart1SampleInput()
@@ -122,18 +122,21 @@ List<char> GetNumbersForLine(string line)
             {
                 logger.LogDebug($"    Found 1 at position {i}");
                 result.Add('1');
+                i = i+1;
                 continue;
             }
             if (line[i] == 't' && line[i + 1] == 'w' && line[i + 2] == 'o')
             {
                 logger.LogDebug($"    Found 2 at position {i}");
                 result.Add('2');
+                i = i+1;
                 continue;
             }
             if (line[i] == 's' && line[i + 1] == 'i' && line[i + 2] == 'x')
             {
                 logger.LogDebug($"    Found 6 at position {i}");
                 result.Add('6');
+                i = i+1;
                 continue;
             }
 
@@ -144,18 +147,21 @@ List<char> GetNumbersForLine(string line)
                 {
                     logger.LogDebug($"    Found 4 at position {i}");
                     result.Add('4');
+                    i = i+2;
                     continue;
                 }
                 if (line[i] == 'f' && line[i + 1] == 'i' && line[i + 2] == 'v' && line[i + 3] == 'e')
                 {
                     logger.LogDebug($"    Found 5 at position {i}");
                     result.Add('5');
+                    i = i+2;
                     continue;
                 }
                 if (line[i] == 'n' && line[i + 1] == 'i' && line[i + 2] == 'n' && line[i + 3] == 'e')
                 {
                     logger.LogDebug($"    Found 9 at position {i}");
                     result.Add('9');
+                    i = i+2;
                     continue;
                 }
                 if (i < line.Length - 4)
@@ -165,18 +171,21 @@ List<char> GetNumbersForLine(string line)
                     {
                         logger.LogDebug($"    Found 3 at position {i}");
                         result.Add('3');
+                        i = i+3;
                         continue;
                     }
                     if (line[i] == 's' && line[i + 1] == 'e' && line[i + 2] == 'v' && line[i + 3] == 'e' && line[i + 4] == 'n')
                     {
                         logger.LogDebug($"    Found 7 at position {i}");
                         result.Add('7');
+                        i = i+3;
                         continue;
                     }
                     if (line[i] == 'e' && line[i + 1] == 'i' && line[i + 2] == 'g' && line[i + 3] == 'h' && line[i + 4] == 't')
                     {
                         logger.LogDebug($"    Found 8 at position {i}");
                         result.Add('8');
+                        i = i+3;
                         continue;
                     }
                 }
