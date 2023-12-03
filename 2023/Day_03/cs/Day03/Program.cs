@@ -11,47 +11,71 @@ using ILoggerFactory factory = LoggerFactory.Create(
 ILogger logger = factory.CreateLogger("Day03");
 var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
-var part1SampleDataFilePath = "sample_input-part_1.txt";
-uint part1SampleDataExpectedResult = 4361;
-var part1SampleDataSum = AllPartNumbersSum(part1SampleDataFilePath);
-if (part1SampleDataSum == part1SampleDataExpectedResult)
+TestPart1();
+TestPart1SimplerData();
+RunPart1();
+
+TestPart2();
+RunPart2();
+
+void TestPart1()
 {
-    logger.LogInformation("Processing sample data yielded expected result!");
-}
-else
-{
-    logger.LogError($"Processing sample data failed. Sum is {part1SampleDataSum}, expected {part1SampleDataExpectedResult}");
+    var part1SampleDataFilePath = "sample_input-part_1.txt";
+    uint part1SampleDataExpectedResult = 4361;
+    var part1SampleDataSum = AllPartNumbersSum(part1SampleDataFilePath);
+    if (part1SampleDataSum == part1SampleDataExpectedResult)
+    {
+        logger.LogInformation("Processing sample data yielded expected result!");
+    }
+    else
+    {
+        logger.LogError($"Processing sample data failed. Sum is {part1SampleDataSum}, expected {part1SampleDataExpectedResult}");
+    }
 }
 
-var superSimpleInputPath = "super-simple-input.txt";
-uint superSimpleInputExpectedSum = 123;
-var superSimpleInputSum = AllPartNumbersSum(superSimpleInputPath);
-if (superSimpleInputSum == superSimpleInputExpectedSum)
+void TestPart1SimplerData()
 {
-    logger.LogInformation("Processing super simple sample data yielded expected result!");
-}
-else
-{
-    logger.LogError($"Processing super simple sample data failed. Sum is {superSimpleInputSum}, expected {superSimpleInputExpectedSum}");
-}
-
-var part1InputDataFilePath = "input-part-1.txt";
-var part1Sum = AllPartNumbersSum(part1InputDataFilePath);
-logger.LogInformation($"Part 1 result is {part1Sum}");
-
-uint part2SampleDataExpectedResult = 467835;
-var part2SampleDataSum = GearRatiosSum(part1SampleDataFilePath);
-if (part2SampleDataSum == part2SampleDataExpectedResult)
-{
-    logger.LogInformation("Processing sample data for part 2 yielded expected result!");
-}
-else
-{
-    logger.LogError($"Processing sample data for part 2 failed. Sum is {part2SampleDataSum}, expected {part2SampleDataExpectedResult}");
+    var superSimpleInputPath = "super-simple-input.txt";
+    uint superSimpleInputExpectedSum = 123;
+    var superSimpleInputSum = AllPartNumbersSum(superSimpleInputPath);
+    if (superSimpleInputSum == superSimpleInputExpectedSum)
+    {
+        logger.LogInformation("Processing super simple sample data yielded expected result!");
+    }
+    else
+    {
+        logger.LogError($"Processing super simple sample data failed. Sum is {superSimpleInputSum}, expected {superSimpleInputExpectedSum}");
+    }
 }
 
-var part2Sum = GearRatiosSum(part1InputDataFilePath);
-logger.LogInformation($"Part 1 result is {part2Sum}");
+void RunPart1()
+{
+    var part1InputDataFilePath = "input-part-1.txt";
+    var part1Sum = AllPartNumbersSum(part1InputDataFilePath);
+    logger.LogInformation($"Part 1 result is {part1Sum}");
+}
+
+void TestPart2()
+{
+    var part2SampleDataFilePath = "sample_input-part_1.txt";
+    uint part2SampleDataExpectedResult = 467835;
+    var part2SampleDataSum = GearRatiosSum(part2SampleDataFilePath);
+    if (part2SampleDataSum == part2SampleDataExpectedResult)
+    {
+        logger.LogInformation("Processing sample data for part 2 yielded expected result!");
+    }
+    else
+    {
+        logger.LogError($"Processing sample data for part 2 failed. Sum is {part2SampleDataSum}, expected {part2SampleDataExpectedResult}");
+    }
+}
+
+void RunPart2()
+{
+    var part2InputDataFilePath = "input-part-1.txt";
+    var part2Sum = GearRatiosSum(part2InputDataFilePath);
+    logger.LogInformation($"Part 1 result is {part2Sum}");
+}
 
 uint GearRatiosSum(string filePath)
 {
