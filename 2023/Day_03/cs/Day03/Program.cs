@@ -21,7 +21,18 @@ if (part1SampleDataSum == part1SampleDataExpectedResult)
 else
 {
     logger.LogError($"Processing sample data failed. Sum is {part1SampleDataSum}, expected {part1SampleDataExpectedResult}");
+}
 
+var superSimpleInputPath = "super-simple-input.txt";
+uint superSimpleInputExpectedSum = 123;
+var superSimpleInputSum = AllPartNumbersSum(superSimpleInputPath);
+if (superSimpleInputSum == superSimpleInputExpectedSum)
+{
+    logger.LogInformation("Processing super simple sample data yielded expected result!");
+}
+else
+{
+    logger.LogError($"Processing super simple sample data failed. Sum is {superSimpleInputSum}, expected {superSimpleInputExpectedSum}");
 }
 
 var part1InputDataFilePath = "input-part-1.txt";
