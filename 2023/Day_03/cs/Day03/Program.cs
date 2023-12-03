@@ -39,6 +39,110 @@ var part1InputDataFilePath = "input-part-1.txt";
 var part1Sum = AllPartNumbersSum(part1InputDataFilePath);
 logger.LogInformation($"Part 1 result is {part1Sum}");
 
+uint part2SampleDataExpectedResult = 467835;
+var part2SampleDataSum = GearRatiosSum(part1SampleDataFilePath);
+if (part2SampleDataSum == part2SampleDataExpectedResult)
+{
+    logger.LogInformation("Processing sample data for part 2 yielded expected result!");
+}
+else
+{
+    logger.LogError($"Processing sample data for part 2 failed. Sum is {part2SampleDataSum}, expected {part2SampleDataExpectedResult}");
+}
+
+var part2Sum = GearRatiosSum(part1InputDataFilePath);
+logger.LogInformation($"Part 1 result is {part2Sum}");
+
+uint GearRatiosSum(string filePath)
+{
+    uint sum = 0;
+    var previousSchematicLine = new EngineSchematicLine()
+    {
+        LineNumber = uint.MaxValue,
+        PartNumbers = new List<PartNumber>(),
+        Symbols = new List<Symbol>(),
+    };
+    var currentSchematicLine = new EngineSchematicLine()
+    {
+        LineNumber = uint.MaxValue,
+        PartNumbers = new List<PartNumber>(),
+        Symbols = new List<Symbol>(),
+    };
+    var nextSchematicLine = new EngineSchematicLine()
+    {
+        LineNumber = uint.MaxValue,
+        PartNumbers = new List<PartNumber>(),
+        Symbols = new List<Symbol>(),
+    };
+
+    uint lineNumber = 0;
+    var lines = File.ReadLines(filePath);
+    foreach (var line in lines)
+    {
+        nextSchematicLine = ParseEngineSchematicLine(line, lineNumber);
+
+        sum += CalculateGearRatioSum(previousSchematicLine, currentSchematicLine, nextSchematicLine);
+
+        previousSchematicLine = currentSchematicLine;
+        currentSchematicLine = nextSchematicLine;
+        lineNumber++;
+    }
+
+    // Handle possible cogs on last line of input
+    nextSchematicLine = new EngineSchematicLine()
+    {
+        LineNumber = uint.MaxValue,
+        PartNumbers = new List<PartNumber>(),
+        Symbols = new List<Symbol>(),
+    };
+    sum += CalculateGearRatioSum(previousSchematicLine, currentSchematicLine, nextSchematicLine);
+
+    return sum;
+    // throw new NotImplementedException();
+}
+
+uint CalculateGearRatioSum(EngineSchematicLine previous, EngineSchematicLine current, EngineSchematicLine next)
+{
+    uint sum = 0;
+    foreach (var symbol in current.Symbols)
+    {
+        if (symbol.Value == '*')
+        {
+            uint gearRatio = 1;
+            uint numberOfAdjacentParts = 0;
+            foreach (var partNumber in previous.PartNumbers)
+            {
+                if (IsAdjacent(symbol, partNumber))
+                {
+                    numberOfAdjacentParts++;
+                    gearRatio *= partNumber.Value;
+                }
+            }
+            foreach (var partNumber in current.PartNumbers)
+            {
+                if (IsAdjacent(symbol, partNumber))
+                {
+                    numberOfAdjacentParts++;
+                    gearRatio *= partNumber.Value;
+                }
+            }
+            foreach (var partNumber in next.PartNumbers)
+            {
+                if (IsAdjacent(symbol, partNumber))
+                {
+                    numberOfAdjacentParts++;
+                    gearRatio *= partNumber.Value;
+                }
+            }
+            if (numberOfAdjacentParts == 2)
+            {
+                sum += gearRatio;
+            }
+        }
+    }
+    return sum;
+}
+
 uint AllPartNumbersSum(string filePath)
 {
     uint sum = 0;
