@@ -27,7 +27,7 @@ void RunPart1()
 
 void TestPart1OnSampleInput()
 {
-    var inputFilePath = "sample-input.txt";
+    var inputFilePath = "sample_input-part_1.txt";
     var expectedResult = 13;
     var result = TotalScore(inputFilePath);
     if (result == expectedResult)
