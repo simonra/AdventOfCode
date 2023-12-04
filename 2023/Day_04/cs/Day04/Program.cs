@@ -12,7 +12,7 @@ ILogger logger = factory.CreateLogger("Day03");
 var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
 TestParseCard();
-TestVeListEquals();
+TestVeqListEquals();
 TestCorrectNumbers();
 TestScore();
 TestPart1OnSampleInput();
@@ -46,8 +46,8 @@ void TestParseCard()
     var expected = new ScratchCard
     {
         Id = 1,
-        WinningNumbers = new VeList<uint> { 41, 48, 83, 86, 17 },
-        NumbersYouHave = new VeList<uint> { 83, 86, 6, 31, 17, 9, 48, 53 }
+        WinningNumbers = new VeqList<uint> { 41, 48, 83, 86, 17 },
+        NumbersYouHave = new VeqList<uint> { 83, 86, 6, 31, 17, 9, 48, 53 }
     };
     var result = ParseScratchCard(input);
     if (result == expected)
@@ -60,10 +60,10 @@ void TestParseCard()
     }
 }
 
-void TestVeListEquals()
+void TestVeqListEquals()
 {
-    var unequalDuplicatesFirst = new VeList<int> { 1, 2, 3, 3, 3, 3, 4 };
-    var unequalDuplicatesSecond = new VeList<int> { 1, 1, 1, 2, 3, 4, 4 };
+    var unequalDuplicatesFirst = new VeqList<int> { 1, 2, 3, 3, 3, 3, 4 };
+    var unequalDuplicatesSecond = new VeqList<int> { 1, 1, 1, 2, 3, 4, 4 };
     if (unequalDuplicatesFirst != unequalDuplicatesSecond)
     {
         logger.LogDebug("Value equal lists are unequal when they contain unequal duplicates");
@@ -73,8 +73,8 @@ void TestVeListEquals()
         logger.LogError($"Value equal lists are claimed to be equal, even when they contain different duplicates! Something is very wrong.");
     }
 
-    var unequalDuplicatesIgnoreOrderFirst = new VeList<int>(requireMatchingOrder: false) { 1, 2, 3, 3, 3, 3, 4 };
-    var unequalDuplicatesIgnoreOrderSecond = new VeList<int>(requireMatchingOrder: false) { 1, 1, 1, 2, 3, 4, 4 };
+    var unequalDuplicatesIgnoreOrderFirst = new VeqList<int>(requireMatchingOrder: false) { 1, 2, 3, 3, 3, 3, 4 };
+    var unequalDuplicatesIgnoreOrderSecond = new VeqList<int>(requireMatchingOrder: false) { 1, 1, 1, 2, 3, 4, 4 };
     if (unequalDuplicatesIgnoreOrderFirst != unequalDuplicatesIgnoreOrderSecond)
     {
         logger.LogDebug("Value equal lists are unequal when they contain unequal duplicates and we ignore ordering for equality");
@@ -84,8 +84,8 @@ void TestVeListEquals()
         logger.LogError($"Value equal lists are claimed to be equal, even when they contain different duplicates and we ignore ordering for equality! Something is very wrong.");
     }
 
-    var equalValuesDifferentOrderIgnoreOrderFirst = new VeList<int>(requireMatchingOrder: false) { 1, 2, 3, 4 };
-    var equalValuesDifferentOrderIgnoreOrderSecond = new VeList<int>(requireMatchingOrder: false) { 4, 3, 2, 1 };
+    var equalValuesDifferentOrderIgnoreOrderFirst = new VeqList<int>(requireMatchingOrder: false) { 1, 2, 3, 4 };
+    var equalValuesDifferentOrderIgnoreOrderSecond = new VeqList<int>(requireMatchingOrder: false) { 4, 3, 2, 1 };
     if (equalValuesDifferentOrderIgnoreOrderFirst == equalValuesDifferentOrderIgnoreOrderSecond)
     {
         logger.LogDebug("Value equal lists are equal when they contain no duplicates and have different ordering when we compare and ignore ordering for equality");
@@ -95,8 +95,8 @@ void TestVeListEquals()
         logger.LogError($"Value equal lists are claimed to be unequal, even when they contain no duplicates and have different ordering when we ignore ordering for equality! Something is very wrong.");
     }
 
-    var equalValuesDifferentOrderFirst = new VeList<int>(requireMatchingOrder: true) { 1, 2, 3, 4 };
-    var equalValuesDifferentOrderSecond = new VeList<int>(requireMatchingOrder: true) { 4, 3, 2, 1 };
+    var equalValuesDifferentOrderFirst = new VeqList<int>(requireMatchingOrder: true) { 1, 2, 3, 4 };
+    var equalValuesDifferentOrderSecond = new VeqList<int>(requireMatchingOrder: true) { 4, 3, 2, 1 };
     if (equalValuesDifferentOrderFirst != equalValuesDifferentOrderSecond)
     {
         logger.LogDebug("Value equal lists are unequal when they contain no duplicates and have different ordering when we compare and care about ordering for equality");
@@ -114,10 +114,10 @@ void TestCorrectNumbers()
     var input = new ScratchCard
     {
         Id = 1,
-        WinningNumbers = new VeList<uint> { 41, 48, 83, 86, 17 },
-        NumbersYouHave = new VeList<uint> { 83, 86, 6, 31, 17, 9, 48, 53 }
+        WinningNumbers = new VeqList<uint> { 41, 48, 83, 86, 17 },
+        NumbersYouHave = new VeqList<uint> { 83, 86, 6, 31, 17, 9, 48, 53 }
     };
-    var expected = new VeList<uint> {48, 83, 86, 17};
+    var expected = new VeqList<uint> {48, 83, 86, 17};
     var result = CorrectNumbers(input);
     if (result == expected)
     {
@@ -131,7 +131,7 @@ void TestCorrectNumbers()
 
 void TestScore()
 {
-    var emptyInput = new VeList<uint>();
+    var emptyInput = new VeqList<uint>();
     var emptyExpected = 0;
     var emptyResult = Score(emptyInput);
     if(emptyResult == emptyExpected)
@@ -143,7 +143,7 @@ void TestScore()
         logger.LogError($"Testing score for empty input failed. Got {emptyResult} expected {emptyExpected}");
     }
 
-    var lonelyInput = new VeList<uint> { 1 };
+    var lonelyInput = new VeqList<uint> { 1 };
     var lonelyExpected = 1;
     var lonelyResult = Score(lonelyInput);
     if(lonelyResult == lonelyExpected)
@@ -155,7 +155,7 @@ void TestScore()
         logger.LogError($"Testing score for lonely input failed. Got {lonelyResult} expected {lonelyExpected}");
     }
 
-    var duoInput = new VeList<uint> { 1, 2 };
+    var duoInput = new VeqList<uint> { 1, 2 };
     var duoExpected = 2;
     var duoResult = Score(duoInput);
     if(duoResult == duoExpected)
@@ -167,7 +167,7 @@ void TestScore()
         logger.LogError($"Testing score for duo input failed. Got {duoResult} expected {duoExpected}");
     }
 
-    var trioInput = new VeList<uint> { 1, 2, 3 };
+    var trioInput = new VeqList<uint> { 1, 2, 3 };
     var trioExpected = 4;
     var trioResult = Score(trioInput);
     if(trioResult == trioExpected)
@@ -194,7 +194,7 @@ uint TotalScore(string filePath)
     return totalScore;
 }
 
-uint Score(VeList<uint> correctNumbers)
+uint Score(VeqList<uint> correctNumbers)
 {
     uint score = 0;
     if(correctNumbers.Count == 0)
@@ -204,9 +204,9 @@ uint Score(VeList<uint> correctNumbers)
     return (uint) Math.Pow(2, correctNumbers.Count - 1);
 }
 
-VeList<uint> CorrectNumbers(ScratchCard scratchCard)
+VeqList<uint> CorrectNumbers(ScratchCard scratchCard)
 {
-    var result = new VeList<uint>();
+    var result = new VeqList<uint>();
     foreach (var winningNumber in scratchCard.WinningNumbers)
     {
         if(scratchCard.NumbersYouHave.Contains(winningNumber))
@@ -226,14 +226,13 @@ VeList<uint> CorrectNumbers(ScratchCard scratchCard)
     return result;
 }
 
-
 ScratchCard ParseScratchCard(string input)
 {
     var headerSplit = input.Split(':');
     var cardId = headerSplit[0].Remove(0, 5).ParseUint();
     var numberSectionsSplit = headerSplit[1].Split('|');
-    var winningNumbers = numberSectionsSplit[0].Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(x => x.ParseUint()).ToVeList();
-    var numbersYouHave = numberSectionsSplit[1].Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(x => x.ParseUint()).ToVeList();
+    var winningNumbers = numberSectionsSplit[0].Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(x => x.ParseUint()).ToVeqList();
+    var numbersYouHave = numberSectionsSplit[1].Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(x => x.ParseUint()).ToVeqList();
     return new ScratchCard { Id = cardId, WinningNumbers = winningNumbers, NumbersYouHave = numbersYouHave };
 }
 
@@ -243,9 +242,9 @@ static class ExtensionMethods
     {
         return UInt16.Parse(s);
     }
-    public static VeList<TSource> ToVeList<TSource>(this System.Collections.Generic.IEnumerable<TSource> source)
+    public static VeqList<TSource> ToVeqList<TSource>(this System.Collections.Generic.IEnumerable<TSource> source)
     {
-        var result = new VeList<TSource>();
+        var result = new VeqList<TSource>();
         result.AddRange(source);
         return result;
     }
@@ -254,8 +253,8 @@ static class ExtensionMethods
 public record ScratchCard
 {
     public required uint Id { get; init; }
-    public required VeList<uint> WinningNumbers { get; init; }
-    public required VeList<uint> NumbersYouHave { get; init; }
+    public required VeqList<uint> WinningNumbers { get; init; }
+    public required VeqList<uint> NumbersYouHave { get; init; }
 }
 
 /// <summary>
@@ -263,11 +262,11 @@ public record ScratchCard
 /// Useful when working with records that contain collections and you want to retain the value equality all the way down.
 /// </summary>
 /// <typeparam name="T"></typeparam>
-public class VeList<T> : List<T>
+public class VeqList<T> : List<T>
 {
     // Based on https://stackoverflow.com/a/69366347
     private readonly bool _requireMatchingOrder;
-    public VeList(bool requireMatchingOrder = true) => _requireMatchingOrder = requireMatchingOrder;
+    public VeqList(bool requireMatchingOrder = true) => _requireMatchingOrder = requireMatchingOrder;
 
     public override bool Equals(object other)
     {
@@ -308,11 +307,11 @@ public class VeList<T> : List<T>
         return allValuesFoundInBoth;
     }
 
-    public static bool operator ==(VeList<T> x, VeList<T> y)
+    public static bool operator ==(VeqList<T> x, VeqList<T> y)
     {
         return x.Equals(y);
     }
-    public static bool operator !=(VeList<T> x, VeList<T> y)
+    public static bool operator !=(VeqList<T> x, VeqList<T> y)
     {
         return !(x.Equals(y));
     }
