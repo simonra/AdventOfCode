@@ -17,6 +17,7 @@ TestCorrectNumbers();
 TestScore();
 TestPart1OnSampleInput();
 RunPart1();
+TestPart2OnSampleInput();
 
 void RunPart1()
 {
@@ -36,7 +37,22 @@ void TestPart1OnSampleInput()
     }
     else
     {
-        logger.LogError($"Testing Part 1: Processing sample data failed. Sum is {result}, expected {expectedResult}");
+        logger.LogError($"Testing Part 1: Processing sample data failed. Result is {result}, expected {expectedResult}");
+    }
+}
+
+void TestPart2OnSampleInput()
+{
+    var inputFilePath = "sample_input-part_2.txt";
+    var expectedResult = 30;
+    var result = TotalNumberOfScratchCardsWon(inputFilePath);
+    if (result == expectedResult)
+    {
+        logger.LogInformation("Testing Part 2: Processing sample data yielded expected result!");
+    }
+    else
+    {
+        logger.LogError($"Testing Part 2: Processing sample data failed. Result is {result}, expected {expectedResult}");
     }
 }
 
@@ -117,7 +133,7 @@ void TestCorrectNumbers()
         WinningNumbers = new VeqList<uint> { 41, 48, 83, 86, 17 },
         NumbersYouHave = new VeqList<uint> { 83, 86, 6, 31, 17, 9, 48, 53 }
     };
-    var expected = new VeqList<uint> {48, 83, 86, 17};
+    var expected = new VeqList<uint> { 48, 83, 86, 17 };
     var result = CorrectNumbers(input);
     if (result == expected)
     {
@@ -134,7 +150,7 @@ void TestScore()
     var emptyInput = new VeqList<uint>();
     var emptyExpected = 0;
     var emptyResult = Score(emptyInput);
-    if(emptyResult == emptyExpected)
+    if (emptyResult == emptyExpected)
     {
         logger.LogDebug($"Testing score for empty input gave expected result");
     }
@@ -146,7 +162,7 @@ void TestScore()
     var lonelyInput = new VeqList<uint> { 1 };
     var lonelyExpected = 1;
     var lonelyResult = Score(lonelyInput);
-    if(lonelyResult == lonelyExpected)
+    if (lonelyResult == lonelyExpected)
     {
         logger.LogDebug($"Testing score for lonely input gave expected result");
     }
@@ -158,7 +174,7 @@ void TestScore()
     var duoInput = new VeqList<uint> { 1, 2 };
     var duoExpected = 2;
     var duoResult = Score(duoInput);
-    if(duoResult == duoExpected)
+    if (duoResult == duoExpected)
     {
         logger.LogDebug($"Testing score for duo input gave expected result");
     }
@@ -170,7 +186,7 @@ void TestScore()
     var trioInput = new VeqList<uint> { 1, 2, 3 };
     var trioExpected = 4;
     var trioResult = Score(trioInput);
-    if(trioResult == trioExpected)
+    if (trioResult == trioExpected)
     {
         logger.LogDebug($"Testing score for trio input gave expected result");
     }
@@ -178,6 +194,51 @@ void TestScore()
     {
         logger.LogError($"Testing score for trio input failed. Got {trioResult} expected {trioExpected}");
     }
+}
+
+uint TotalNumberOfScratchCardsWon(string filePath)
+{
+    var numberOfScratchCards = new Dictionary<uint, uint>();
+    var lines = File.ReadLines(filePath);
+    foreach (var line in lines)
+    {
+        logger.LogDebug($"Processing line {line}");
+        var scratchCard = ParseScratchCard(line);
+        if (numberOfScratchCards.ContainsKey(scratchCard.Id))
+        {
+            logger.LogDebug($"    Card already present, adding 1 to count");
+            numberOfScratchCards[scratchCard.Id] = numberOfScratchCards[scratchCard.Id] + 1;
+        }
+        else
+        {
+            logger.LogDebug($"    Card not previously present, setting count to 1");
+            numberOfScratchCards.Add(scratchCard.Id, 1);
+        }
+        var correctNumbers = CorrectNumbers(scratchCard);
+        logger.LogDebug($"    Card has {correctNumbers.Count} correct numbers");
+        var numberOfExtraCards = (uint) correctNumbers.Count + numberOfScratchCards[scratchCard.Id];
+        if (correctNumbers.Count > 0)
+        {
+            for (uint i = 1; i < correctNumbers.Count + 1; i++)
+            {
+                if (numberOfScratchCards.ContainsKey(scratchCard.Id + i))
+                {
+                    logger.LogDebug($"    Incrementing count of Card with ID {scratchCard.Id + i} by 1 from {numberOfScratchCards[scratchCard.Id + i]} to {numberOfScratchCards[scratchCard.Id + i] + numberOfExtraCards}");
+                    numberOfScratchCards[scratchCard.Id + i] = numberOfScratchCards[scratchCard.Id + i] + numberOfExtraCards;
+                }
+                else
+                {
+                    logger.LogDebug($"    Card with ID {scratchCard.Id + i} not previously present, setting count to number of extra cards won");
+                    numberOfScratchCards.Add(scratchCard.Id + i, numberOfExtraCards);
+                }
+            }
+        }
+        logger.LogDebug($"After Processing line {line}, {nameof(numberOfScratchCards)} looks like this:\n{JsonSerializer.Serialize(numberOfScratchCards, serializerOptions)}");
+    }
+
+    // var totalNumberOfScratchCards = numberOfScratchCards.Aggregate((uint) 1, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
+
+    return numberOfScratchCards.Aggregate((uint) 1, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
 }
 
 uint TotalScore(string filePath)
@@ -197,11 +258,11 @@ uint TotalScore(string filePath)
 uint Score(VeqList<uint> correctNumbers)
 {
     uint score = 0;
-    if(correctNumbers.Count == 0)
+    if (correctNumbers.Count == 0)
     {
         return 0;
     }
-    return (uint) Math.Pow(2, correctNumbers.Count - 1);
+    return (uint)Math.Pow(2, correctNumbers.Count - 1);
 }
 
 VeqList<uint> CorrectNumbers(ScratchCard scratchCard)
@@ -209,7 +270,7 @@ VeqList<uint> CorrectNumbers(ScratchCard scratchCard)
     var result = new VeqList<uint>();
     foreach (var winningNumber in scratchCard.WinningNumbers)
     {
-        if(scratchCard.NumbersYouHave.Contains(winningNumber))
+        if (scratchCard.NumbersYouHave.Contains(winningNumber))
         {
             result.Add(winningNumber);
         }
@@ -319,7 +380,8 @@ public class VeqList<T> : List<T>
     public override int GetHashCode()
     {
         var hashCode = 0;
-        if(_requireMatchingOrder){
+        if (_requireMatchingOrder)
+        {
             foreach (var item in this)
             {
                 hashCode ^= item.GetHashCode();
