@@ -32,11 +32,11 @@ void TestPart1OnSampleInput()
     var result = TotalScore(inputFilePath);
     if (result == expectedResult)
     {
-        logger.LogInformation("Processing sample data yielded expected result!");
+        logger.LogInformation("Testing Part 1: Processing sample data yielded expected result!");
     }
     else
     {
-        logger.LogError($"Processing sample data failed. Sum is {result}, expected {expectedResult}");
+        logger.LogError($"Testing Part 1: Processing sample data failed. Sum is {result}, expected {expectedResult}");
     }
 }
 
