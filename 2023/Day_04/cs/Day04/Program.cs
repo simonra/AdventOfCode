@@ -5,7 +5,7 @@ using ILoggerFactory factory = LoggerFactory.Create(
     builder =>
     {
         builder.SetMinimumLevel(LogLevel.Information);
-        builder.SetMinimumLevel(LogLevel.Debug);
+        // builder.SetMinimumLevel(LogLevel.Debug);
         builder.AddConsole();
     });
 ILogger logger = factory.CreateLogger("Day03");
@@ -216,20 +216,21 @@ uint TotalNumberOfScratchCardsWon(string filePath)
         }
         var correctNumbers = CorrectNumbers(scratchCard);
         logger.LogDebug($"    Card has {correctNumbers.Count} correct numbers");
-        var numberOfExtraCards = (uint) correctNumbers.Count + numberOfScratchCards[scratchCard.Id];
+        var numberOfExtraCards = /*(uint) correctNumbers.Count +*/ numberOfScratchCards[scratchCard.Id];
+        logger.LogDebug($"    Before attacking main loop of Card with ID {scratchCard.Id}, {nameof(numberOfScratchCards)} looks like this:\n{JsonSerializer.Serialize(numberOfScratchCards, serializerOptions)}");
         if (correctNumbers.Count > 0)
         {
-            for (uint i = 1; i < correctNumbers.Count + 1; i++)
+            for (uint idOffset = 1; idOffset < correctNumbers.Count + 1; idOffset++)
             {
-                if (numberOfScratchCards.ContainsKey(scratchCard.Id + i))
+                if (numberOfScratchCards.ContainsKey(scratchCard.Id + idOffset))
                 {
-                    logger.LogDebug($"    Incrementing count of Card with ID {scratchCard.Id + i} by 1 from {numberOfScratchCards[scratchCard.Id + i]} to {numberOfScratchCards[scratchCard.Id + i] + numberOfExtraCards}");
-                    numberOfScratchCards[scratchCard.Id + i] = numberOfScratchCards[scratchCard.Id + i] + numberOfExtraCards;
+                    logger.LogDebug($"    Incrementing count of Card with ID {scratchCard.Id + idOffset} by 1 from {numberOfScratchCards[scratchCard.Id + idOffset]} to {numberOfScratchCards[scratchCard.Id + idOffset] + numberOfExtraCards}");
+                    numberOfScratchCards[scratchCard.Id + idOffset] = numberOfScratchCards[scratchCard.Id + idOffset] + numberOfExtraCards;
                 }
                 else
                 {
-                    logger.LogDebug($"    Card with ID {scratchCard.Id + i} not previously present, setting count to number of extra cards won");
-                    numberOfScratchCards.Add(scratchCard.Id + i, numberOfExtraCards);
+                    logger.LogDebug($"    Card with ID {scratchCard.Id + idOffset} not previously present, setting count to number of extra cards won");
+                    numberOfScratchCards.Add(scratchCard.Id + idOffset, numberOfExtraCards);
                 }
             }
         }
@@ -238,7 +239,7 @@ uint TotalNumberOfScratchCardsWon(string filePath)
 
     // var totalNumberOfScratchCards = numberOfScratchCards.Aggregate((uint) 1, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
 
-    return numberOfScratchCards.Aggregate((uint) 1, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
+    return numberOfScratchCards.Aggregate((uint) 0, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
 }
 
 uint TotalScore(string filePath)
