@@ -18,12 +18,20 @@ TestScore();
 TestPart1OnSampleInput();
 RunPart1();
 TestPart2OnSampleInput();
+RunPart2();
 
 void RunPart1()
 {
     var inputFilePath = "input.txt";
     var result = TotalScore(inputFilePath);
     logger.LogInformation($"Part 1 result is {result}");
+}
+
+void RunPart2()
+{
+    var inputFilePath = "input.txt";
+    var result = TotalNumberOfScratchCardsWon(inputFilePath);
+    logger.LogInformation($"Part 2 result is {result}");
 }
 
 void TestPart1OnSampleInput()
@@ -216,7 +224,7 @@ uint TotalNumberOfScratchCardsWon(string filePath)
         }
         var correctNumbers = CorrectNumbers(scratchCard);
         logger.LogDebug($"    Card has {correctNumbers.Count} correct numbers");
-        var numberOfExtraCards = /*(uint) correctNumbers.Count +*/ numberOfScratchCards[scratchCard.Id];
+        var numberOfExtraCards = numberOfScratchCards[scratchCard.Id];
         logger.LogDebug($"    Before attacking main loop of Card with ID {scratchCard.Id}, {nameof(numberOfScratchCards)} looks like this:\n{JsonSerializer.Serialize(numberOfScratchCards, serializerOptions)}");
         if (correctNumbers.Count > 0)
         {
@@ -236,8 +244,6 @@ uint TotalNumberOfScratchCardsWon(string filePath)
         }
         logger.LogDebug($"After Processing line {line}, {nameof(numberOfScratchCards)} looks like this:\n{JsonSerializer.Serialize(numberOfScratchCards, serializerOptions)}");
     }
-
-    // var totalNumberOfScratchCards = numberOfScratchCards.Aggregate((uint) 1, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
 
     return numberOfScratchCards.Aggregate((uint) 0, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
 }
