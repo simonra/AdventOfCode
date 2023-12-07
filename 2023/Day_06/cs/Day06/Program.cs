@@ -7,7 +7,7 @@ using ILoggerFactory factory = LoggerFactory.Create(
     builder =>
     {
         builder.SetMinimumLevel(LogLevel.Information);
-        builder.SetMinimumLevel(LogLevel.Debug);
+        // builder.SetMinimumLevel(LogLevel.Debug);
         builder.AddConsole();
     });
 ILogger logger = factory.CreateLogger("Day06");
@@ -84,7 +84,7 @@ UInt128 WaysToWinProductPart2(string filePath)
     UInt128 previousBest = 0;
     for (UInt128 timing = 0; timing < raceToBeat.TimeLimit; timing++)
     {
-        var distance = Distance128(timing, raceToBeat.TimeLimit);
+        var distance = Distance(timing, raceToBeat.TimeLimit);
         if(raceToBeat.RecordDistance < distance)
         {
             numberOfWaysToWin++;
@@ -104,12 +104,18 @@ UInt128 WaysToWinProductPart2(string filePath)
     return numberOfWaysToWin;
 }
 
-List<uint> WinningTimings(uint timeLimit, uint recordDistance)
+List<T> WinningTimings<T>(T timeLimit, T recordDistance)
+    where T :
+        System.Numerics.IComparisonOperators<T,T,bool>,
+        System.Numerics.IIncrementOperators<T>,
+        System.Numerics.IMultiplyOperators<T,T,T>, // Requirements further down the chain have to be reflected here
+        System.Numerics.ISubtractionOperators<T,T,T>
 {
-    var result = new List<uint>();
-    for (uint timing = 0; timing < timeLimit; timing++)
+    var result = new List<T>();
+    var zero = timeLimit - timeLimit;
+    for (T timing = zero; timing < timeLimit; timing++)
     {
-        var distance = Distance(timing, timeLimit);
+        T distance = Distance(timing, timeLimit);
         if(recordDistance < distance)
         {
             result.Add(timing);
@@ -142,12 +148,13 @@ uint LongestHoldTimeToBeatRecord(uint timeLimit, uint recordDistance)
     return initialGuess;
 }
 
-uint Distance(uint holdTime, uint timeLimit)
-{
-    return holdTime * (timeLimit - holdTime);
-}
-
-UInt128 Distance128(UInt128 holdTime, UInt128 timeLimit)
+T Distance<T>(T holdTime, T timeLimit)
+// where T : System.Numerics.INumber<T>
+// where T : System.Numerics.IBinaryInteger<T>
+    where T :
+        System.Numerics.IMultiplyOperators<T,T,T>,
+        System.Numerics.ISubtractionOperators<T,T,T>
+        // ,System.Numerics.IAdditionOperators<T,T,T>
 {
     return holdTime * (timeLimit - holdTime);
 }
