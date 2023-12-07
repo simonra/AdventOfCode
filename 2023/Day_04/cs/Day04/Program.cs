@@ -5,7 +5,7 @@ using ILoggerFactory factory = LoggerFactory.Create(
     builder =>
     {
         builder.SetMinimumLevel(LogLevel.Information);
-        builder.SetMinimumLevel(LogLevel.Debug);
+        // builder.SetMinimumLevel(LogLevel.Debug);
         builder.AddConsole();
     });
 ILogger logger = factory.CreateLogger("Day04");
@@ -18,12 +18,20 @@ TestScore();
 TestPart1OnSampleInput();
 RunPart1();
 TestPart2OnSampleInput();
+RunPart2();
 
 void RunPart1()
 {
     var inputFilePath = "input.txt";
     var result = TotalScore(inputFilePath);
     logger.LogInformation($"Part 1 result is {result}");
+}
+
+void RunPart2()
+{
+    var inputFilePath = "input.txt";
+    var result = TotalNumberOfScratchCardsWon(inputFilePath);
+    logger.LogInformation($"Part 2 result is {result}");
 }
 
 void TestPart1OnSampleInput()
@@ -121,6 +129,17 @@ void TestVeqListEquals()
     {
         logger.LogError($"Value equal lists are claimed to be equal, when they contain no duplicates and have different ordering when we ignore ordering for equality! Something is very wrong.");
     }
+
+    var equalValuesAndNullsIgnoreOrderFirst = new VeqList<int?>(requireMatchingOrder: false) { 1, null, 3, 4 };
+    var equalValuesAndNullsIgnoreOrderSecond = new VeqList<int?>(requireMatchingOrder: false) { 4, 3, null, 1 };
+    if (equalValuesAndNullsIgnoreOrderFirst == equalValuesAndNullsIgnoreOrderSecond)
+    {
+        logger.LogDebug("Value equal lists are equal when they contain nulls and no duplicates and have different ordering when we compare and ignore ordering for equality");
+    }
+    else
+    {
+        logger.LogError($"Value equal lists are claimed to be unequal, even when they contain nulls, no duplicates and have different ordering when we ignore ordering for equality! Something is very wrong.");
+    }
 }
 
 void TestCorrectNumbers()
@@ -216,29 +235,28 @@ uint TotalNumberOfScratchCardsWon(string filePath)
         }
         var correctNumbers = CorrectNumbers(scratchCard);
         logger.LogDebug($"    Card has {correctNumbers.Count} correct numbers");
-        var numberOfExtraCards = (uint) correctNumbers.Count + numberOfScratchCards[scratchCard.Id];
+        var numberOfExtraCards = numberOfScratchCards[scratchCard.Id];
+        logger.LogDebug($"    Before attacking main loop of Card with ID {scratchCard.Id}, {nameof(numberOfScratchCards)} looks like this:\n{JsonSerializer.Serialize(numberOfScratchCards, serializerOptions)}");
         if (correctNumbers.Count > 0)
         {
-            for (uint i = 1; i < correctNumbers.Count + 1; i++)
+            for (uint idOffset = 1; idOffset < correctNumbers.Count + 1; idOffset++)
             {
-                if (numberOfScratchCards.ContainsKey(scratchCard.Id + i))
+                if (numberOfScratchCards.ContainsKey(scratchCard.Id + idOffset))
                 {
-                    logger.LogDebug($"    Incrementing count of Card with ID {scratchCard.Id + i} by 1 from {numberOfScratchCards[scratchCard.Id + i]} to {numberOfScratchCards[scratchCard.Id + i] + numberOfExtraCards}");
-                    numberOfScratchCards[scratchCard.Id + i] = numberOfScratchCards[scratchCard.Id + i] + numberOfExtraCards;
+                    logger.LogDebug($"    Incrementing count of Card with ID {scratchCard.Id + idOffset} by 1 from {numberOfScratchCards[scratchCard.Id + idOffset]} to {numberOfScratchCards[scratchCard.Id + idOffset] + numberOfExtraCards}");
+                    numberOfScratchCards[scratchCard.Id + idOffset] = numberOfScratchCards[scratchCard.Id + idOffset] + numberOfExtraCards;
                 }
                 else
                 {
-                    logger.LogDebug($"    Card with ID {scratchCard.Id + i} not previously present, setting count to number of extra cards won");
-                    numberOfScratchCards.Add(scratchCard.Id + i, numberOfExtraCards);
+                    logger.LogDebug($"    Card with ID {scratchCard.Id + idOffset} not previously present, setting count to number of extra cards won");
+                    numberOfScratchCards.Add(scratchCard.Id + idOffset, numberOfExtraCards);
                 }
             }
         }
         logger.LogDebug($"After Processing line {line}, {nameof(numberOfScratchCards)} looks like this:\n{JsonSerializer.Serialize(numberOfScratchCards, serializerOptions)}");
     }
 
-    // var totalNumberOfScratchCards = numberOfScratchCards.Aggregate((uint) 1, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
-
-    return numberOfScratchCards.Aggregate((uint) 1, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
+    return numberOfScratchCards.Aggregate((uint) 0, (aggregatedValue, nextItem) => aggregatedValue + nextItem.Value);
 }
 
 uint TotalScore(string filePath)
@@ -257,7 +275,6 @@ uint TotalScore(string filePath)
 
 uint Score(VeqList<uint> correctNumbers)
 {
-    uint score = 0;
     if (correctNumbers.Count == 0)
     {
         return 0;
@@ -329,7 +346,7 @@ public class VeqList<T> : List<T>
     private readonly bool _requireMatchingOrder;
     public VeqList(bool requireMatchingOrder = true) => _requireMatchingOrder = requireMatchingOrder;
 
-    public override bool Equals(object other)
+    public override bool Equals(object? other)
     {
         if (!(other is IEnumerable<T> otherAsEnumerable))
         {
@@ -346,12 +363,23 @@ public class VeqList<T> : List<T>
 
         // Check if all elements present in both, including duplicates, but order doesn't matter
         // Based on https://stackoverflow.com/a/22173807
+#pragma warning disable CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
         var counts = this
+            .Where(v => v != null)
             .GroupBy(v => v)
             .ToDictionary(g => g.Key, g => g.Count());
+#pragma warning restore CS8714 // The type cannot be used as type parameter in the generic type or method. Nullability of type argument doesn't match 'notnull' constraint.
+        // Because dictionary keys cannot be null anymore
+        var numberOfNullElementsInThis = this.Count(x => x == null);
+        var numberOfNullElementsInOther = 0;
         var allValuesPresentInBoth = true;
         foreach (var otherElement in otherAsEnumerable)
         {
+            if(otherElement == null)
+            {
+                numberOfNullElementsInOther++;
+                continue;
+            }
             int countInOther;
             if (counts.TryGetValue(otherElement, out countInOther))
             {
@@ -363,7 +391,7 @@ public class VeqList<T> : List<T>
                 break;
             }
         }
-        var allValuesFoundInBoth = allValuesPresentInBoth && counts.Values.All(c => c == 0);
+        var allValuesFoundInBoth = allValuesPresentInBoth && counts.Values.All(c => c == 0) && numberOfNullElementsInThis == numberOfNullElementsInOther;
 
         return allValuesFoundInBoth;
     }
@@ -384,14 +412,14 @@ public class VeqList<T> : List<T>
         {
             foreach (var item in this)
             {
-                hashCode ^= item.GetHashCode();
+                hashCode ^= item?.GetHashCode() ?? 0;
             }
         }
         else
         {
             foreach (var item in this.Select(x => x).OrderBy(x => x).ToList())
             {
-                hashCode ^= item.GetHashCode();
+                hashCode ^= item?.GetHashCode() ?? 0;
             }
         }
 
