@@ -8,7 +8,7 @@ using ILoggerFactory factory = LoggerFactory.Create(
         builder.SetMinimumLevel(LogLevel.Debug);
         builder.AddConsole();
     });
-ILogger logger = factory.CreateLogger("Day03");
+ILogger logger = factory.CreateLogger("Day04");
 var serializerOptions = new JsonSerializerOptions { WriteIndented = true };
 
 TestParseCard();
