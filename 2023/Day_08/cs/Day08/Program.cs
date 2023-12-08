@@ -83,7 +83,7 @@ UInt64 NumberOfStepsFromAllXANodesTillAllOnXZNodes(string instructions, Dictiona
 
         if(result % 10000000 == 0)
         {
-            logger.LogInformation($"{DateTime.Now} Running for {DateTime.Now - startTime} At iteration {result} ({(double)result/(double)UInt64.MaxValue} of uint.MaxValue)");
+            logger.LogInformation($"{DateTime.Now} Running for {DateTime.Now - startTime} At iteration {result.ToString("N0", new System.Globalization.NumberFormatInfo {NumberGroupSeparator = " "})} ({(double)result/(double)UInt64.MaxValue} of uint.MaxValue)");
         }
     }
     return result;
