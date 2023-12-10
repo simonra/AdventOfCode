@@ -43,7 +43,7 @@ public static class ChineseRemainderTheorem
     public static bool TryFindSimultaneousSolution<T>(IEnumerable<(T a, T m)> congruences, out (T a, T m) result)
     where T : IBinaryInteger<T>, System.Numerics.ISignedNumber<T>
     {
-        checked
+        checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
         {
             var originalCongruences = congruences.ToList();
 
@@ -114,7 +114,6 @@ public static class ChineseRemainderTheorem
                 }
             }
             var factoredValidSystem = primegruencesByPrime.Select(group => group.First()).ToList();
-            // var factoredValidSystem = primeFactoredCongruences;
 
             // If no conflicts found, take first of each group
             var unFactoredSystem = factoredValidSystem
@@ -142,35 +141,11 @@ public static class ChineseRemainderTheorem
                 }
                 solutionForPair = temporaryResult.Remainder * currentCongruence.Divisor * y1 + currentCongruence.Remainder * temporaryResult.Divisor * y2;
 
-                // if(temporaryResult.Remainder > currentCongruence.Remainder)
-                // {
-                //     var remainderDiff = temporaryResult.Remainder - currentCongruence.Remainder;
-                //     var modInverse = BinaryIntegerFunctions.ModInverseFast(currentCongruence.Remainder, temporaryResult.Remainder);
-                //     Console.WriteLine($"remainderDiff: {remainderDiff} modInverse: {modInverse}");
-
-                //     solutionForPair = (temporaryResult.Remainder - currentCongruence.Remainder) * BinaryIntegerFunctions.ModInverseFast(currentCongruence.Remainder, temporaryResult.Remainder) * currentCongruence.Remainder + currentCongruence.Remainder;
-                // }
-                // else
-                // {
-                //     var remainderDiff = currentCongruence.Remainder - temporaryResult.Remainder;
-                //     var modInverse = BinaryIntegerFunctions.ModInverseFast(temporaryResult.Remainder, currentCongruence.Remainder);
-                //     Console.WriteLine($"remainderDiff: {remainderDiff} modInverse: {modInverse}");
-
-                //     solutionForPair = (currentCongruence.Remainder - temporaryResult.Remainder) * BinaryIntegerFunctions.ModInverseFast(temporaryResult.Remainder, currentCongruence.Remainder) * temporaryResult.Remainder + temporaryResult.Remainder;
-                // }
                 var nextRemainder = solutionForPair % (currentCongruence.Divisor * temporaryResult.Divisor);
                 var nextDivisor = currentCongruence.Divisor * temporaryResult.Divisor;
                 temporaryResult.Remainder = nextRemainder;
                 temporaryResult.Divisor = nextDivisor;
             }
-            // def solve_crt(a1, m1, a2, m2):
-            //     k = (a2 - a1) * pow(m1, -1, m2)
-            //     return m1 * k + a1
-
-            // acc = reduced[0]
-            // for a, m in reduced[1:]:
-            //     acc = solve_crt(acc[0], acc[1], a, m) % (m * acc[1]), m * acc[1]
-
 
             result = (a: temporaryResult.Remainder, m: temporaryResult.Divisor);
             return true;
@@ -213,7 +188,7 @@ public static class BinaryIntegerFunctions
     public static T Pow<T>(this T number, T exponent)
     where T : System.Numerics.IBinaryInteger<T>
     {
-        checked
+        checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
         {
             var result = T.One;
             for (T i = T.Zero; i < exponent; i++)
@@ -224,75 +199,75 @@ public static class BinaryIntegerFunctions
         }
     }
 
-    public static T ModInverseSafeButSlow<T>(T a, T m)
-    where T : System.Numerics.IBinaryInteger<T>
-    {
-        checked
-        {
-            if (m == T.One) return T.Zero;
-            T candidate = T.Zero;
-            while(candidate < m)
-            {
-                if((a * candidate) % m == T.One)
-                {
-                    // break;
-                    return candidate;
-                }
-                else if((a * (m - candidate)) % m == T.One)
-                {
-                    return (m - candidate);
-                }
-                else
-                {
-                    candidate += T.One;
-                }
-            }
-            return candidate;
+    // public static T ModInverseSafeButSlow<T>(T a, T m)
+    // where T : System.Numerics.IBinaryInteger<T>
+    // {
+    //     checked
+    //     {
+    //         if (m == T.One) return T.Zero;
+    //         T candidate = T.Zero;
+    //         while(candidate < m)
+    //         {
+    //             if((a * candidate) % m == T.One)
+    //             {
+    //                 // break;
+    //                 return candidate;
+    //             }
+    //             else if((a * (m - candidate)) % m == T.One)
+    //             {
+    //                 return (m - candidate);
+    //             }
+    //             else
+    //             {
+    //                 candidate += T.One;
+    //             }
+    //         }
+    //         return candidate;
 
-            // if (m == T.One) return T.Zero;
-            // T a0 = a;
-            // T m0 = m;
-            // (T x, T y) = (T.One, T.Zero);
+    //         // if (m == T.One) return T.Zero;
+    //         // T a0 = a;
+    //         // T m0 = m;
+    //         // (T x, T y) = (T.One, T.Zero);
 
-            // while (a > T.One) {
-            //     T q = a / m;
-            //     (a, m) = (m, a % m);
-            //     if(x > q * y)
-            //     {
-            //         (x, y) = (y, x - q * y);
-            //     }
-            //     else
-            //     {
-            //         Console.WriteLine($"WARNING: When finding mod inverse of a {a0} and m {m0} q * y is greater than x, q {q} y {y} x {x}");
-            //         (x, y) = (y, x + m0);
-            //     }
-            // }
-            // return x < T.Zero ? x + m0 : x;
-        }
-    }
+    //         // while (a > T.One) {
+    //         //     T q = a / m;
+    //         //     (a, m) = (m, a % m);
+    //         //     if(x > q * y)
+    //         //     {
+    //         //         (x, y) = (y, x - q * y);
+    //         //     }
+    //         //     else
+    //         //     {
+    //         //         Console.WriteLine($"WARNING: When finding mod inverse of a {a0} and m {m0} q * y is greater than x, q {q} y {y} x {x}");
+    //         //         (x, y) = (y, x + m0);
+    //         //     }
+    //         // }
+    //         // return x < T.Zero ? x + m0 : x;
+    //     }
+    // }
 
-    public static T ModInverse<T>(T a, T m)
-    where T : System.Numerics.IBinaryInteger<T>
-    {
-        checked
-        {
-            if (m == T.One) return T.Zero;
-            T m0 = m;
-            (T x, T y) = (T.One, T.Zero);
+    // public static T ModInverse<T>(T a, T m)
+    // where T : System.Numerics.IBinaryInteger<T>
+    // {
+    //     checked
+    //     {
+    //         if (m == T.One) return T.Zero;
+    //         T m0 = m;
+    //         (T x, T y) = (T.One, T.Zero);
 
-            while (a > T.One) {
-                T q = a / m;
-                (a, m) = (m, a % m);
-                (x, y) = (y, x - q * y);
-            }
-            return x < T.Zero ? x + m0 : x;
-        }
-    }
+    //         while (a > T.One) {
+    //             T q = a / m;
+    //             (a, m) = (m, a % m);
+    //             (x, y) = (y, x - q * y);
+    //         }
+    //         return x < T.Zero ? x + m0 : x;
+    //     }
+    // }
 
     public static T ModInverseFast<T>(T a, T m)
     where T : System.Numerics.IBinaryInteger<T>, System.Numerics.ISignedNumber<T>
     {
-        checked
+        checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
         {
             var extendedEuclideanResult = ExtendedEuclideanAlgorithmGcd(a, m);
             if(extendedEuclideanResult.BezoutCoefficientS < T.Zero)
@@ -306,7 +281,7 @@ public static class BinaryIntegerFunctions
     public static (T BezoutCoefficientS, T BezoutCoefficientT, T GreatestCommonDivisor, T GcdQuotientS, T GcdQuotientT) ExtendedEuclideanAlgorithmGcd<T>(T a, T b)
     where T : System.Numerics.IBinaryInteger<T>, System.Numerics.ISignedNumber<T>
     {
-        checked
+        checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
         {
             // Based on https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
             T zero = a - a;
@@ -316,33 +291,23 @@ public static class BinaryIntegerFunctions
             }
             T one = a / a;
 
-            T old_r = a;
-            T r = b;
-            T old_s = one;
-            T s = zero;
-            T old_t = zero;
-            T t = one;
-            T quotient = zero;
-            T temp = zero;
+            (T old_r, T r) = (a, b);
+            (T old_s, T s) = (T.One, T.Zero);
+            (T old_t, T t) = (T.Zero, T.One);
+            T quotient = T.Zero;
             while (r != zero)
             {
                 quotient = old_r / r; // integer division! Make sure to floor if using floats. Maybe consider Math.DivRem() in dotnet
-                temp = r;
-                r = old_r - quotient * r;
-                old_r = temp;
-                temp = s;
-                s = old_s - quotient * s;
-                old_s = temp;
-                temp = t;
-                t = old_t - quotient * t;
-                old_t = temp;
+                (old_r, r) = (r, old_r - quotient * r);
+                (old_s, s) = (s, old_s - quotient * s);
+                (old_t, t) = (t, old_t - quotient * t);
             }
             return (BezoutCoefficientS: old_s, BezoutCoefficientT: old_t, GreatestCommonDivisor: old_r, GcdQuotientS: s, GcdQuotientT: t);
         }
     }
 
     public static IEnumerable<T> EnumeratePrimeFactors<T>(this T value) where T : IBinaryInteger<T>/*, IUnsignedNumber<T>*/ {
-        checked
+        checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
         {
             // Based on https://stackoverflow.com/a/76691571
             // Further reading https://en.wikipedia.org/wiki/Wheel_factorization
