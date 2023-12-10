@@ -283,13 +283,16 @@ where T : System.Numerics.IBinaryInteger<T>
 T LeastCommonMultiple<T>(T a, T b)
 where T : System.Numerics.IBinaryInteger<T>
 {
-    var greatestCommonDivisor = ExtendedEuclideanAlgorithmGcd(a, b).GreatestCommonDivisor;
-    logger.LogInformation($"Greatest common divisor of {a} and {b} for LCM is {greatestCommonDivisor}");
-    if(greatestCommonDivisor == T.Zero)
+    checked
     {
-        return T.Zero;
+        var greatestCommonDivisor = ExtendedEuclideanAlgorithmGcd(a, b).GreatestCommonDivisor;
+        logger.LogInformation($"Greatest common divisor of {a} and {b} for LCM is {greatestCommonDivisor}");
+        if(greatestCommonDivisor == T.Zero)
+        {
+            return T.Zero;
+        }
+        return (a / greatestCommonDivisor) * b;
     }
-    return (a / greatestCommonDivisor) * b;
 }
 
 T LeastCommonMultipleOfCollection<T>(IEnumerable<T> numbers)

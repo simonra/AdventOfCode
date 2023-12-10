@@ -5,7 +5,7 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 
 /// <summary>
-/// A solver for the chinese remainder theorem in C#
+/// A solver for the Chinese Remainder Theorem in C#
 /// </summary>
 public static class ChineseRemainderTheorem
 {
@@ -97,32 +97,8 @@ public static class ChineseRemainderTheorem
                     })
                 .ToList();
 
-
-            // ToDo: Can this be prettier with a fold?
-            // var temporaryResult = reducedSystemToSolve.First();
-            // var solutionForPair = T.Zero;
-            // for (int i = 1; i < reducedSystemToSolve.Count(); i++)
-            // {
-            //     var currentCongruence = reducedSystemToSolve.Skip(i).First();
-
-            //     // x = a1*M1*y1 + a2*M2*y2
-            //     // x = a1*m2*(modinverse(m2,m1)) + a2*m1*modinverse(m1,m2)
-            //     var y1 = BinaryIntegerHelperFunctions.ModInverseFast(currentCongruence.Divisor, temporaryResult.Divisor);
-            //     var y2 = BinaryIntegerHelperFunctions.ModInverseFast(temporaryResult.Divisor, currentCongruence.Divisor);
-
-            //     solutionForPair = temporaryResult.Remainder * currentCongruence.Divisor * y1 + currentCongruence.Remainder * temporaryResult.Divisor * y2;
-
-            //     var nextRemainder = solutionForPair % (currentCongruence.Divisor * temporaryResult.Divisor);
-            //     var nextDivisor = currentCongruence.Divisor * temporaryResult.Divisor;
-
-            //     temporaryResult.Remainder = nextRemainder;
-            //     temporaryResult.Divisor = nextDivisor;
-            // }
-
             var solution = reducedSystemToSolve.Aggregate(SolveCongruencePair);
             result = (a: solution.Remainder, m: solution.Divisor);
-
-            // result = (a: temporaryResult.Remainder, m: temporaryResult.Divisor);
             return true;
         }
     }
@@ -210,8 +186,8 @@ public static class ChineseRemainderTheorem
     private static (T Remainder, T Divisor) SolveCongruencePair<T>((T Remainder, T Divisor) first, (T Remainder, T Divisor) second)
     where T : System.Numerics.IBinaryInteger<T>, System.Numerics.ISignedNumber<T>
     {
-        var y1 = BinaryIntegerHelperFunctions.ModInverseFast(second.Divisor, first.Divisor);
-        var y2 = BinaryIntegerHelperFunctions.ModInverseFast(first.Divisor, second.Divisor);
+        var y1 = ChineseRemainderTheoremBinaryIntegerHelperFunctions.ModInverse(second.Divisor, first.Divisor);
+        var y2 = ChineseRemainderTheoremBinaryIntegerHelperFunctions.ModInverse(first.Divisor, second.Divisor);
 
         var solutionForPairsX = first.Remainder * second.Divisor * y1 + second.Remainder * first.Divisor * y2;
 
@@ -222,7 +198,7 @@ public static class ChineseRemainderTheorem
     }
 }
 
-public static class BinaryIntegerHelperFunctions
+public static class ChineseRemainderTheoremBinaryIntegerHelperFunctions
 {
     public static T Pow<T>(this T number, T exponent)
     where T : System.Numerics.IBinaryInteger<T>
@@ -238,7 +214,7 @@ public static class BinaryIntegerHelperFunctions
         }
     }
 
-    public static T ModInverseFast<T>(T a, T m)
+    public static T ModInverse<T>(T a, T m)
     where T : System.Numerics.IBinaryInteger<T>, System.Numerics.ISignedNumber<T>
     {
         checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
@@ -515,33 +491,32 @@ public static class BinaryIntegerHelperFunctions
             return unchecked(x - (y | z));
         }
     }
-}
+    private static class BinaryIntegerConstants<T> where T : IBinaryInteger<T>
+    {
+        public static int Size    { get; }
+        public static T Two       { get; }
+        public static T Three     { get; }
+        public static T Four      { get; }
+        public static T Five      { get; }
+        public static T Six       { get; }
+        public static T Seven     { get; }
+        public static T Eleven    { get; }
+        public static T Thirteen  { get; }
+        public static T Seventeen { get; }
 
-public static class BinaryIntegerConstants<T> where T : IBinaryInteger<T>
-{
-    public static int Size    { get; }
-    public static T Two       { get; }
-    public static T Three     { get; }
-    public static T Four      { get; }
-    public static T Five      { get; }
-    public static T Six       { get; }
-    public static T Seven     { get; }
-    public static T Eleven    { get; }
-    public static T Thirteen  { get; }
-    public static T Seventeen { get; }
+        static BinaryIntegerConstants() {
+            var size = int.CreateChecked(value: T.PopCount(value: T.AllBitsSet));
 
-    static BinaryIntegerConstants() {
-        var size = int.CreateChecked(value: T.PopCount(value: T.AllBitsSet));
-
-        Size      = int.CreateChecked(value: size);
-        Two       = T.CreateTruncating(value: 2U);
-        Three     = T.CreateTruncating(value: 3U);
-        Four      = T.CreateTruncating(value: 4U);
-        Five      = T.CreateTruncating(value: 5U);
-        Six       = T.CreateTruncating(value: 6U);
-        Seven     = T.CreateTruncating(value: 7U);
-        Eleven    = T.CreateTruncating(value: 11U);
-        Thirteen  = T.CreateTruncating(value: 13U);
-        Seventeen = T.CreateTruncating(value: 17U);
+            Size      = int.CreateChecked(value: size);
+            Two       = T.CreateTruncating(value: 2U);
+            Three     = T.CreateTruncating(value: 3U);
+            Four      = T.CreateTruncating(value: 4U);
+            Five      = T.CreateTruncating(value: 5U);
+            Six       = T.CreateTruncating(value: 6U);
+            Seven     = T.CreateTruncating(value: 7U);
+            Eleven    = T.CreateTruncating(value: 11U);
+            Thirteen  = T.CreateTruncating(value: 13U);
+            Seventeen = T.CreateTruncating(value: 17U);
+        }
     }
 }
