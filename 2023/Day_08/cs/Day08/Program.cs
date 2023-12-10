@@ -192,22 +192,22 @@ Int128 NumberOfStepsFromAllXANodesTillAllOnXZNodesCycleMath(string instructions,
     Int128 longestCycleLength = cycleLengths.Max();
 
     return 0;
-    var startTime = DateTime.Now;
-    while (true)
-    {
-        if (cycleLengths.All(x => result % x == 0))
-        {
-            break;
-        }
+    // var startTime = DateTime.Now;
+    // while (true)
+    // {
+    //     if (cycleLengths.All(x => result % x == 0))
+    //     {
+    //         break;
+    //     }
 
-        result += longestCycleLength;
+    //     result += longestCycleLength;
 
-        if ((result / longestCycleLength) % 10000 == 5)
-        {
-            logger.LogInformation($"{DateTime.Now} Running for {DateTime.Now - startTime} At iteration {result.ToString("N0", new System.Globalization.NumberFormatInfo { NumberGroupSeparator = " " })} ({(double)result / (double)UInt64.MaxValue} of uint.MaxValue)");
-        }
-    }
-    return 0;
+    //     if ((result / longestCycleLength) % 10000 == 5)
+    //     {
+    //         logger.LogInformation($"{DateTime.Now} Running for {DateTime.Now - startTime} At iteration {result.ToString("N0", new System.Globalization.NumberFormatInfo { NumberGroupSeparator = " " })} ({(double)result / (double)UInt64.MaxValue} of uint.MaxValue)");
+    //     }
+    // }
+    // return 0;
 }
 
 void TestLeastCommonMultipleOfPair()
@@ -354,10 +354,10 @@ uint NumberOfStepsFromAAAToZZZ(string instructions, Dictionary<string, NodeConne
     var network = new Dictionary<string, NodeConnections>();
     using (StreamReader sr = new StreamReader(filePath))
     {
-        instructions = sr.ReadLine();
+        instructions = sr.ReadLine()!;
         sr.ReadLine(); // Skip empty separator line
 
-        string line;
+        string? line;
         while ((line = sr.ReadLine()) != null)
         {
             var idAndConnections = line.Split(" = ");
