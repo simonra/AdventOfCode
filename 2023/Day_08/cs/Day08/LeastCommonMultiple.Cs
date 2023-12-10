@@ -27,18 +27,12 @@ public static class LeastCommonMultiple
         checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
         {
             // Based on https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-            T zero = a - a;
-            if (a == zero || b == zero)
-            {
-                return (BezoutCoefficientS: zero, BezoutCoefficientT: zero, GreatestCommonDivisor: zero, GcdQuotientS: zero, GcdQuotientT: zero);
-            }
-            T one = a / a;
 
             (T old_r, T r) = (a, b);
             (T old_s, T s) = (T.One, T.Zero);
             (T old_t, T t) = (T.Zero, T.One);
             T quotient = T.Zero;
-            while (r != zero)
+            while (r != T.Zero)
             {
                 quotient = old_r / r; // integer division! Make sure to floor if using floats. Maybe consider Math.DivRem() in dotnet
                 (old_r, r) = (r, old_r - quotient * r);
