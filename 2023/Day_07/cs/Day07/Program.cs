@@ -12,38 +12,6 @@ using ILoggerFactory factory = LoggerFactory.Create(
     });
 ILogger logger = factory.CreateLogger("Day07");
 
-// var xs = new List<int> { 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5 };
-// logger.LogInformation($"Raw xs are {xs.ToJson()}");
-// var grouped = xs.GroupBy(x => x);
-// logger.LogInformation($"Xs Grouped are {grouped.ToJson()}");
-
-// var cards =
-//     new List<Card>
-//     {
-//         new Card { Label = 'A', Power = 14 },
-//         new Card { Label = '2', Power = 2 },
-//         new Card { Label = '2', Power = 2 },
-//         new Card { Label = '3', Power = 3 },
-//         new Card { Label = '3', Power = 3 },
-//         new Card { Label = '3', Power = 3 },
-//         new Card { Label = '4', Power = 4 },
-//         new Card { Label = '4', Power = 4 },
-//         new Card { Label = '4', Power = 4 },
-//         new Card { Label = '4', Power = 4 },
-//         new Card { Label = '5', Power = 5 },
-//         new Card { Label = '5', Power = 5 },
-//         new Card { Label = '5', Power = 5 },
-//         new Card { Label = '5', Power = 5 },
-//         new Card { Label = '5', Power = 5 },
-//     };
-// var cardsGrouped = cards.GroupBy(x => x.Power);
-// logger.LogInformation($"Cards Grouped are {cardsGrouped.ToJson()}");
-// logger.LogInformation($"Number of groups are {cardsGrouped.Count()}");
-// foreach (var group in cardsGrouped)
-// {
-//     logger.LogInformation($"Number of members in group {group.ToJson()} is {group.Count()}");
-// }
-
 TestPart1OnSampleInput();
 RunPart1();
 TestPart2OnSampleInput();
@@ -56,7 +24,6 @@ void RunPart1()
     logger.LogInformation("Starting RunPart1");
     var inputFile = "input.txt";
     var parsedHands = ParseHands(inputFile);
-    // logger.LogInformation($"Parsed hands are {parsedHands.ToJson()}");
     var winnings = Winnings(parsedHands);
     logger.LogInformation($"Part 1 result: {winnings}");
 }
@@ -84,7 +51,6 @@ void RunPart2()
     logger.LogInformation("Starting RunPart2");
     var inputFile = "input.txt";
     var parsedHands = ParseHandsPart2(inputFile);
-    // logger.LogInformation($"Parsed hands are {parsedHands.ToJson()}");
     var winnings = Winnings(parsedHands);
     logger.LogInformation($"Part 2 result: {winnings}");
 }
@@ -322,7 +288,6 @@ static class ExtensionMethods
         {
             return cards.HandType();
         }
-        Console.WriteLine($"We process hand with jokers!");
         var cardGroups = cards.GroupBy(c => c.Power);
         if (cardGroups.Count() == 1)
         {
