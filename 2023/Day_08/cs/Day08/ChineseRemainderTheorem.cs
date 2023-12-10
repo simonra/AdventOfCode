@@ -9,7 +9,6 @@ using System.Runtime.CompilerServices;
 /// </summary>
 public static class ChineseRemainderTheorem
 {
-    // https://github.com/edoannunziata/jardin/blob/master/misc/Aoc23Day8BonusRound.ipynb
     /*
         Assume a system of congruences like this
 
@@ -19,25 +18,57 @@ public static class ChineseRemainderTheorem
         ...
         x ≡ ai mod mi
 
-        CRT requires that all the congruences have to have co-prime divisors, that is that none of the m's share factors.
-        The easiest way to achieve this is by splitting up all the equations so that each m only has a (power of) a single prime factor.
+        The Chinese Remainder Theorem (CRT) requires that all the congruences have to have co-prime divisors, that is that none of the m's share factors.
+        In a valid system, the easiest way to achieve this is by splitting up all the equations, so that each m only has a (power of) a single prime factor,
+        and removing all the entries that share the same prime, leaving only one congruence per prime.
+
         This can be done because
 
-        x ≡ a mod (p0^n0)*(p1^n1)*...*(pi^ni)
+        x ≡ a mod (p0^e0)*(p1^e1)*...*(pi^ei)
 
-        can be split up into
+        which can be split up into
 
-        x ≡ a mod p0^n0
-        x ≡ a mod p1^n1
+        x ≡ a mod p0^e0
+        x ≡ a mod p1^e1
         ...
-        x ≡ a mod pi^ni
+        x ≡ a mod pi^ei
 
         and we can then replace the entry with the new collection of entries in the list to process.
 
-        Should there be entries sharing primes, they are either equivalent and all except 1 of them can be removed, or they indicate a conflict that makes the system unsolvable.
+        Should there be entries sharing primes, they are either equivalent and all except 1 of them can be removed,
+        or they indicate a conflict that makes the system unsolvable.
         The 2 basic contradicting cases are:
-            - The exponents (n's) are the same but the remainders (a's) are different.
+            - The exponents (e's) are the same but the remainders (a's) are different.
             - a_biggerExponent mod (p ^ smaller exponent) ≠ a_smallerExponent
+
+        After we've ascertained that there are no conflicts, and have removed all duplicates, we can pairwise reduce the set until
+        we are left with 1 congruence, which will be our solution.
+
+        To reduce the solution pairwise, use the general solution
+            x = a0*M0*y0 + a1*M1*y1 + a2*M2*y2 + ... ai*Mi*yi
+        where
+            Mx is the product of all the m's except the x'th one (e.g. for x ≡ a0 mod m0 it is m1*m2*...mi, and for x ≡ a1 mod m1 it would be m0*m2*...*mi).\
+            yx is the modular inverse of Mx (be careful that this is the capital M)
+
+        The solution for a pair
+            x ≡ a0 mod m0
+            x ≡ a1 mod m1
+        yields
+            M0 = m1
+            M1 = m0
+            y0 = the inverse for m1 mod m0
+            y1 = the inverse for m0 mod m1
+        and becomes
+            x = a0 * m1 *(Inverse(m1 mod m0)) + a1 * m0* Inverse(m0 mod m1)
+
+        We can further use this to construct the next congruence
+            x_next ≡ (x mod (m0 * m1)) mod (m0 * m1)
+        which we use for the pair
+            x_next ≡ (x mod (m0 * m1)) mod (m0 * m1)
+            x ≡ a2 mod m2
+        all the way up until we have reduced all the congruences in the system.
+
+        Because some use cases have need for the both the solution divisor in addition to, or instead of, the remainder, return both and let the user deal with it.
     */
 
     public static bool TryFindSimultaneousSolution<T>(IEnumerable<(T a, T m)> congruences, out (T a, T m) result)
@@ -45,18 +76,70 @@ public static class ChineseRemainderTheorem
     {
         checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
         {
+            List<(T Remainder, T Prime, T Power)> primeFactoredCongruences = MakePrimeFactoredSystemOfCongruences(congruences);
+
+            if(!SystemOfPrimeFactoredCongruencesIsValid(primeFactoredCongruences))
+            {
+                result = default;
+                return false;
+            }
+
+            // Beware that there is some double work here, because the grouping is also done in the function checking validity.
+            // However, I think it's worth it for the readability.
+            // The selection of only the first member of the group is because all the others in the group are [co-prime](https://en.wikipedia.org/wiki/Coprime_integers), and are therefore redundant with regards to the solution.
+            List<(T Remainder, T Divisor)> reducedSystemToSolve = primeFactoredCongruences
+                .GroupBy(x => x.Prime)
+                .Select(group => group.First())
+                .Select(x =>
+                    {
+                        var divisor = x.Prime.Pow(x.Power);
+                        return (Remainder: x.Remainder, Divisor: divisor);
+                    })
+                .ToList();
+
+
+            // ToDo: Can this be prettier with a fold?
+            var temporaryResult = reducedSystemToSolve.First();
+            var solutionForPair = T.Zero;
+            for (int i = 1; i < reducedSystemToSolve.Count(); i++)
+            {
+                var currentCongruence = reducedSystemToSolve.Skip(i).First();
+
+                // x = a1*M1*y1 + a2*M2*y2
+                // x = a1*m2*(modinverse(m2,m1)) + a2*m1*modinverse(m1,m2)
+                var y1 = BinaryIntegerFunctions.ModInverseFast(currentCongruence.Divisor, temporaryResult.Divisor);
+                var y2 = BinaryIntegerFunctions.ModInverseFast(temporaryResult.Divisor, currentCongruence.Divisor);
+
+                solutionForPair = temporaryResult.Remainder * currentCongruence.Divisor * y1 + currentCongruence.Remainder * temporaryResult.Divisor * y2;
+
+                var nextRemainder = solutionForPair % (currentCongruence.Divisor * temporaryResult.Divisor);
+                var nextDivisor = currentCongruence.Divisor * temporaryResult.Divisor;
+
+                temporaryResult.Remainder = nextRemainder;
+                temporaryResult.Divisor = nextDivisor;
+            }
+
+            result = (a: temporaryResult.Remainder, m: temporaryResult.Divisor);
+            return true;
+        }
+    }
+
+    private static List<(T Remainder, T Prime, T Power)> MakePrimeFactoredSystemOfCongruences<T>(IEnumerable<(T Remainder, T Divisor)> congruences)
+    where T : IBinaryInteger<T>
+    {
+        checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
+        {
             var originalCongruences = congruences.ToList();
 
             // Convert system into factored system
-            // ToDo: Extract method returning the list
             var primeFactoredCongruences = new List<(T Remainder, T Prime, T Power)>();
             foreach(var originalCongruence in originalCongruences)
             {
-                var divisorsPrimeFactors = originalCongruence.m.EnumeratePrimeFactors().ToList();
+                var divisorsPrimeFactors = originalCongruence.Divisor.EnumeratePrimeFactors().ToList();
                 if(!divisorsPrimeFactors.Any())
                 {
                     // m is prime itself
-                    primeFactoredCongruences.Add((Remainder: originalCongruence.a, Prime: originalCongruence.m, Power: T.One));
+                    primeFactoredCongruences.Add((Remainder: originalCongruence.Remainder, Prime: originalCongruence.Divisor, Power: T.One));
                 }
                 else
                 {
@@ -71,16 +154,23 @@ public static class ChineseRemainderTheorem
                                 power += T.One;
                             }
                         }
-                        primeFactoredCongruences.Add((Remainder: originalCongruence.a, Prime: primeGroup.First(), Power: power));
+                        primeFactoredCongruences.Add((Remainder: originalCongruence.Remainder, Prime: primeGroup.First(), Power: power));
                     }
                 }
             }
+            // Congruences in system that share the same unique prime factor are redundant, use distinct here to remove any obvious duplicates
             primeFactoredCongruences = primeFactoredCongruences.OrderBy(x => x.Prime).ThenBy(x => x.Power).ThenBy(x => x.Remainder).Distinct().ToList();
+            return primeFactoredCongruences;
+        }
+    }
 
-            // Check collection of factored congruences for contradictions
-            // ToDo: Extract method (maybe return bool for contradictions and out result for reduced collection?)
-            var primegruencesByPrime = primeFactoredCongruences.GroupBy(x => x.Prime);
-            foreach(var group in primegruencesByPrime.Where(g => g.Count() > 1))
+    private static bool SystemOfPrimeFactoredCongruencesIsValid<T>(IEnumerable<(T Remainder, T Prime, T Power)> congruences)
+    where T : IBinaryInteger<T>
+    {
+        checked
+        {
+            var congruencesByPrime = congruences.ToList().GroupBy(x => x.Prime);
+            foreach(var group in congruencesByPrime.Where(g => g.Count() > 1))
             {
                 var previous = group.First();
                 for (int i = 1; i < group.Count(); i++)
@@ -90,16 +180,14 @@ public static class ChineseRemainderTheorem
                     {
                         if(previous.Remainder != current.Remainder)
                         {
-                            result = default;
                             return false;
                         }
                     }
-                    // Might only need 1 check at this point given sorting, but include both branches because I'm paranoid, and it gives some safety should the code be copied alone
+                    // Might only need 1 check at this point given sorting, but include both branches because I'm paranoid, and it gives some safety should the code be copied out alone
                     else if(current.Power > previous.Power)
                     {
                         if(current.Remainder % (previous.Prime.Pow(previous.Power)) != previous.Remainder)
                         {
-                            result = default;
                             return false;
                         }
                     }
@@ -107,51 +195,14 @@ public static class ChineseRemainderTheorem
                     {
                         if(previous.Remainder % (current.Prime.Pow(current.Power)) != current.Remainder)
                         {
-                            result = default;
                             return false;
                         }
                     }
                 }
             }
-            var factoredValidSystem = primegruencesByPrime.Select(group => group.First()).ToList();
-
-            // If no conflicts found, take first of each group
-            var unFactoredSystem = factoredValidSystem
-                .Select(x =>
-                    {
-                        var divisor = x.Prime.Pow(x.Power);
-                        return (Remainder: x.Remainder, Divisor: divisor);
-                    })
-                .ToList();
-
-
-            var temporaryResult = unFactoredSystem.First();
-            for (int i = 1; i < unFactoredSystem.Count(); i++)
-            {
-                var currentCongruence = unFactoredSystem.Skip(i).First();
-                var solutionForPair = T.Zero;
-
-                // x = a1*M1*y1 + a2*M2*y2
-                // x = a1*m2*(modinverse(m2,m1)) + a2*m1*modinverse(m1,m2)
-                var y1 = BinaryIntegerFunctions.ModInverseFast(currentCongruence.Divisor, temporaryResult.Divisor);
-                var y2 = BinaryIntegerFunctions.ModInverseFast(temporaryResult.Divisor, currentCongruence.Divisor);
-                if(y1 < T.Zero || y2 < T.Zero)
-                {
-                    Console.WriteLine($"WARNING: Mod inverse is negative m1: {temporaryResult.Divisor}, m2 {currentCongruence.Divisor}, y1 {y1}, y2 {y2}");
-                }
-                solutionForPair = temporaryResult.Remainder * currentCongruence.Divisor * y1 + currentCongruence.Remainder * temporaryResult.Divisor * y2;
-
-                var nextRemainder = solutionForPair % (currentCongruence.Divisor * temporaryResult.Divisor);
-                var nextDivisor = currentCongruence.Divisor * temporaryResult.Divisor;
-                temporaryResult.Remainder = nextRemainder;
-                temporaryResult.Divisor = nextDivisor;
-            }
-
-            result = (a: temporaryResult.Remainder, m: temporaryResult.Divisor);
             return true;
         }
     }
-
 }
 public static class BinaryIntegerConstants<T> where T : IBinaryInteger<T>
 {
@@ -284,18 +335,12 @@ public static class BinaryIntegerFunctions
         checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
         {
             // Based on https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-            T zero = a - a;
-            if (a == zero || b == zero)
-            {
-                return (BezoutCoefficientS: zero, BezoutCoefficientT: zero, GreatestCommonDivisor: zero, GcdQuotientS: zero, GcdQuotientT: zero);
-            }
-            T one = a / a;
 
             (T old_r, T r) = (a, b);
             (T old_s, T s) = (T.One, T.Zero);
             (T old_t, T t) = (T.Zero, T.One);
             T quotient = T.Zero;
-            while (r != zero)
+            while (r != T.Zero)
             {
                 quotient = old_r / r; // integer division! Make sure to floor if using floats. Maybe consider Math.DivRem() in dotnet
                 (old_r, r) = (r, old_r - quotient * r);
