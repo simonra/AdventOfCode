@@ -14,7 +14,7 @@ ILogger logger = factory.CreateLogger("Day08");
 
 TestPart1OnSampleInput();
 RunPart1();
-TestExtendedEuclideanAlgorithmGcd();
+// TestExtendedEuclideanAlgorithmGcd();
 TestLeastCommonMultipleOfPair();
 TestLeastCommonMultipleOfCollection();
 RunPart2();
@@ -159,9 +159,9 @@ UInt64 NumberOfStepsFromAllXANodesTillAllOnXZNodesBruteForce(string instructions
 //     return node.EndsWith('Z');
 // }
 
-UInt64 NumberOfStepsFromAllXANodesTillAllOnXZNodesCycleMath(string instructions, Dictionary<string, NodeConnections> network)
+Int128 NumberOfStepsFromAllXANodesTillAllOnXZNodesCycleMath(string instructions, Dictionary<string, NodeConnections> network)
 {
-    UInt64 result = 1;
+    Int128 result = 1;
     var startingNodes = network.Keys.Where(k => k.EndsWith('A')).ToArray();
     var cyclesByOrigin = new Dictionary<string, Dictionary<string, List<uint>>>();
     foreach (var node in startingNodes)
@@ -171,8 +171,8 @@ UInt64 NumberOfStepsFromAllXANodesTillAllOnXZNodesCycleMath(string instructions,
     }
 
     logger.LogInformation($"Cycles per origin {cyclesByOrigin.ToJson()}");
-    var cycleLengths = new List<UInt64>();
-    UInt64 allCycleLengthsProduct = 277;
+    var cycleLengths = new List<Int128>();
+    Int128 allCycleLengthsProduct = 277;
     foreach (var originCycles in cyclesByOrigin.Values)
     {
         foreach (var cycleByDestination in originCycles.Values)
@@ -185,11 +185,11 @@ UInt64 NumberOfStepsFromAllXANodesTillAllOnXZNodesCycleMath(string instructions,
     logger.LogInformation($"Product of all cycle lengths is {allCycleLengthsProduct}");
     logger.LogInformation($"Product of all cycle lengths without common divisor is {allCycleLengthsProduct/277}");
     // var cycleLengths = cyclesByOrigin.Values.Select(x => x.First()).Select(x => x.Value.First()).ToList();
-    var lcm = LeastCommonMultipleOfCollection(cycleLengths);
+    var lcm = cycleLengths.FindLeastCommonMultipleOfCollection();
     // var lcm = LeastCommonMultipleOfCollection(cycleLengths.Select(x => x/277).ToList());
     logger.LogInformation($"LCM is {lcm} (this is the puzzle answer)");
 
-    UInt64 longestCycleLength = cycleLengths.Max();
+    Int128 longestCycleLength = cycleLengths.Max();
 
     return 0;
     var startTime = DateTime.Now;
@@ -207,152 +207,61 @@ UInt64 NumberOfStepsFromAllXANodesTillAllOnXZNodesCycleMath(string instructions,
             logger.LogInformation($"{DateTime.Now} Running for {DateTime.Now - startTime} At iteration {result.ToString("N0", new System.Globalization.NumberFormatInfo { NumberGroupSeparator = " " })} ({(double)result / (double)UInt64.MaxValue} of uint.MaxValue)");
         }
     }
-
-    // var numberOfPaths = currentNodes.Count();
-    // UInt64 numberOfInstructions = (UInt64)instructions.Length;
-    // int nextInstructionOffset;
-    // var startTime = DateTime.Now;
-    // while(true)
-    // {
-    //     if(currentNodes.All(n => n.EndsWith('Z')))
-    //     {
-    //         break;
-    //     }
-    //     nextInstructionOffset = (int)(result % numberOfInstructions);
-    //     for (int i = 0; i < numberOfPaths; i++)
-    //     {
-    //         var currentNodeId = currentNodes[i];
-    //         if(instructions[nextInstructionOffset] == 'L')
-    //         {
-    //             currentNodes[i] = network[currentNodeId].Left;
-    //         }
-    //         else if(instructions[nextInstructionOffset] == 'R')
-    //         {
-    //             currentNodes[i] = network[currentNodeId].Right;
-    //         }
-    //     }
-    //     result++;
-
-    //     if(result % 10000000 == 0)
-    //     {
-    //         logger.LogInformation($"{DateTime.Now} Running for {DateTime.Now - startTime} At iteration {result.ToString("N0", new System.Globalization.NumberFormatInfo {NumberGroupSeparator = " "})} ({(double)result/(double)UInt64.MaxValue} of uint.MaxValue)");
-    //     }
-    // }
-    // return result;
-
     return 0;
-
-    // throw new NotImplementedException();
-}
-
-(T BezoutCoefficientS, T BezoutCoefficientT, T GreatestCommonDivisor, T GcdQuotientS, T GcdQuotientT) ExtendedEuclideanAlgorithmGcd<T>(T a, T b)
-where T : System.Numerics.IBinaryInteger<T>
-{
-    // Based on https://en.wikipedia.org/wiki/Extended_Euclidean_algorithm
-    T zero = a - a;
-    if (a == zero || b == zero)
-    {
-        return (BezoutCoefficientS: zero, BezoutCoefficientT: zero, GreatestCommonDivisor: zero, GcdQuotientS: zero, GcdQuotientT: zero);
-    }
-    T one = a / a;
-
-    T old_r = a;
-    T r = b;
-    T old_s = one;
-    T s = zero;
-    T old_t = zero;
-    T t = one;
-    T quotient = zero;
-    T temp = zero;
-    while (r != zero)
-    {
-        quotient = old_r / r; // integer division! Make sure to floor if using floats. Maybe consider Math.DivRem() in dotnet
-        temp = r;
-        r = old_r - quotient * r;
-        old_r = temp;
-        temp = s;
-        s = old_s - quotient * s;
-        old_s = temp;
-        temp = t;
-        t = old_t - quotient * t;
-        old_t = temp;
-    }
-    return (BezoutCoefficientS: old_s, BezoutCoefficientT: old_t, GreatestCommonDivisor: old_r, GcdQuotientS: s, GcdQuotientT: t);
-}
-
-T LeastCommonMultiple<T>(T a, T b)
-where T : System.Numerics.IBinaryInteger<T>
-{
-    checked
-    {
-        var greatestCommonDivisor = ExtendedEuclideanAlgorithmGcd(a, b).GreatestCommonDivisor;
-        logger.LogInformation($"Greatest common divisor of {a} and {b} for LCM is {greatestCommonDivisor}");
-        if(greatestCommonDivisor == T.Zero)
-        {
-            return T.Zero;
-        }
-        return (a / greatestCommonDivisor) * b;
-    }
-}
-
-T LeastCommonMultipleOfCollection<T>(IEnumerable<T> numbers)
-where T : System.Numerics.IBinaryInteger<T>
-{
-    return numbers.Aggregate(LeastCommonMultiple);
 }
 
 void TestLeastCommonMultipleOfPair()
 {
     var a = 8;
     var b = 9;
-    var result = LeastCommonMultiple(a, b);
+    var result = LeastCommonMultiple.FindLeastCommonMultipleForPair(a, b);
     logger.LogInformation($"Least common multiple of {a} and {b} is {result}");
 
     a = 21;
     b = 6;
-    result = LeastCommonMultiple(a, b);
+    result = LeastCommonMultiple.FindLeastCommonMultipleForPair(a, b);
     logger.LogInformation($"Least common multiple of {a} and {b} is {result} (expected 42)");
 }
 
 void TestLeastCommonMultipleOfCollection()
 {
-    var numbers = new List<uint> { 8, 9, 21 };
-    var result = LeastCommonMultipleOfCollection(numbers);
+    var numbers = new List<int> { 8, 9, 21 };
+    var result = numbers.FindLeastCommonMultipleOfCollection();
     logger.LogInformation($"Least common multiple of collection {numbers.ToJson()} is {result} (expected 504)");
 }
 
-void TestExtendedEuclideanAlgorithmGcd()
-{
-    var a = 3;
-    var b = 7;
-    var result = ExtendedEuclideanAlgorithmGcd(a, b);
-    logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
-    logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
+// void TestExtendedEuclideanAlgorithmGcd()
+// {
+//     var a = 3;
+//     var b = 7;
+//     var result = ExtendedEuclideanAlgorithmGcd(a, b);
+//     logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
+//     logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
 
-    a = 3;
-    b = 35;
-    result = ExtendedEuclideanAlgorithmGcd(a, b);
-    logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
-    logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
+//     a = 3;
+//     b = 35;
+//     result = ExtendedEuclideanAlgorithmGcd(a, b);
+//     logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
+//     logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
 
-    a = 21;
-    b = 5;
-    result = ExtendedEuclideanAlgorithmGcd(a, b);
-    logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
-    logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
+//     a = 21;
+//     b = 5;
+//     result = ExtendedEuclideanAlgorithmGcd(a, b);
+//     logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
+//     logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
 
-    a = 1;
-    b = 0;
-    result = ExtendedEuclideanAlgorithmGcd(a, b);
-    logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
-    logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
+//     a = 1;
+//     b = 0;
+//     result = ExtendedEuclideanAlgorithmGcd(a, b);
+//     logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
+//     logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
 
-    a = 0;
-    b = 1;
-    result = ExtendedEuclideanAlgorithmGcd(a, b);
-    logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
-    logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
-}
+//     a = 0;
+//     b = 1;
+//     result = ExtendedEuclideanAlgorithmGcd(a, b);
+//     logger.LogInformation($"When a is {a} and b is {b} BezoutCoefficientS: {result.BezoutCoefficientS}, BezoutCoefficientT: {result.BezoutCoefficientT}, GreatestCommonDivisor: {result.GreatestCommonDivisor}, GcdQuotientS: {result.GcdQuotientS}, GcdQuotientT: {result.GcdQuotientT}");
+//     logger.LogInformation($"The GCD {result.GreatestCommonDivisor} should be equal to a * s + b * t, so {a} * {result.BezoutCoefficientS} + {b} * {result.BezoutCoefficientT} = {result.GreatestCommonDivisor}, which for our result is {a * result.BezoutCoefficientS + b * result.BezoutCoefficientT == result.GreatestCommonDivisor} ");
+// }
 
 Dictionary<string, List<uint>> FindCycles(string instructions, Dictionary<string, NodeConnections> network, string startingNode)
 {
