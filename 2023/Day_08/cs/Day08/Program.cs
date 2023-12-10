@@ -187,7 +187,7 @@ UInt64 NumberOfStepsFromAllXANodesTillAllOnXZNodesCycleMath(string instructions,
     // var cycleLengths = cyclesByOrigin.Values.Select(x => x.First()).Select(x => x.Value.First()).ToList();
     var lcm = LeastCommonMultipleOfCollection(cycleLengths);
     // var lcm = LeastCommonMultipleOfCollection(cycleLengths.Select(x => x/277).ToList());
-    logger.LogInformation($"LCM is {lcm}");
+    logger.LogInformation($"LCM is {lcm} (this is the puzzle answer)");
 
     UInt64 longestCycleLength = cycleLengths.Max();
 
