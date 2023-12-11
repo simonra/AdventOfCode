@@ -40,7 +40,6 @@ void TestSlidingWindow()
     var original = Enumerable.Range(1, 15).ToList();
     logger.LogDebug($"Original list is {original.ToJson()}");
 
-    // var largerWindow = original.SlidingWindow(20);
     foreach(var window in original.SlidingWindow(20))
     {
         logger.LogDebug($"When window is 20, next entry is {window.ToJson()}");
@@ -147,7 +146,6 @@ static class ExtensionMethods
         {
             reductions.Add(reductions.Last().Differences().ToList());
         }
-        // .TakeLast(2).
         var result = reductions.Select(x => x.Last()).Reverse().Aggregate(T.Zero, (accumulated, next) => accumulated + next);
         return result;
     }
@@ -161,7 +159,6 @@ static class ExtensionMethods
         {
             reductions.Add(reductions.Last().Differences().ToList());
         }
-        // .TakeLast(2).
         var result = reductions.Select(x => x.First()).Reverse().Aggregate(T.Zero, (accumulated, next) => next - accumulated);
         return result;
     }
