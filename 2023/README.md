@@ -66,3 +66,9 @@ static class ExtensionMethods
     }
 }
 ```
+
+In the first property group, together with the `OutputType` and `Nullable` tags, put this so that you get errors when integer types over/underflow, as might be expected to happen when working on things like Advent of Code:
+
+```xml
+<CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+```
