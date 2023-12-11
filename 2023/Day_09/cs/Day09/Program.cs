@@ -8,12 +8,12 @@ using ILoggerFactory factory = LoggerFactory.Create(
     builder =>
     {
         builder.SetMinimumLevel(LogLevel.Information);
-        builder.SetMinimumLevel(LogLevel.Debug);
+        // builder.SetMinimumLevel(LogLevel.Debug);
         builder.AddConsole();
     });
 ILogger logger = factory.CreateLogger("Day09");
 
-// TestSlidingWindow();
+TestSlidingWindow();
 TestPart1OnSampleInput();
 RunPart1();
 TestPart2OnSampleInput();
@@ -38,27 +38,27 @@ void RunPart2()
 void TestSlidingWindow()
 {
     var original = Enumerable.Range(1, 15).ToList();
-    logger.LogInformation($"Original list is {original.ToJson()}");
+    logger.LogDebug($"Original list is {original.ToJson()}");
 
     // var largerWindow = original.SlidingWindow(20);
     foreach(var window in original.SlidingWindow(20))
     {
-        logger.LogInformation($"When window is 20, next entry is {window.ToJson()}");
+        logger.LogDebug($"When window is 20, next entry is {window.ToJson()}");
     }
 
     foreach(var window in original.SlidingWindow(2))
     {
-        logger.LogInformation($"When window is 2, next entry is {window.ToJson()}");
+        logger.LogDebug($"When window is 2, next entry is {window.ToJson()}");
     }
 
     foreach(var window in original.SlidingWindow(3))
     {
-        logger.LogInformation($"When window is 3, next entry is {window.ToJson()}");
+        logger.LogDebug($"When window is 3, next entry is {window.ToJson()}");
     }
 
     foreach(var window in original.Select(x => x * 2).Differences())
     {
-        logger.LogInformation($"Differences are {window.ToJson()}");
+        logger.LogDebug($"Differences are {window.ToJson()}");
     }
 }
 
@@ -99,8 +99,6 @@ void TestPart2OnSampleInput()
 T SumOfPredictionsOfLast<T>(string filePath)
 where T : INumber<T>
 {
-    // string instructions;
-    // var network = new Dictionary<string, NodeConnections>();
     T result = T.Zero;
     using (StreamReader sr = new StreamReader(filePath))
     {
@@ -116,8 +114,6 @@ where T : INumber<T>
 T SumOfPredictionsOfFirst<T>(string filePath)
 where T : INumber<T>
 {
-    // string instructions;
-    // var network = new Dictionary<string, NodeConnections>();
     T result = T.Zero;
     using (StreamReader sr = new StreamReader(filePath))
     {
@@ -170,25 +166,10 @@ static class ExtensionMethods
         return result;
     }
 
-    public static List<T> ParseOasisLine<T>(this string input)
+    public static IEnumerable<T> ParseOasisLine<T>(this string input)
     where T : INumber<T>
     {
-        return input.Split(' ').Select(x => T.Parse(x, null)).ToList();
-    }
-
-    // public static List<Int128> ParseOasisLine(this string input)
-    // {
-    //     return input.Split(' ').Select(x => x.ToInt128()).ToList();
-    // }
-
-    public static uint ToUint(this string s)
-    {
-        return UInt16.Parse(s);
-    }
-
-    public static Int128 ToInt128(this string s)
-    {
-        return Int128.Parse(s);
+        return input.Split(' ').Select(x => T.Parse(x, null));
     }
 
     public static IEnumerable<T> Differences<T>(this IEnumerable<T> input)
