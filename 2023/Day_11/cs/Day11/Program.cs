@@ -13,6 +13,8 @@ ILogger logger = factory.CreateLogger("Day11");
 TestTranspose();
 TestPart1OnSampleInput();
 RunPart1();
+TestPart2OnSampleInput();
+RunPart2();
 
 void RunPart1()
 {
@@ -20,6 +22,29 @@ void RunPart1()
     var inputFile = "input.txt";
     var result = inputFile.ParseRawImage().ExpandEmptySpace().FindGalaxyPositions().FindManhattanDistances().Sum();
     logger.LogInformation($"Part 1 result: {result}");
+}
+
+void RunPart2()
+{
+    logger.LogInformation($"Starting {nameof(RunPart2)}");
+    var inputFile = "input.txt";
+    var rawImage = inputFile.ParseRawImage();
+    logger.LogDebug($"Parsed image");
+    var initialPositions = rawImage.FindGalaxyPositions();
+    logger.LogDebug($"Found positions");
+    var emptyRows = rawImage.EmptyRows().ToList();
+    logger.LogDebug($"Found empty rows");
+    logger.LogDebug($"Empty rows are\n{emptyRows.ToJson(false)}");
+    var emptyColumns = rawImage.EmptyColumns().ToList();
+    logger.LogDebug($"Found empty columns");
+    logger.LogDebug($"Empty columns are\n{emptyColumns.ToJson(false)}");
+    var distances = initialPositions.FindManhattanDistances(emptyRows: emptyRows, emptyColumns: emptyColumns).ToList();
+    logger.LogDebug($"Found distances");
+    // logger.LogDebug($"Distances are\n{distances.ToJson(false)}");
+    var result = distances.Aggregate(UInt128.Zero, (foldedValue, nextItem) => nextItem + foldedValue);
+    // var result = initialPositions.FindManhattanDistances(emptyRows: emptyRows, emptyColumns: emptyColumns).Aggregate(UInt128.Zero, (foldedValue, nextItem) => nextItem + foldedValue);
+    logger.LogInformation($"Part 2 result: {result}");
+    logger.LogInformation($"Part 2 result is not: [780825890760 (low), ]");
 }
 
 void TestPart1OnSampleInput()
@@ -51,6 +76,29 @@ void TestPart1OnSampleInput()
     // {
     //     logger.LogInformation("Testing Part 1: Processing sample data yielded expected result!");
     // }
+}
+
+void TestPart2OnSampleInput()
+{
+    logger.LogInformation($"Starting {nameof(TestPart2OnSampleInput)}");
+    var inputFile = "sample_input-part_1.txt";
+    var rawImage = inputFile.ParseRawImage();
+    logger.LogDebug($"Parsed image");
+    var initialPositions = rawImage.FindGalaxyPositions();
+    logger.LogDebug($"Found positions");
+    logger.LogDebug($"Galaxy positions are {initialPositions.ToJson(false)}");
+    var emptyRows = rawImage.EmptyRows().ToList();
+    logger.LogDebug($"Found empty rows");
+    logger.LogDebug($"Empty rows are\n{emptyRows.ToJson(false)}");
+    var emptyColumns = rawImage.EmptyColumns().ToList();
+    logger.LogDebug($"Found empty columns");
+    logger.LogDebug($"Empty columns are\n{emptyColumns.ToJson(false)}");
+    var distances = initialPositions.FindManhattanDistances(emptyRows: emptyRows, emptyColumns: emptyColumns).ToList();
+    logger.LogDebug($"Found distances");
+    logger.LogDebug($"Distances are\n{distances.ToJson(false)}");
+    var result = distances.Aggregate(UInt128.Zero, (foldedValue, nextItem) => nextItem + foldedValue);
+    // var result = initialPositions.FindManhattanDistances(emptyRows: emptyRows, emptyColumns: emptyColumns).Aggregate(UInt128.Zero, (foldedValue, nextItem) => nextItem + foldedValue);
+    logger.LogInformation($"{nameof(TestPart2OnSampleInput)} result: {result}");
 }
 
 void TestTranspose()
@@ -152,6 +200,29 @@ static class ExtensionMethods
         return expandedInY.Transpose().Select(x => x.ToList()).ToList();
     }
 
+    public static IEnumerable<int> EmptyColumns(this IEnumerable<IEnumerable<char>> rawImage)
+    {
+        var transposed = rawImage.Transpose();
+        for (int i = 0; i < transposed.Count(); i++)
+        {
+            if(transposed.Skip(i).First().All(x => x == '.'))
+            {
+                yield return i;
+            }
+        }
+    }
+
+    public static IEnumerable<int> EmptyRows(this IEnumerable<IEnumerable<char>> rawImage)
+    {
+        for (int i = 0; i < rawImage.Count(); i++)
+        {
+            if(rawImage.Skip(i).First().All(x => x == '.'))
+            {
+                yield return i;
+            }
+        }
+    }
+
     public static List<(int X, int Y)> FindGalaxyPositions(this IEnumerable<IEnumerable<char>> image)
     {
         var result = new List<(int X, int Y)>();
@@ -167,6 +238,42 @@ static class ExtensionMethods
             }
         }
         return result;
+    }
+
+    public static IEnumerable<UInt128> FindManhattanDistances(this IEnumerable<(int X, int Y)> pairs, IEnumerable<int> emptyRows, IEnumerable<int> emptyColumns)
+    {
+        for (int i = 0; i < pairs.Count(); i++)
+        {
+            var current = pairs.Skip(i).First();
+            for (int j = i + 1; j < pairs.Count(); j++)
+            {
+                var next = pairs.Skip(j).First();
+                var emptyRowsBetween = emptyRows.CountOfElementsBetween(current.Y, next.Y);
+                var emptyColsBetween = emptyColumns.CountOfElementsBetween(current.X, next.X);
+                UInt128 distanceX = 0;
+                UInt128 distanceY = 0;
+                distanceX += (UInt128)((current.X > next.X) ? current.X - next.X : next.X - current.X);
+                distanceY += (UInt128)((current.Y > next.Y) ? current.Y - next.Y : next.Y - current.Y);
+                distanceX += (UInt128)(emptyColsBetween * 1000000 - emptyColsBetween);
+                distanceY += (UInt128)(emptyRowsBetween * 1000000 - emptyRowsBetween);
+                // distanceX += (UInt128)(emptyColsBetween * 10 - emptyColsBetween);
+                // distanceY += (UInt128)(emptyRowsBetween * 10 - emptyRowsBetween);
+                yield return distanceX + distanceY;
+            }
+        }
+    }
+
+    public static int CountOfElementsBetween<T>(this IEnumerable<T> elements, T first, T second)
+    where T: IComparisonOperators<T, T, bool>
+    {
+        if(first < second)
+        {
+            return elements.Count(e => first < e && e < second);
+        }
+        else
+        {
+            return elements.Count(e => second < e && e < first);
+        }
     }
 
     public static IEnumerable<T> FindManhattanDistances<T>(this IEnumerable<(T X, T Y)> pairs)
