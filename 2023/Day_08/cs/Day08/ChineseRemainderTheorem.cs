@@ -186,8 +186,8 @@ public static class ChineseRemainderTheorem
     private static (T Remainder, T Divisor) SolveCongruencePair<T>((T Remainder, T Divisor) first, (T Remainder, T Divisor) second)
     where T : System.Numerics.IBinaryInteger<T>, System.Numerics.ISignedNumber<T>
     {
-        var y1 = ChineseRemainderTheoremBinaryIntegerHelperFunctions.ModInverse(second.Divisor, first.Divisor);
-        var y2 = ChineseRemainderTheoremBinaryIntegerHelperFunctions.ModInverse(first.Divisor, second.Divisor);
+        var y1 = ModInverse(second.Divisor, first.Divisor);
+        var y2 = ModInverse(first.Divisor, second.Divisor);
 
         var solutionForPairsX = first.Remainder * second.Divisor * y1 + second.Remainder * first.Divisor * y2;
 
@@ -196,11 +196,8 @@ public static class ChineseRemainderTheorem
 
         return (Remainder: solutionRemainder, Divisor: solutionDivisor);
     }
-}
 
-public static class ChineseRemainderTheoremBinaryIntegerHelperFunctions
-{
-    public static T Pow<T>(this T number, T exponent)
+    private static T Pow<T>(this T number, T exponent)
     where T : System.Numerics.IBinaryInteger<T>
     {
         checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
@@ -214,7 +211,7 @@ public static class ChineseRemainderTheoremBinaryIntegerHelperFunctions
         }
     }
 
-    public static T ModInverse<T>(T a, T m)
+    private static T ModInverse<T>(T a, T m)
     where T : System.Numerics.IBinaryInteger<T>, System.Numerics.ISignedNumber<T>
     {
         checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
@@ -228,7 +225,7 @@ public static class ChineseRemainderTheoremBinaryIntegerHelperFunctions
         }
     }
 
-    public static (T BezoutCoefficientS, T BezoutCoefficientT, T GreatestCommonDivisor, T GcdQuotientS, T GcdQuotientT) ExtendedEuclideanAlgorithmGcd<T>(T a, T b)
+    private static (T BezoutCoefficientS, T BezoutCoefficientT, T GreatestCommonDivisor, T GcdQuotientS, T GcdQuotientT) ExtendedEuclideanAlgorithmGcd<T>(T a, T b)
     where T : System.Numerics.IBinaryInteger<T>, System.Numerics.ISignedNumber<T>
     {
         checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
@@ -250,7 +247,7 @@ public static class ChineseRemainderTheoremBinaryIntegerHelperFunctions
         }
     }
 
-    public static IEnumerable<T> EnumeratePrimeFactors<T>(this T value) where T : IBinaryInteger<T>/*, IUnsignedNumber<T>*/ {
+    private static IEnumerable<T> EnumeratePrimeFactors<T>(this T value) where T : IBinaryInteger<T>/*, IUnsignedNumber<T>*/ {
         checked // Throws if number overflow/underflow. Explicit, because I will copy paste it and forget that it can (should in the contexts I use it) be set in project settings
         {
             // Based on the answer Kittoes0124 gave here https://stackoverflow.com/a/76691571
@@ -382,10 +379,10 @@ public static class ChineseRemainderTheoremBinaryIntegerHelperFunctions
         (value > other).As<T>();
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static T MostSignificantBit<T>(this T value) where T : IBinaryInteger<T> =>
+    private static T MostSignificantBit<T>(this T value) where T : IBinaryInteger<T> =>
         (T.CreateTruncating(value: BinaryIntegerConstants<T>.Size) - T.LeadingZeroCount(value: value));
 
-    public static T SquareRoot<T>(this T value) where T : IBinaryInteger<T>/*, IUnsignedNumber<T> */{
+    private static T SquareRoot<T>(this T value) where T : IBinaryInteger<T>/*, IUnsignedNumber<T> */{
         return BinaryIntegerConstants<T>.Size switch {
 #if !FORCE_SOFTWARE_SQRT
             8 => T.CreateTruncating(value: ((uint)MathF.Sqrt(x: uint.CreateTruncating(value: value)))),

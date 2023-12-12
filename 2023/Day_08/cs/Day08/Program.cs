@@ -36,49 +36,49 @@ void TestChineseRemainderTheoremTryFindSimultaneousSolution()
     logger.LogInformation($"Processing input {congruences.ToJson()} hasSolution: {hasSolution}, the solution is {solution} (expected (0, 51701783603))");
 }
 
-void TestEnumeratePrimeFactors()
-{
-    var number = 337500; //  2*2*3*3*3*5*5*5*5*5
-    var primeFactors = number.EnumeratePrimeFactors().ToList();
-    logger.LogInformation($"Factorization of {number} yielded {primeFactors.ToJson()}");
+// void TestEnumeratePrimeFactors()
+// {
+//     var number = 337500; //  2*2*3*3*3*5*5*5*5*5
+//     var primeFactors = number.EnumeratePrimeFactors().ToList();
+//     logger.LogInformation($"Factorization of {number} yielded {primeFactors.ToJson()}");
 
-    number = 3;
-    primeFactors = number.EnumeratePrimeFactors().ToList();
-    logger.LogInformation($"Factorization of {number} yielded {primeFactors.ToJson()}");
+//     number = 3;
+//     primeFactors = number.EnumeratePrimeFactors().ToList();
+//     logger.LogInformation($"Factorization of {number} yielded {primeFactors.ToJson()}");
 
-    var collection = new List<(int Remainder, int Prime, int Power)>() {(1, 2, 3), (1, 2, 4), (1, 3, 1), (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 2, 3), (1, 2, 3), (1, 2, 3), (1, 2, 3), (1, 2, 3) };
-    collection = collection.OrderBy(x => x.Prime).ThenBy(x => x.Power).ToList();
-    foreach(var item in collection)
-    {
-        logger.LogInformation($"The collection item is {item}");
-    }
-    logger.LogInformation($"Now the distinct items are");
-    collection = collection.Distinct().ToList();
-    foreach(var item in collection)
-    {
-        logger.LogInformation($"The collection item is {item}");
-    }
-    var groups = collection.GroupBy(x => x.Prime);
-    logger.LogInformation($"The groups are {groups.ToJson()}");
-    // for (int i = 0; i < groups.Count(); i++)
-    // {
-    //     logger.LogInformation($"The group is {groups.Skip(i).Take(1).ToJson()}");
-    //     if(i > 0)
-    //     {
-    //         logger.LogInformation($"The previous group is {groups.Skip(i - 1).Take(1).ToJson()}");
-    //     }
-    // }
-    logger.LogInformation("For eaching the groups");
-    foreach(var group in groups)
-    {
-        var firstElement = group.First();
-        logger.LogInformation($"The first element is {firstElement}");
-        if(group.Count() > 1)
-        {
-            logger.LogInformation($"The second element is {group.Skip(1).First()}");
-        }
-    }
-}
+//     var collection = new List<(int Remainder, int Prime, int Power)>() {(1, 2, 3), (1, 2, 4), (1, 3, 1), (1, 5, 1), (1, 5, 2), (1, 5, 3), (1, 2, 3), (1, 2, 3), (1, 2, 3), (1, 2, 3), (1, 2, 3) };
+//     collection = collection.OrderBy(x => x.Prime).ThenBy(x => x.Power).ToList();
+//     foreach(var item in collection)
+//     {
+//         logger.LogInformation($"The collection item is {item}");
+//     }
+//     logger.LogInformation($"Now the distinct items are");
+//     collection = collection.Distinct().ToList();
+//     foreach(var item in collection)
+//     {
+//         logger.LogInformation($"The collection item is {item}");
+//     }
+//     var groups = collection.GroupBy(x => x.Prime);
+//     logger.LogInformation($"The groups are {groups.ToJson()}");
+//     // for (int i = 0; i < groups.Count(); i++)
+//     // {
+//     //     logger.LogInformation($"The group is {groups.Skip(i).Take(1).ToJson()}");
+//     //     if(i > 0)
+//     //     {
+//     //         logger.LogInformation($"The previous group is {groups.Skip(i - 1).Take(1).ToJson()}");
+//     //     }
+//     // }
+//     logger.LogInformation("For eaching the groups");
+//     foreach(var group in groups)
+//     {
+//         var firstElement = group.First();
+//         logger.LogInformation($"The first element is {firstElement}");
+//         if(group.Count() > 1)
+//         {
+//             logger.LogInformation($"The second element is {group.Skip(1).First()}");
+//         }
+//     }
+// }
 
 void RunPart1()
 {
