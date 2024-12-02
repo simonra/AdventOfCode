@@ -6,8 +6,8 @@ open System.Numerics
 
 printfn "Hello from F#"
 
-// let lines = seq { yield! System.IO.File.ReadLines "Input/Example.txt" }
-let lines = seq { yield! System.IO.File.ReadLines "Input/Input.txt" }
+let lines = seq { yield! System.IO.File.ReadLines "Input/Example.txt" }
+// let lines = seq { yield! System.IO.File.ReadLines "Input/Input.txt" }
 // for line in lines do
 //     printfn $"%A{line}"
 
@@ -50,15 +50,25 @@ printfn $"Counts of each element in first column: %A{countsInFirst}"
 
 let countsInSecondIfInFirst =
     countsInSecond |> Seq.where (fun pair -> Seq.contains (fst pair) firstColumn)
+
 printfn $"Counts of each element in second column that are present in first: %A{countsInSecondIfInFirst}"
 
-let countsInFirstIfInSecond = countsInFirst |> Seq.where (fun pair -> Seq.contains (fst pair) secondColumn)
+let countsInFirstIfInSecond =
+    countsInFirst |> Seq.where (fun pair -> Seq.contains (fst pair) secondColumn)
+
 printfn $"Counts of each element in first column that are present in second: %A{countsInFirstIfInSecond}"
 
-let similarityScore3 = Seq.fold2 (fun accumulated firstPair secondPair -> accumulated + (fst firstPair) * (snd secondPair) * (snd firstPair)) 0 countsInFirstIfInSecond countsInSecondIfInFirst
+let similarityScore3 =
+    Seq.fold2
+        (fun accumulated firstPair secondPair -> accumulated + (fst firstPair) * (snd secondPair) * (snd firstPair))
+        0
+        countsInFirstIfInSecond
+        countsInSecondIfInFirst
+
 printfn $"Similarity score take 3 is %A{similarityScore3}"
 
 exit 0
+
 let similarityScore =
     Seq.fold
         (fun accumulated nextPair ->
