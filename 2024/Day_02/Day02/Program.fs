@@ -5,7 +5,7 @@ open System
 
 let mutable inputFileName = "Input/Example.txt"
 inputFileName <- "Input/EdgeCasesFirst2Invalid.txt"
-inputFileName <- "Input/Input.txt"
+// inputFileName <- "Input/Input.txt"
 
 let lines = seq { yield! System.IO.File.ReadLines inputFileName }
 
@@ -178,7 +178,7 @@ let ReportIsSafeWithBadnessTolerance (report:Report) numberOfUnsafeLevelPairsAll
 let ReportIsSafeWithBadnessToleranceBruteForce (report:Report) : bool =
     let mutable reportIsSafe = ReportIsSafe report
     if not reportIsSafe then
-        report.Levels |> Seq.iteri (fun i v ->
+        report.Levels |> Seq.takeWhile (fun _ -> not reportIsSafe) |> Seq.iteri (fun i v ->
             let skippedI = Seq.removeAt i report.Levels
             if (ReportIsSafe { Levels = skippedI }) then
                 reportIsSafe <- true
