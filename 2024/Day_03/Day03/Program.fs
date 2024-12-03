@@ -52,12 +52,19 @@ let sumsOfProducts inputs =
 printfn $"Sums of products are '%A{lines |> products |> sumsOfProducts}'"
 
 let removeSectionsAfterDonts (input: string) : string =
+    // For task 2 it appears the do/don't setting is supposed to persist across lines, so remove the linebreaks before evaluating
     let trimNewlines = input.Replace("\n", "")
 
+    // Explanation of this regex for future self:
+    // `(?<groupname>expression)` creates a group named `groupname`.
+    // When you have `?expression`, or `?(group)`, the leading ? will match the first occurrence, as opposed to the normal which is matching the last occurrence.
+    // Having named groups here is kinda pointless, this could have been simplified to `(don't\(\)).*?(do\(\))`
     let firstPass =
         Regex(@"(?<frontgroup>don't\(\)).*?(?<backgroup>do\(\))", RegexOptions.Compiled)
             .Replace(trimNewlines, "")
 
+    // Remove potential trailing occurrence of `don't()`
+    // (no need for similar check at start because problem description says to start in do()-mode).
     Regex(@"(?<frontgroup>don't\(\)).*$", RegexOptions.Compiled)
         .Replace(firstPass, "")
 
