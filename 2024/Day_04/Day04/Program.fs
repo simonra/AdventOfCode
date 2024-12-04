@@ -2,7 +2,7 @@
 printfn "Hello from F#"
 
 let mutable inputFileName = "Input/Example.txt"
-// inputFileName <- "Input/3x3.txt"
+inputFileName <- "Input/3x3.txt"
 inputFileName <- "Input/4x3.txt"
 // inputFileName <- "Input/3x4.txt"
 // inputFileName <- "Input/Input.txt"
@@ -25,8 +25,8 @@ let rotate45degreesClockwise (input : 'a option seq seq) : 'a option seq seq =
     // let asymmetryFactor = System.Math.Abs(rowsIn - colsIn)
     let asymmetryFactorRows = if rowsIn > colsIn then rowsIn - colsIn else 0
     let asymmetryFactorColumns = if colsIn > rowsIn then colsIn - rowsIn else 0
-    let rowsOut = rowsIn + colsIn - 1 + asymmetryFactorRows
-    let colsOut = rowsIn + colsIn - 1 + asymmetryFactorColumns
+    let rowsOut = rowsIn + colsIn - 1
+    let colsOut = rowsIn + colsIn - 1
     let inputAsArrays = input |> toArray
     let mutable output : 'a option array array = Array.init rowsOut (fun r -> Array.init colsOut (fun _ -> None))
     printfn $"Dimensions:"
