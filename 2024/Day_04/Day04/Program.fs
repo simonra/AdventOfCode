@@ -4,10 +4,10 @@ printfn "Hello from F#"
 // 2534 too low
 
 let mutable inputFileName = "Input/Example.txt"
-// inputFileName <- "Input/3x3.txt"
+inputFileName <- "Input/3x3.txt"
 // inputFileName <- "Input/4x3.txt"
 // inputFileName <- "Input/3x4.txt"
-inputFileName <- "Input/Input.txt"
+// inputFileName <- "Input/Input.txt"
 
 let lines = seq { yield! System.IO.File.ReadLines inputFileName }
 
@@ -189,3 +189,27 @@ let foundXmasesInAllDirections (input: char option array array) : int =
 // printfn $"Number of occurrences of xmas is %A{occurrencesFound}"
 
 printfn $"Total number of xmases found %A{lines |> toArrayOfArraysOfChars |> foundXmasesInAllDirections}"
+
+let windowed2d (windowSizeRows: int) (windowSizeColumns: int) (input: 'a array array) : 'a array array seq =
+    let inputAsArray: 'a array array = input |> Seq.map Seq.toArray |> Seq.toArray
+    let rowsIn = (inputAsArray |> Seq.length) - 1
+    let colsIn = (inputAsArray |> Seq.head |> Seq.length) - 1
+    let wr = windowSizeRows - 1
+    let wc = windowSizeColumns - 1
+    let defaultInitValue : 'a = Seq.head (Seq.head input)
+    seq {
+        for rowCounter = 0 to rowsIn - wr do
+            for colCounter = 0 to colsIn - wc do
+                let mutable output : 'a array array =
+                    // Array.create windowSizeRows (Array.create windowSizeColumns defaultInitValue)
+                    Array.init windowSizeRows (fun _ -> Array.init windowSizeColumns (fun _ -> defaultInitValue))
+                for windowRowCounter = 0 to wr do
+                    for windowColumnCounter = 0 to wc do
+                        let nextValue = inputAsArray[rowCounter+windowRowCounter][colCounter+windowColumnCounter]
+                        output[windowRowCounter][windowColumnCounter] <- nextValue
+                yield output
+    }
+// Array.windowed
+let charArrayInput = lines |> toArrayOfArraysOfChars
+let myBestSlidingWindow = windowed2d 2 2 charArrayInput
+printfn $"Windowed 2d is %A{myBestSlidingWindow |> Seq.toList}"
