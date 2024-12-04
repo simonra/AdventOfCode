@@ -20,21 +20,23 @@ let rotate45degreesClockwise (input : 'a option seq seq) : 'a option seq seq =
     // if input |> Seq.length
     // let mutable output = seq { seq { Some(0) } }
     // let mutable output : 'a option seq seq = seq { seq { } }
-    let rowsIn = input |> Seq.head |> Seq.length
-    let colsIn = input |> Seq.length
+    let rowsIn = input |> Seq.length
+    let colsIn = input |> Seq.head |> Seq.length
+    // let asymmetryFactor = System.Math.Abs(rowsIn - colsIn)
     let rowsOut = rowsIn + colsIn - 1
     let colsOut = rowsIn + colsIn - 1
     let inputAsArrays = input |> toArray
-    let mutable output : 'a option array array = Array.init colsOut (fun r -> Array.init rowsOut (fun _ -> None))
-    printfn $"Dimentions:"
+    let mutable output : 'a option array array = Array.init rowsOut (fun r -> Array.init colsOut (fun _ -> None))
+    printfn $"Dimensions:"
     printfn $"Input rows: %A{rowsIn} columns: %A{colsIn}"
     printfn $"Output rows: %A{rowsOut} columns: %A{colsOut}"
-    for colCounter = 0 to colsIn - 1 do
-        for rowCounter = 0 to rowsIn - 1 do
-            let outputColumn = 0 - rowCounter + colCounter + colsIn - 1
+    for rowCounter = 0 to colsIn - 1 do
+        for colCounter = 0 to rowsIn - 1 do
+            // M[x][y] to cell RM[x+y+1][−x+y+n]
             let outputRow = rowCounter + colCounter + 1 - 1
+            let outputColumn = 0 - rowCounter + colCounter + colsIn - 1
             printfn $"colCounter: %A{colCounter} rowCounter: %A{rowCounter} outputColumn: %A{outputColumn} outputRow: %A{outputRow}"
-            output[outputColumn][outputRow] <- inputAsArrays[colCounter][rowCounter]
+            output[outputRow][outputColumn] <- inputAsArrays[rowCounter][colCounter]
     output |> toSequence
 
 // let linesAsCharArrays = lines |> Seq.map Seq.toArray
