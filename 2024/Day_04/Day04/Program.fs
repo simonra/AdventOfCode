@@ -2,8 +2,8 @@
 printfn "Hello from F#"
 
 let mutable inputFileName = "Input/Example.txt"
-inputFileName <- "Input/3x3.txt"
-// inputFileName <- "Input/4x3.txt"
+// inputFileName <- "Input/3x3.txt"
+inputFileName <- "Input/4x3.txt"
 // inputFileName <- "Input/3x4.txt"
 // inputFileName <- "Input/Input.txt"
 
@@ -23,20 +23,23 @@ let rotate45degreesClockwise (input : 'a option seq seq) : 'a option seq seq =
     let rowsIn = input |> Seq.length
     let colsIn = input |> Seq.head |> Seq.length
     // let asymmetryFactor = System.Math.Abs(rowsIn - colsIn)
-    let rowsOut = rowsIn + colsIn - 1
-    let colsOut = rowsIn + colsIn - 1
+    let asymmetryFactorRows = if rowsIn > colsIn then rowsIn - colsIn else 0
+    let asymmetryFactorColumns = if colsIn > rowsIn then colsIn - rowsIn else 0
+    let rowsOut = rowsIn + colsIn - 1 + asymmetryFactorRows
+    let colsOut = rowsIn + colsIn - 1 + asymmetryFactorColumns
     let inputAsArrays = input |> toArray
     let mutable output : 'a option array array = Array.init rowsOut (fun r -> Array.init colsOut (fun _ -> None))
     printfn $"Dimensions:"
     printfn $"Input rows: %A{rowsIn} columns: %A{colsIn}"
     printfn $"Output rows: %A{rowsOut} columns: %A{colsOut}"
-    for rowCounter = 0 to colsIn - 1 do
-        for colCounter = 0 to rowsIn - 1 do
+    for rowCounter = 0 to rowsIn - 1 do
+        for colCounter = 0 to colsIn - 1 do
             // M[x][y] to cell RM[x+y+1][−x+y+n]
             let outputRow = rowCounter + colCounter + 1 - 1
-            let outputColumn = 0 - rowCounter + colCounter + colsIn - 1
-            printfn $"colCounter: %A{colCounter} rowCounter: %A{rowCounter} outputColumn: %A{outputColumn} outputRow: %A{outputRow}"
-            output[outputRow][outputColumn] <- inputAsArrays[rowCounter][colCounter]
+            let outputColumn = 0 - rowCounter + colCounter + colsIn - 1 - asymmetryFactorColumns + asymmetryFactorRows
+            printfn $"rowCounter: %A{rowCounter} colCounter: %A{colCounter} outputRow: %A{outputRow} outputColumn: %A{outputColumn}"
+            let nextValue = inputAsArrays[rowCounter][colCounter]
+            output[outputRow][outputColumn] <- nextValue
     output |> toSequence
 
 // let linesAsCharArrays = lines |> Seq.map Seq.toArray
