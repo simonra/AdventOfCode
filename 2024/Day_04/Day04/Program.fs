@@ -4,10 +4,10 @@ printfn "Hello from F#"
 // 2534 too low
 
 let mutable inputFileName = "Input/Example.txt"
-inputFileName <- "Input/3x3.txt"
+// inputFileName <- "Input/3x3.txt"
 // inputFileName <- "Input/4x3.txt"
 // inputFileName <- "Input/3x4.txt"
-// inputFileName <- "Input/Input.txt"
+inputFileName <- "Input/Input.txt"
 
 let lines = seq { yield! System.IO.File.ReadLines inputFileName }
 
@@ -191,9 +191,8 @@ let foundXmasesInAllDirections (input: char option array array) : int =
 printfn $"Total number of xmases found %A{lines |> toArrayOfArraysOfChars |> foundXmasesInAllDirections}"
 
 let windowed2d (windowSizeRows: int) (windowSizeColumns: int) (input: 'a array array) : 'a array array seq =
-    let inputAsArray: 'a array array = input |> Seq.map Seq.toArray |> Seq.toArray
-    let rowsIn = (inputAsArray |> Seq.length) - 1
-    let colsIn = (inputAsArray |> Seq.head |> Seq.length) - 1
+    let rowsIn = (input |> Seq.length) - 1
+    let colsIn = (input |> Seq.head |> Seq.length) - 1
     let wr = windowSizeRows - 1
     let wc = windowSizeColumns - 1
     let defaultInitValue : 'a = Seq.head (Seq.head input)
@@ -205,11 +204,31 @@ let windowed2d (windowSizeRows: int) (windowSizeColumns: int) (input: 'a array a
                     Array.init windowSizeRows (fun _ -> Array.init windowSizeColumns (fun _ -> defaultInitValue))
                 for windowRowCounter = 0 to wr do
                     for windowColumnCounter = 0 to wc do
-                        let nextValue = inputAsArray[rowCounter+windowRowCounter][colCounter+windowColumnCounter]
+                        let nextValue = input[rowCounter+windowRowCounter][colCounter+windowColumnCounter]
                         output[windowRowCounter][windowColumnCounter] <- nextValue
                 yield output
     }
 // Array.windowed
+// let charArrayInput = lines |> toArrayOfArraysOfChars
+// let myBestSlidingWindow = windowed2d 1 1 charArrayInput
+// printfn $"Windowed 2d is %A{myBestSlidingWindow |> Seq.toList}"
+
+let containsXmas (input: char option array array) : bool =
+    if input[1][1] <> Some('A') then
+        false
+    else
+        let lrTb = input[0][0] = Some('M') && input[2][2] = Some('S')
+        let lrBt = input[0][0] = Some('S') && input[2][2] = Some('M')
+        let lr = lrTb || lrBt
+        let rlTb = input[0][2] = Some('M') && input[2][0] = Some('S')
+        let rlBt = input[0][2] = Some('S') && input[2][0] = Some('M')
+        let rl = rlTb || rlBt
+        lr && rl
+        // ((input[0][0] = Some('M') && input[2][2] = Some('S')) || (input[0][0] = Some('S') && input[2][2] = Some('M'))) && (input[0][2] = Some('M') && input[2][0] = Some('S')) || (input[0][2] = Some('S') && input[2][0] = Some('M'))
+
 let charArrayInput = lines |> toArrayOfArraysOfChars
-let myBestSlidingWindow = windowed2d 2 2 charArrayInput
-printfn $"Windowed 2d is %A{myBestSlidingWindow |> Seq.toList}"
+let windowsOf3x3 = charArrayInput |> windowed2d 3 3
+let windowsThatAreXmas = windowsOf3x3 |> Seq.where containsXmas
+let sumOfXmases = windowsThatAreXmas |> Seq.length
+
+printfn $"The proper sum of x-MAS'es is %A{sumOfXmases}"
