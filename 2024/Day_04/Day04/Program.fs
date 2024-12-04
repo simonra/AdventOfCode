@@ -15,7 +15,7 @@ let toArray (input : 'a seq seq) : 'a array array =
 let toSequence (input: 'a array array) : 'a seq seq =
     input |> Array.map Array.toSeq |> Array.toSeq
 
-let rotate45degreesClockwise (input : 'a option seq seq) : 'a option seq seq =
+let rotate45degreesClockwise (input : 'a option array array) : 'a option array array =
     // https://math.stackexchange.com/questions/732679/how-to-rotate-a-matrix-by-45-degrees
     // if input |> Seq.length
     // let mutable output = seq { seq { Some(0) } }
@@ -27,7 +27,6 @@ let rotate45degreesClockwise (input : 'a option seq seq) : 'a option seq seq =
     let asymmetryFactorColumns = if colsIn > rowsIn then colsIn - rowsIn else 0
     let rowsOut = rowsIn + colsIn - 1
     let colsOut = rowsIn + colsIn - 1
-    let inputAsArrays = input |> toArray
     let mutable output : 'a option array array = Array.init rowsOut (fun r -> Array.init colsOut (fun _ -> None))
     printfn $"Dimensions:"
     printfn $"Input rows: %A{rowsIn} columns: %A{colsIn}"
@@ -38,15 +37,15 @@ let rotate45degreesClockwise (input : 'a option seq seq) : 'a option seq seq =
             let outputRow = rowCounter + colCounter + 1 - 1
             let outputColumn = 0 - rowCounter + colCounter + colsIn - 1 - asymmetryFactorColumns + asymmetryFactorRows
             printfn $"rowCounter: %A{rowCounter} colCounter: %A{colCounter} outputRow: %A{outputRow} outputColumn: %A{outputColumn}"
-            let nextValue = inputAsArrays[rowCounter][colCounter]
+            let nextValue = input[rowCounter][colCounter]
             output[outputRow][outputColumn] <- nextValue
-    output |> toSequence
+    output
 
 // let linesAsCharArrays = lines |> Seq.map Seq.toArray
 
 
 printfn $"Original"
 printfn $"%A{lines |> Seq.toList}"
-let rotated = lines |> Seq.map Seq.toList |> Seq.map (Seq.map (fun x -> Some(x))) |> rotate45degreesClockwise
+let rotated = lines |> Seq.map Seq.toList |> Seq.map (Seq.map (fun x -> Some(x))) |> toArray |> rotate45degreesClockwise
 printfn $"Rotated"
-printfn $"%A{rotated |> Seq.map Seq.toList |> Seq.toList}"
+printfn $"%A{rotated}"
