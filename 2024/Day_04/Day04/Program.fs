@@ -214,14 +214,13 @@ let containsXmas (input: char option array array) : bool =
         let lrTb = input[0][0] = Some('M') && input[2][2] = Some('S')
         let lrBt = input[0][0] = Some('S') && input[2][2] = Some('M')
         let lr = lrTb || lrBt
-        let rlTb = input[0][2] = Some('M') && input[2][0] = Some('S')
-        let rlBt = input[0][2] = Some('S') && input[2][0] = Some('M')
-        let rl = rlTb || rlBt
-        lr && rl
-        // ((input[0][0] = Some('M') && input[2][2] = Some('S'))
-        // || (input[0][0] = Some('S') && input[2][2] = Some('M')))
-        // && (input[0][2] = Some('M') && input[2][0] = Some('S'))
-        // || (input[0][2] = Some('S') && input[2][0] = Some('M'))
+        if lr then
+            let rlTb = input[0][2] = Some('M') && input[2][0] = Some('S')
+            let rlBt = input[0][2] = Some('S') && input[2][0] = Some('M')
+            let rl = rlTb || rlBt
+            rl
+        else
+            false
 
 let charArrayInput = lines |> toArrayOfArraysOfChars
 let windowsOf3x3 = charArrayInput |> windowed2d 3 3
