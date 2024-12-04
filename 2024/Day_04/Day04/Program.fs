@@ -1,7 +1,8 @@
 ﻿// For more information see https://aka.ms/fsharp-console-apps
 printfn "Hello from F#"
 
-// 2534 too low
+// 2549
+// 2003
 
 let mutable inputFileName = "Input/Example.txt"
 // inputFileName <- "Input/3x3.txt"
@@ -31,7 +32,7 @@ let rotate45degreesClockwise (input: 'a option array array) : 'a option array ar
     let colsOut = rowsIn + colsIn - 1
 
     let mutable output: 'a option array array =
-        Array.init rowsOut (fun r -> Array.init colsOut (fun _ -> None))
+        Array.init rowsOut (fun _ -> Array.init colsOut (fun _ -> None))
 
     // printfn $"Dimensions:"
     // printfn $"Input rows: %A{rowsIn} columns: %A{colsIn}"
@@ -43,8 +44,7 @@ let rotate45degreesClockwise (input: 'a option array array) : 'a option array ar
             let outputRow = rowCounter + colCounter + 1 - 1
 
             let outputColumn =
-                0 - rowCounter + colCounter + colsIn - 1 - asymmetryFactorColumns
-                + asymmetryFactorRows
+                0 - rowCounter + colCounter + colsIn - 1 - asymmetryFactorColumns + asymmetryFactorRows
 
             // printfn $"rowCounter: %A{rowCounter} colCounter: %A{colCounter} outputRow: %A{outputRow} outputColumn: %A{outputColumn}"
 
@@ -56,7 +56,7 @@ let rotate45degreesClockwise (input: 'a option array array) : 'a option array ar
 let rotate90DegreesClockwise (input: 'a option array array) : 'a option array array =
     let rowsIn = input |> Seq.length
     let colsIn = input |> Seq.head |> Seq.length
-    let mutable output: 'a option array array = Array.init colsIn (fun r -> Array.init rowsIn (fun _ -> None))
+    let mutable output: 'a option array array = Array.init colsIn (fun _ -> Array.init rowsIn (fun _ -> None))
     for rowCounter = 0 to rowsIn - 1 do
         for colCounter = 0 to colsIn - 1 do
             let nextValue = input[rowCounter][colCounter]
@@ -89,8 +89,6 @@ let toArrayOfArraysOfChars input =
     input |> Seq.map Seq.toList |> Seq.map (Seq.map (fun x -> Some(x))) |> toArray
 
 let foundXmasesInAllDirections (input: char option array array) : int =
-    let mutable total = 0
-
     // Don't repeatedly apply rotate45, because the matrix grows a bit in size each time it's done.
 
     let initialRotationCount: int =
@@ -119,9 +117,7 @@ let foundXmasesInAllDirections (input: char option array array) : int =
 
     let turned180Degrees = input |> rotate90DegreesClockwise |> rotate90DegreesClockwise
     let turnedTwiceCount: int =
-        input
-        |> rotate90DegreesClockwise
-        |> rotate90DegreesClockwise
+        turned180Degrees
         |> toCollectionOfStrings
         |> Seq.map (numberOfOccurrences None)
         |> Seq.sum
@@ -147,8 +143,7 @@ let foundXmasesInAllDirections (input: char option array array) : int =
         |> Seq.map (numberOfOccurrences None)
         |> Seq.sum
 
-    total <-
-        total
+    0
         + initialRotationCount
         + initialRotatedOnceCount
         + turnedOnceCount
@@ -158,7 +153,6 @@ let foundXmasesInAllDirections (input: char option array array) : int =
         + turnedThriceCount
         + turnedThriceRotatedCount
 
-    total
 
 // printfn $"Original"
 // printfn $"%A{lines |> Seq.toList}"
@@ -224,7 +218,10 @@ let containsXmas (input: char option array array) : bool =
         let rlBt = input[0][2] = Some('S') && input[2][0] = Some('M')
         let rl = rlTb || rlBt
         lr && rl
-        // ((input[0][0] = Some('M') && input[2][2] = Some('S')) || (input[0][0] = Some('S') && input[2][2] = Some('M'))) && (input[0][2] = Some('M') && input[2][0] = Some('S')) || (input[0][2] = Some('S') && input[2][0] = Some('M'))
+        // ((input[0][0] = Some('M') && input[2][2] = Some('S'))
+        // || (input[0][0] = Some('S') && input[2][2] = Some('M')))
+        // && (input[0][2] = Some('M') && input[2][0] = Some('S'))
+        // || (input[0][2] = Some('S') && input[2][0] = Some('M'))
 
 let charArrayInput = lines |> toArrayOfArraysOfChars
 let windowsOf3x3 = charArrayInput |> windowed2d 3 3
