@@ -9,7 +9,6 @@ let mutable inputFileName = "Input/Example.txt"
 // inputFileName <- "Input/3x4.txt"
 inputFileName <- "Input/Input.txt"
 
-// Need to handle forwards, backwards, diagonally up, diagonally down, both diagonals backwards
 let lines = seq { yield! System.IO.File.ReadLines inputFileName }
 
 let toArray (input: 'a seq seq) : 'a array array =
@@ -92,8 +91,7 @@ let toArrayOfArraysOfChars input =
 let foundXmasesInAllDirections (input: char option array array) : int =
     let mutable total = 0
 
-    let initialRotationLines: string seq = input |> toCollectionOfStrings
-    // printfn $"%A{initialRotationLines |> Seq.toList}"
+    // Don't repeatedly apply rotate45, because the matrix grows a bit in size each time it's done.
 
     let initialRotationCount: int =
         input |> toCollectionOfStrings |> Seq.map (numberOfOccurrences None) |> Seq.sum
@@ -105,21 +103,21 @@ let foundXmasesInAllDirections (input: char option array array) : int =
         |> Seq.map (numberOfOccurrences None)
         |> Seq.sum
 
+    let turned90Degrees = input |> rotate90DegreesClockwise
     let turnedOnceCount: int =
-        input
-        |> rotate90DegreesClockwise
+        turned90Degrees
         |> toCollectionOfStrings
         |> Seq.map (numberOfOccurrences None)
         |> Seq.sum
 
+    let turned135Degrees = turned90Degrees |> rotate45degreesClockwise
     let turnedOnceRotatedCount: int =
-        input
-        |> rotate90DegreesClockwise
-        |> rotate45degreesClockwise
+        turned135Degrees
         |> toCollectionOfStrings
         |> Seq.map (numberOfOccurrences None)
         |> Seq.sum
 
+    let turned180Degrees = input |> rotate90DegreesClockwise |> rotate90DegreesClockwise
     let turnedTwiceCount: int =
         input
         |> rotate90DegreesClockwise
@@ -128,30 +126,23 @@ let foundXmasesInAllDirections (input: char option array array) : int =
         |> Seq.map (numberOfOccurrences None)
         |> Seq.sum
 
+    let turned225Degrees = turned180Degrees |> rotate45degreesClockwise
     let turnedTwiceRotatedCount: int =
-        input
-        |> rotate90DegreesClockwise
-        |> rotate90DegreesClockwise
-        |> rotate45degreesClockwise
+        turned225Degrees
         |> toCollectionOfStrings
         |> Seq.map (numberOfOccurrences None)
         |> Seq.sum
 
+    let turned270Degrees = input |> rotate90DegreesClockwise |> rotate90DegreesClockwise |> rotate90DegreesClockwise
     let turnedThriceCount: int =
-        input
-        |> rotate90DegreesClockwise
-        |> rotate90DegreesClockwise
-        |> rotate90DegreesClockwise
+        turned270Degrees
         |> toCollectionOfStrings
         |> Seq.map (numberOfOccurrences None)
         |> Seq.sum
 
+    let turned315Degrees = turned270Degrees |> rotate45degreesClockwise
     let turnedThriceRotatedCount: int =
-        input
-        |> rotate90DegreesClockwise
-        |> rotate90DegreesClockwise
-        |> rotate90DegreesClockwise
-        |> rotate45degreesClockwise
+        turned315Degrees
         |> toCollectionOfStrings
         |> Seq.map (numberOfOccurrences None)
         |> Seq.sum
