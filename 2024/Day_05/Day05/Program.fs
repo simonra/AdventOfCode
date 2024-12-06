@@ -1,8 +1,11 @@
 ﻿// For more information see https://aka.ms/fsharp-console-apps
+
+open System
+
 printfn "Hello from F#"
 
 let mutable inputFileName = "Input/Example.txt"
-inputFileName <- "Input/Input.txt"
+//inputFileName <- "Input/Input.txt" // 4662
 
 let inputText = System.IO.File.ReadAllText inputFileName
 
@@ -32,7 +35,7 @@ let parseOrderingRules (allRules:string) : pageOrderRequirement seq =
     parsedPairs
 
 let requirementsRelevantForManual (requirements: pageOrderRequirement seq) (pages: pageNumber seq) : pageOrderRequirement seq =
-    requirements |> Seq.where (fun rule -> Seq.contains rule.before pages || Seq.contains rule.after pages)
+    requirements |> Seq.where (fun rule -> Seq.contains rule.before pages && Seq.contains rule.after pages)
 
 let pagesWhichMustComeBefore (requirements: pageOrderRequirement seq) (page: pageNumber) : pageNumber seq =
     requirements |> Seq.where (fun rule -> rule.after = page) |> Seq.map (fun rule -> rule.before)
@@ -68,6 +71,39 @@ let rec pagesViolateAfterRule
             else
                 pagesViolateAfterRule requirements followingPages
 
+// let
+let rec validOrderingByRules
+    (requirements: pageOrderRequirement seq)
+    (previous: pageOrderRequirement option)
+    : pageNumber seq =
+        if previous = None then
+            let startingPair =
+                requirements
+                |> Seq.find (fun r ->
+                    (Seq.forall (fun r2 -> r2.after <> r.before) requirements)
+                )
+            let nextResult: pageNumber seq = validOrderingByRules (requirements |> Seq.except (seq {startingPair})) (Some startingPair)
+            let firstPairAsSequence: pageNumber seq = seq {startingPair.before}
+            let combined: pageNumber seq = Seq.append firstPairAsSequence nextResult
+            combined
+        // else if (Seq.isEmpty requirements) then
+        //     seq {previous.Value.before; previous.Value.after}
+        else if (Seq.length requirements = 1) then
+            let lastRequirement = Seq.head requirements
+            seq { lastRequirement.before; lastRequirement.after }
+        else
+            let next =
+                requirements
+                |> Seq.tryFind (fun r -> previous.Value.after = r.before)
+            if next <> None then
+                Seq.append (seq {next.Value.before}) (validOrderingByRules (requirements |> Seq.except (seq {next.Value})) (next))
+            else
+                let startingPair =
+                    requirements
+                    |> Seq.find (fun r ->
+                        (Seq.forall (fun r2 -> r2.after <> r.before) requirements)
+                    )
+                Seq.append (seq {startingPair.before}) (validOrderingByRules (requirements |> Seq.except (seq {startingPair})) (Some startingPair))
 let inputSections = inputText.Split("\n\n")
 let rulesTextSection = inputSections |> Seq.head
 let manualPagesTextSection = inputSections |> Seq.last
@@ -75,26 +111,74 @@ let manualPagesTextSection = inputSections |> Seq.last
 let parsedRules = rulesTextSection |> parseOrderingRules
 let parsedManuals = manualPagesTextSection |> parsePages
 
-printfn $"Rules:"
-printfn $"%A{parsedRules |> Seq.toList}"
-printfn $"Pages"
-printfn $"%A{parsedManuals |> Seq.map Seq.toList}"
+// printfn $"Rules:"
+// printfn $"%A{parsedRules |> Seq.toList}"
+// printfn $"Pages"
+// printfn $"%A{parsedManuals |> Seq.map Seq.toList}"
 
-let middlePages = parsedManuals |> Seq.map middlePage
-printfn $"Middle pages:"
+// let middlePages = parsedManuals |> Seq.map middlePage
+// printfn $"%A{DateTime.Now} Middle pages:"
 // middlePages |> Seq.iter (fun x -> printfn $"%A{x}")
 
 // printfn $"Integer division works like this: %A{3/2}"
 
-let safeManuals =
+printfn $"%A{DateTime.Now} Creating ruleset paris"
+let manualRulesetPairs: ((pageNumber seq) * (pageOrderRequirement seq)) list =
     parsedManuals
-    |> Seq.where (fun manual ->
+    |> Seq.map (fun manual ->
         let relevantRequirements = requirementsRelevantForManual parsedRules manual
-        let reversedManual = manual |> Seq.rev
-        not (pagesViolateBeforeRule relevantRequirements manual) && not (pagesViolateAfterRule relevantRequirements reversedManual)
+        manual, relevantRequirements)
+    |> Seq.toList
+printfn $"%A{DateTime.Now} Done creating {manualRulesetPairs |> Seq.length} ruleset paris"
+printfn $"%A{DateTime.Now} Starting work on task 1"
+let safeManuals =
+    manualRulesetPairs
+    |> Seq.mapi (fun i x ->
+        if i % 10 = 0 then
+            printfn $"%A{DateTime.Now} Processing manual #%A{i}"
+        x)
+    |> Seq.where (fun (manual , ruleset) ->
+        if pagesViolateBeforeRule ruleset manual then
+            false
+        else
+            let reversedManual = manual |> Seq.rev
+            if pagesViolateAfterRule ruleset reversedManual then
+                false
+            else
+                true
         // raise (System.NotImplementedException(""))
         )
+    |> Seq.map (fun (manual , ruleset) -> manual)
     |> Seq.map middlePage
     |> Seq.sum
 
-printfn $"Sum of middle pages of safe manuals are: '%A{safeManuals}'"
+printfn $"%A{DateTime.Now} Sum of middle pages of safe manuals are: '%A{safeManuals}'"
+// exit 0
+printfn $"%A{DateTime.Now} Starting work on part 2"
+let incorrectlyOrdered =
+    manualRulesetPairs
+    |> Seq.where (fun (manual , ruleset) ->
+        if pagesViolateBeforeRule ruleset manual then
+            true
+        else
+            let reversedManual = manual |> Seq.rev
+            pagesViolateAfterRule ruleset reversedManual
+        )
+printfn $"%A{DateTime.Now} Done finding incorrect manuals"
+let forcedValidOrdersWithDuplicates =
+    incorrectlyOrdered
+    |> Seq.map (fun (manual, ruleset) -> validOrderingByRules ruleset None)
+    |> Seq.toList
+let forcedValidOrders =
+    forcedValidOrdersWithDuplicates
+    |> Seq.map (fun x -> Seq.distinct x)
+printfn $"%A{DateTime.Now} Done finding correct orders of incorrect manuals"
+let middleNumbers =
+    forcedValidOrders
+    |> Seq.map middlePage
+printfn $"%A{DateTime.Now} Done finding middle pages of corrected manuals"
+let sumMiddleNumbers =
+    middleNumbers
+    |> Seq.sum
+
+printfn $"%A{DateTime.Now} The sum of the middle numbers of the corrected pages: %A{sumMiddleNumbers}"
