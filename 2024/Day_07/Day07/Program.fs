@@ -79,9 +79,9 @@ let operators = [(+); (*)]
 let solutionsToEquations =
     equations |> Seq.map (fun x -> (x , (findSolutions operators x)))
 let validSolutions =
-    solutionsToEquations |> Seq.where (fun (equation, solutions) -> solutions |> Seq.exists (fun x -> x.isValid))
+    solutionsToEquations |> Seq.where (fun (_, solutions) -> solutions |> Seq.exists (fun x -> x.isValid))
 let sumOfValidResults =
-    validSolutions |> Seq.sumBy (fun (equation, solutions) -> equation.result)
+    validSolutions |> Seq.sumBy (fun (equation, _) -> equation.result)
 printfn $"The sum of (valid) solutions to part 1 are: {sumOfValidResults}"
 
 let concat first second =
@@ -90,36 +90,7 @@ let part2Operators = [(+); (*); (concat)]
 let part2SolutionsToEquations =
     equations |> Seq.map (fun x -> (x , (findSolutions part2Operators x)))
 let part2ValidSolutions =
-    part2SolutionsToEquations |> Seq.where (fun (equation, solutions) -> solutions |> Seq.exists (fun x -> x.isValid))
+    part2SolutionsToEquations |> Seq.where (fun (_, solutions) -> solutions |> Seq.exists (fun x -> x.isValid))
 let part2SumOfValidResults =
-    part2ValidSolutions |> Seq.sumBy (fun (equation, solutions) -> equation.result)
+    part2ValidSolutions |> Seq.sumBy (fun (equation, _) -> equation.result)
 printfn $"The sum of (valid) solutions to part 1 are: {part2SumOfValidResults}"
-
-// let solvableEquations: equation seq =
-//     equations
-//     |> raise (NotImplementedException(""))
-
-
-
-// let moreCombinations = getPerms ["a"; "b"; "c"] 3
-// printfn $"The more combinations are"
-// printfn $"%A{moreCombinations}"
-
-// let combinations (length:int) (itemsToPermute: 'a array) : 'a seq seq =
-//     let numberOfItemsToDistribute = itemsToPermute |> Seq.length
-//     let numberOfCombinations =
-// https://stackoverflow.com/a/3640224/2890086
-// int maxlength = 12;
-// string ValidChars;
-// private void Dive(string prefix, int level)
-// {
-//     level += 1;
-//     foreach (char c in ValidChars)
-//     {
-//         Console.WriteLine(prefix + c);
-//         if (level < maxlength)
-//         {
-//             Dive(prefix + c, level);
-//         }
-//     }
-// }
