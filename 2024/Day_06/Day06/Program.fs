@@ -103,3 +103,7 @@ let countXes =
     |> Array.map (fun nextRow -> nextRow |> Array.fold (fun rowSum next -> rowSum + if next = 'X' then 1 else 0) 0)
     |> Array.sum
 printfn $"%A{DateTime.Now} Final sum of Xes is '%A{countXes}'"
+// printMap finalMap
+
+// Part 2
+// Candidate blockage places: Previous X-es
