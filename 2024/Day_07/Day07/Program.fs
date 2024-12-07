@@ -3,7 +3,7 @@
 printfn "Hello from F#"
 
 let mutable inputFileName = "Input/Example.txt"
-inputFileName <- "Input/Input.txt"
+// inputFileName <- "Input/Input.txt"
 
 let lines = seq { yield! System.IO.File.ReadLines inputFileName }
 
@@ -13,7 +13,7 @@ type equation<'a> = {
 }
 
 type solution<'a,'b,'c> = {
-    isValid           : bool
+    isValid          : bool
     operatorSequence : ('a -> 'b -> 'c) seq
 }
 
@@ -49,15 +49,22 @@ module PermutationFunctions =
         getPermsImpl List.empty n lst
 
 let testSolution (equation:equation<'a>) (operators:('a -> 'b -> 'c) list) : bool =
-    let operationsApplied = (Seq.head equation.inputNumbers, Seq.tail equation.inputNumbers, operators) |||> Seq.fold2 (fun acc nextNumber nextOperator -> nextOperator acc nextNumber)
+    let operationsApplied =
+        (Seq.head equation.inputNumbers, Seq.tail equation.inputNumbers, operators)
+        |||> Seq.fold2 (fun acc nextNumber nextOperator -> nextOperator acc nextNumber)
     operationsApplied = equation.result
 
-let findSolutions (allowedOperators:('a -> 'b -> 'c) list) (equation:equation<'a>) : solution<'a, 'b, 'c> seq =
-    let numberOfInputs = equation.inputNumbers |> Seq.length
-    let numberOfOperations = numberOfInputs - 1
-    let candidateOperations = PermutationFunctions.getPerms allowedOperators numberOfOperations
-    let solutions = candidateOperations |> Seq.map (fun x -> {isValid = testSolution equation x; operatorSequence = x})
-    solutions
+let findSolutions
+    (allowedOperators:('a -> 'b -> 'c) list)
+    (equation:equation<'a>)
+    : solution<'a, 'b, 'c> seq =
+        let numberOfInputs = equation.inputNumbers |> Seq.length
+        let numberOfOperations = numberOfInputs - 1
+        let candidateOperations = PermutationFunctions.getPerms allowedOperators numberOfOperations
+        let solutions =
+            candidateOperations
+            |> Seq.map (fun x -> {isValid = testSolution equation x; operatorSequence = x})
+        solutions
 
 let numberType = int64
 let equations =
@@ -72,14 +79,17 @@ let equations =
             |> Seq.where (fun x -> x <> "")
             |> Seq.map numberType
         { result = result
-          inputNumbers = numbers }
-        )
+          inputNumbers = numbers })
 
 let operators = [(+); (*)]
 let solutionsToEquations =
     equations |> Seq.map (fun x -> (x , (findSolutions operators x)))
 let validSolutions =
-    solutionsToEquations |> Seq.where (fun (_, solutions) -> solutions |> Seq.exists (fun x -> x.isValid))
+    solutionsToEquations
+    |> Seq.where (
+        fun (_, solutions) ->
+            solutions
+            |> Seq.exists (fun x -> x.isValid))
 let sumOfValidResults =
     validSolutions |> Seq.sumBy (fun (equation, _) -> equation.result)
 printfn $"The sum of (valid) solutions to part 1 are: {sumOfValidResults}"
@@ -90,7 +100,11 @@ let part2Operators = [(+); (*); (concat)]
 let part2SolutionsToEquations =
     equations |> Seq.map (fun x -> (x , (findSolutions part2Operators x)))
 let part2ValidSolutions =
-    part2SolutionsToEquations |> Seq.where (fun (_, solutions) -> solutions |> Seq.exists (fun x -> x.isValid))
+    part2SolutionsToEquations
+    |> Seq.where (
+        fun (_, solutions) ->
+            solutions
+            |> Seq.exists (fun x -> x.isValid))
 let part2SumOfValidResults =
     part2ValidSolutions |> Seq.sumBy (fun (equation, _) -> equation.result)
 printfn $"The sum of (valid) solutions to part 1 are: {part2SumOfValidResults}"
