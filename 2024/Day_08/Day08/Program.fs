@@ -46,9 +46,11 @@ type coordinate = {
 }
 
 let findAntiNodesForCoordinatePair (input: (coordinate * coordinate)) : (coordinate * coordinate) =
-    let sortedInput = seq {fst input; snd input} |> Seq.sortBy (fun x -> x.row, x.column)
-    let firstNode = sortedInput |> Seq.head
-    let secondNode = sortedInput |> Seq.tail |> Seq.head
+    // let sortedInput = seq {fst input; snd input} |> Seq.sortBy (fun x -> x.row, x.column)
+    // let firstNode = sortedInput |> Seq.head
+    // let secondNode = sortedInput |> Seq.tail |> Seq.head
+    let firstNode = fst input
+    let secondNode = snd input
     // let rowDistance = Math.Abs(secondNode.row - firstNode.row)
     let rowDistance = secondNode.row - firstNode.row
     // let colDistance = Math.Abs(secondNode.column - firstNode.column)
@@ -56,6 +58,49 @@ let findAntiNodesForCoordinatePair (input: (coordinate * coordinate)) : (coordin
     let firstAntiNode = {row = (firstNode.row - (rowDistance)); column = firstNode.column - (colDistance)}
     let secondAntiNode = {row = (secondNode.row + (rowDistance)); column = secondNode.column + (colDistance)}
     (firstAntiNode, secondAntiNode)
+
+let coordinateIsWithinBounds
+    (lowerBound: coordinate)
+    (upperBound: coordinate)
+    (input: coordinate)
+    : bool =
+        lowerBound.row <= input.row
+        && input.row < upperBound.row
+        && lowerBound.column <= input.column
+        && input.column < upperBound.column
+
+let findAntiNodesForCoordinatePairPart2
+    (lowerBound: coordinate)
+    (upperBound: coordinate)
+    (input: coordinate * coordinate)
+    : coordinate seq =
+        let firstNode = fst input
+        let secondNode = snd input
+        let rowDistance = secondNode.row - firstNode.row
+        let colDistance = secondNode.column - firstNode.column
+        let antiNodesBefore =
+            firstNode
+            |> Seq.unfold (fun (iteratorState:coordinate) ->
+                if coordinateIsWithinBounds lowerBound upperBound iteratorState then
+                // if lowerBound.row <= iteratorState.row && lowerBound.column <= iteratorState.column then
+                    let nextState = {row = (iteratorState.row - rowDistance); column = iteratorState.column - colDistance}
+                    Some(iteratorState, nextState)
+                else
+                    None
+                )
+        let antiNodesAfter =
+            secondNode
+            |> Seq.unfold (fun (iteratorState:coordinate) ->
+                if coordinateIsWithinBounds lowerBound upperBound iteratorState then
+                // if iteratorState.row < upperBound.row && iteratorState.column < upperBound.column then
+                    let nextState = {row = (iteratorState.row + rowDistance); column = iteratorState.column + colDistance}
+                    Some(iteratorState, nextState)
+                else
+                    None
+                )
+            // |> Seq.takeWhile (fun x -> x<>None )
+        Seq.append antiNodesBefore antiNodesAfter
+        // antiNodesBefore
 
 let findAllCoordinatesPerCharacter (input: char array array) : Map<char, coordinate list> =
     input
@@ -90,6 +135,20 @@ let findAllAntiNodesPerCharacters (input: Map<char, coordinate list>) : Map<char
         nodePairsPerChar
         |> Map.map (fun _ value -> value |> Seq.map findAntiNodesForCoordinatePair)
     antiNodesPerPair |> Map.map (fun k v -> v |> Seq.toList)
+
+let findAllAntiNodesPerCharacterPart2
+    (lowerBound: coordinate)
+    (upperBound: coordinate)
+    (input: Map<char, coordinate list>)
+    : Map<char, coordinate seq> =
+        // let nodePairsPerChar =
+        input
+        |> Map.map (fun _ value ->
+            value
+            |> findAllPairsOfItems
+            |> Seq.map (fun pair -> pair |> findAntiNodesForCoordinatePairPart2 lowerBound upperBound)
+            |> Seq.collect id
+            )
 
 let removeAntiNodesOutsideBounds
     (lowerBound: coordinate)
@@ -152,3 +211,19 @@ let numberOfAntiNodesWithinBounds =
     antiNodesWithinBounds |> Seq.length
 
 printfn $"The number of anti nodes within the bounds are %A{numberOfAntiNodesWithinBounds}"
+
+let part2AllAntiNodesPerCharacter =
+    coordPerCharacter
+    |> findAllAntiNodesPerCharacterPart2 {row = 0; column = 0} {row = numberOfRows; column = numberOfColumns}
+
+let part2AllAntiNodes =
+    part2AllAntiNodesPerCharacter
+    |> Map.values
+    |> Seq.collect id
+
+let part2UniqueNumberOfAntNodes =
+    part2AllAntiNodes
+    |> Seq.distinct
+    |> Seq.length
+
+printfn $"The number of anti nodes for part 2 are %A{part2UniqueNumberOfAntNodes}"
