@@ -1,6 +1,6 @@
 ﻿open System
 // For more information see https://aka.ms/fsharp-console-apps
-printfn $"{DateTime.Now} Hello from F#"
+printfn $"{DateTime.Now:o} Hello from F#"
 
 let mutable inputFileName = "Input/Example.txt"
 inputFileName <- "Input/Input.txt"
@@ -120,12 +120,12 @@ let topoMap =
 
 topoMap
 |> upperBound
-|> (fun x -> printfn $"{DateTime.Now} Upper score bound for map of size {topoMap.Length} rows x {topoMap |> Seq.head |> Seq.length} columns is {x}")
+|> (fun x -> printfn $"{DateTime.Now:o} Upper score bound for map of size {topoMap.Length} rows x {topoMap |> Seq.head |> Seq.length} columns is {x}")
 
 topoMap
 |> scorePart1
-|> (fun x -> printfn $"{DateTime.Now} Part 1 score is {x}")
+|> (fun x -> printfn $"{DateTime.Now:o} Part 1 score is {x}")
 
 topoMap
 |> scorePart2
-|> (fun x -> printfn $"{DateTime.Now} Part 2 score is {x}")
+|> (fun x -> printfn $"{DateTime.Now:o} Part 2 score is {x}")
