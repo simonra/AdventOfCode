@@ -1,6 +1,6 @@
 ﻿open System
 // For more information see https://aka.ms/fsharp-console-apps
-printfn "Hello from F#"
+printfn $"{DateTime.Now} Hello from F#"
 
 let mutable inputFileName = "Input/Example.txt"
 inputFileName <- "Input/Input.txt"
@@ -115,7 +115,7 @@ lines
 |> calculateChecksum
 // |> Seq.iteri (fun i v -> printfn $"Found %A{v} at index %A{i}")
 // |> Seq.iteri (fun i v -> printf $"(%A{v})")
-|> printfn "%A"
+|> (fun x -> printfn $"{DateTime.Now}  %A{x}")
 
 // [|1;1;1;2;2;2;3;3;3;|]
 // |> Part2.swapRange 0 6 2
@@ -141,4 +141,4 @@ lines
 |> Part2.calculateChecksum
 // |> Seq.iteri (fun i v -> printfn $"Found %A{v} at index %A{i}")
 // |> Seq.iteri (fun i v -> printf $"(%A{v})")
-|> printfn "%A"
+|> (fun x -> printfn $"{DateTime.Now}  %A{x}")
