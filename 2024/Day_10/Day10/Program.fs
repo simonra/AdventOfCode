@@ -43,8 +43,6 @@ let validRoutesFromZero (inputMap: int array array) (zeroCoordinate: int * int) 
         seq {
             if remainingDistance = 0 then
                 yield coordinate
-            // elif remainingDistance < 0 then
-            //     yield! Seq.empty
             else
             let newRemainingDistance = remainingDistance - 1
             let row = fst coordinate
@@ -65,18 +63,14 @@ let validRoutesFromZero (inputMap: int array array) (zeroCoordinate: int * int) 
             if coordinateIsWithinMap coordinate then
                 let valueAtNext = inputMap[fst coordinate][snd coordinate]
                 if valueAtNext = valueAtCurrent + 1 then
-                    // yield coordinate
                     yield! nextValidPositions coordinate remainingDistance
-                else yield! Seq.empty
-            else yield! Seq.empty
+            //     else yield! Seq.empty
+            // else yield! Seq.empty
         }
-    // for i = 1 to 9 do
     let validPaths = nextValidPositions zeroCoordinate 9
     validPaths
-    // |> Seq.distinct
-    |> Seq.length
 
-let score (input: int array array) =
+let zeroPoints (input: int array array) =
     let numberOfRows = input |> Seq.length
     let numberOfColumns = input |> Seq.head |> Seq.length
     let zeroPositions =
@@ -86,18 +80,39 @@ let score (input: int array array) =
                     if input[i][j] = 0 then yield (i,j)
                     else ()
         }
+    zeroPositions
+
+let peaksPerZero (input: int array array) =
+    let zeroPositions = zeroPoints input
     let evaluateValidForMap = validRoutesFromZero input
-    let numberOfValidRoutesPerZero =
+    let peaksPerZero =
         zeroPositions
         |> Seq.map (fun x -> evaluateValidForMap x)
+    peaksPerZero
+
+let scorePart1 (input: int array array) =
+    let uniquePeaksPerZero =
+        input
+        |> peaksPerZero
+        |> Seq.map (fun x -> Seq.distinct x)
+    let numberOfPeaksPerZero =
+        uniquePeaksPerZero
+        |> Seq.map (fun x -> Seq.length x)
+    let totalNumberOfPathsFromZeroesToPeaks =
+        numberOfPeaksPerZero
         |> Seq.sum
-    // let validRoutesToNines =
-    //     seq {
-    //         for zeroPos in zeroPositions do
-    //             for i = 1 to 9 do // Paths can max be 9 long
-    //                 raise (NotImplementedException())
-    //     }
-    numberOfValidRoutesPerZero
+    totalNumberOfPathsFromZeroesToPeaks
+let scorePart2 (input: int array array) =
+    let peaksPerZero =
+        input
+        |> peaksPerZero
+    let numberOfPeaksPerZero =
+        peaksPerZero
+        |> Seq.map (fun x -> Seq.length x)
+    let totalNumberOfPathsFromZeroesToPeaks =
+        numberOfPeaksPerZero
+        |> Seq.sum
+    totalNumberOfPathsFromZeroesToPeaks
 
 let topoMap =
     lines
@@ -108,5 +123,9 @@ topoMap
 |> (fun x -> printfn $"{DateTime.Now} Upper score bound for map of size {topoMap.Length} rows x {topoMap |> Seq.head |> Seq.length} columns is {x}")
 
 topoMap
-|> score
+|> scorePart1
 |> (fun x -> printfn $"{DateTime.Now} Part 1 score is {x}")
+
+topoMap
+|> scorePart2
+|> (fun x -> printfn $"{DateTime.Now} Part 2 score is {x}")
