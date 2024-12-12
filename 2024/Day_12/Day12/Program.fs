@@ -61,6 +61,82 @@ type region with
         |> Seq.collect id
         |> Seq.length
     member r.fencingPrice = r.area * r.circumference
+    member r.numberOfSides : int =
+        if r.memberCoordinates.Count = 0 then
+            printfn $"This is wrong, debug me"
+            0
+        elif r.memberCoordinates.Count < 3 then
+            4
+        else
+        let outsidePoints : coordinate list =
+            r.memberCoordinates
+            |> Seq.map (fun c ->
+                let otherCoordinates = r.memberCoordinates |> Set.remove c
+                seq {
+                    if (otherCoordinates |> Seq.forall (fun o -> not (c.isAbove o) )) then
+                        yield { row = c.row - 1; column = c.column }
+                    if (otherCoordinates |> Seq.forall (fun o -> not (c.isBelow o) )) then
+                        yield { row = c.row + 1; column = c.column }
+                    if (otherCoordinates |> Seq.forall (fun o -> not (c.isToTheRightOf o) )) then
+                        yield { row = c.row; column = c.column + 1 }
+                    if (otherCoordinates |> Seq.forall (fun o -> not (c.isToTheLeftOf o) )) then
+                        yield { row = c.row; column = c.column - 1 }
+                })
+            |> Seq.collect id
+            |> Seq.toList
+        let sharesRows =
+            outsidePoints
+            |> Seq.groupBy (fun p -> p.row)
+        let sharesColumns =
+            outsidePoints
+            |> Seq.groupBy (fun p -> p.column)
+        let uniquePerRow =
+            sharesRows
+            |> Seq.map (fun (g,p) ->
+                p
+                |> Seq.pairwise
+                |> Seq.fold (fun (aggregate: Set<coordinate>) (first,second) ->
+                    let areNeighbours = first.isToTheLeftOf second || first.isToTheRightOf second
+                    if areNeighbours then
+                        aggregate
+                    else
+                        aggregate.Add(first).Add(second)
+                    ) Set.empty
+                )
+                // |> Seq.fold (fun (aggregate: Set<coordinate>) nextPoint ->
+                //     let isAdjacent =
+                //         p
+                //         |> Seq.exists (fun o -> nextPoint.isToTheLeftOf o || nextPoint.isToTheRightOf o)
+                //     if isAdjacent then
+                //         aggregate
+                //     else
+                //         aggregate.Add(nextPoint)
+                //     ) Set.empty
+                // )
+            |> Seq.collect id
+            |> (fun x -> Set(x))
+        let uniquePerCol =
+            sharesColumns
+            |> Seq.map (fun (g,p) ->
+                p
+                |> Seq.pairwise
+                |> Seq.fold (fun (aggregate: Set<coordinate>) (first,second) ->
+                    let areNeighbours = first.isAbove second || first.isBelow second
+                    if areNeighbours then
+                        aggregate
+                    else
+                        aggregate.Add(first).Add(second)
+                    ) Set.empty
+                )
+            |> Seq.collect id
+            |> Set
+        let rowAdjacentSides =
+            uniquePerRow
+            |> 
+        // Fold adjacents
+        // For each, check if above/below i row, or left/right if column, is in set. If yes, +1
+        raise (NotImplementedException())
+    member r.bulkDiscountedFencingPrice = r.area * r.numberOfSides
 
 let parseRegions (input: char array array) : region seq =
     let mutable foundRegions: region list = List.empty
@@ -121,4 +197,10 @@ let part1Result =
     |> Seq.sum
 
 printfn $"{DateTime.Now:o} Part 1 result is '{part1Result}'"
+printfn $"{DateTime.Now:o}"
+let part2Result =
+    regions
+    |> Seq.map (fun r -> r.bulkDiscountedFencingPrice)
+    |> Seq.sum
+printfn $"{DateTime.Now:o} Part 2 result is '{part2Result}'"
 printfn $"{DateTime.Now:o}"
