@@ -36,6 +36,18 @@ type coordinate with
         || c.isAbove other
         || c.isToTheRightOf other
         || c.isToTheLeftOf other
+    member c.isDiagonallyUpperLeftOf (other:coordinate) : bool =
+        c.row + 1 = other.row
+        && c.column + 1 = other.column
+    member c.isDiagonallyUpperRightOf (other:coordinate) : bool =
+        c.row + 1 = other.row
+        && c.column - 1 = other.column
+    member c.isDiagonallyLowerLeftOf (other:coordinate) : bool =
+        c.row - 1 = other.row
+        && c.column + 1 = other.column
+    member c.isDiagonallyLowerRightOf (other:coordinate) : bool =
+        c.row - 1 = other.row
+        && c.column - 1 = other.column
 
 type region with
     member r.area : int = r.memberCoordinates.Count
@@ -68,6 +80,24 @@ type region with
         elif r.memberCoordinates.Count < 3 then
             4
         else
+        let numberOfCorners : int =
+            r.memberCoordinates
+            |> Seq.fold (fun aggregated mc ->
+                let otherCoordinates = r.memberCoordinates |> Set.remove mc
+                let noneAbove = otherCoordinates |> Seq.forall (fun o -> not (mc.isAbove o) )
+                let noneBelow = otherCoordinates |> Seq.forall (fun o -> not (mc.isBelow o) )
+                let noneLeft  = otherCoordinates |> Seq.forall (fun o -> not (mc.isToTheRightOf o) )
+                let noneRight = otherCoordinates |> Seq.forall (fun o -> not (mc.isToTheLeftOf o) )
+                let noneDiagonallyAboveLeft  = otherCoordinates |> Seq.forall (fun o -> not (mc.isDiagonallyLowerLeftOf o) )
+                let noneDiagonallyAboveRight = otherCoordinates |> Seq.forall (fun o -> not (mc.isDiagonallyLowerRightOf o) )
+                let noneDiagonallyBelowLeft  = otherCoordinates |> Seq.forall (fun o -> not (mc.isDiagonallyUpperLeftOf o) )
+                let noneDiagonallyBelowRight = otherCoordinates |> Seq.forall (fun o -> not (mc.isDiagonallyUpperRightOf o) )
+                raise (NotImplementedException())
+                // aggregated
+                // let isUpperLeftCorner = noneAbove && noneLeft
+                // ┌ ┐
+                // └ ┘
+                ) 0
         let outsidePoints : coordinate list =
             r.memberCoordinates
             |> Seq.map (fun c ->
@@ -83,7 +113,10 @@ type region with
                         yield { row = c.row; column = c.column - 1 }
                 })
             |> Seq.collect id
+            |> Seq.distinct
             |> Seq.toList
+        // for op in outsidePoints do
+        //
         let sharesRows =
             outsidePoints
             |> Seq.groupBy (fun p -> p.row)
@@ -132,7 +165,7 @@ type region with
             |> Set
         let rowAdjacentSides =
             uniquePerRow
-            |> 
+            |> ignore
         // Fold adjacents
         // For each, check if above/below i row, or left/right if column, is in set. If yes, +1
         raise (NotImplementedException())
