@@ -3,8 +3,8 @@
 printfn $"{DateTime.Now:o} Hello from F#"
 
 let mutable inputFileName = "Input/Example.txt"
-// inputFileName <- "Input/Example-bigger.txt"
-// inputFileName <- "Input/Input.txt"
+inputFileName <- "Input/Example-bigger.txt"
+inputFileName <- "Input/Input.txt"
 
 let lines = seq { yield! System.IO.File.ReadLines inputFileName }
 
@@ -69,10 +69,10 @@ let parseRegions (input: char array array) : region seq =
         for column = 0 to input[row].Length - 1 do
             let nextItemValue = input[row][column]
             let nextCoordinate: coordinate = {row = row; column = column}
-            let matchingRegions = foundRegions |> Seq.where (fun r -> r.contentType = nextItemValue)
+            let matchingRegions = foundRegions |> Seq.indexed |> Seq.where (fun (i, r) -> r.contentType = nextItemValue)
             let adjacentRegions =
                 matchingRegions
-                |> Seq.indexed
+                // |> Seq.indexed
                 |> Seq.where (fun (i,r) ->
                     r.memberCoordinates
                     |> Seq.exists (fun m -> (nextCoordinate.isAdjacentTo m)))
@@ -111,10 +111,12 @@ let toArrayOfArraysOfChars input =
     |> Seq.map Seq.toArray
     |> Seq.toArray
 
-let part1Result =
+let regions =
     lines
     |> toArrayOfArraysOfChars
     |> parseRegions
+let part1Result =
+    regions
     |> Seq.map (fun r -> r.fencingPrice)
     |> Seq.sum
 
