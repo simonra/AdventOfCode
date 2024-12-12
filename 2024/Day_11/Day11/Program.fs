@@ -5,7 +5,6 @@ printfn $"{DateTime.Now:o} Hello from F#"
 let mutable inputFileName = "Input/Example.txt"
 // inputFileName <- "Input/Input.txt"
 
-// https://stackoverflow.com/a/65345593/2890086
 let lines = seq { yield! System.IO.File.ReadLines inputFileName }
 
 let initialNumbers =
@@ -15,6 +14,7 @@ let initialNumbers =
     |> Array.toSeq
     // |> Seq.map uint64
 
+// https://stackoverflow.com/a/65345593/2890086
 let repeat f n = Seq.init n (fun _ -> f) |> Seq.reduce (>>)
 
 let mutable nextGenDict: Map<string, string seq> = Map.empty
