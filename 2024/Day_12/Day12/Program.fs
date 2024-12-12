@@ -3,8 +3,8 @@
 printfn $"{DateTime.Now:o} Hello from F#"
 
 let mutable inputFileName = "Input/Example.txt"
-inputFileName <- "Input/Example-bigger.txt"
-inputFileName <- "Input/Input.txt"
+// inputFileName <- "Input/Example-bigger.txt"
+// inputFileName <- "Input/Input.txt"
 
 let lines = seq { yield! System.IO.File.ReadLines inputFileName }
 
@@ -63,7 +63,7 @@ type region with
     member r.fencingPrice = r.area * r.circumference
 
 let parseRegions (input: char array array) : region seq =
-    let mutable foundRegions: region seq = Seq.empty
+    let mutable foundRegions: region list = List.empty
     for row = 0 to input.Length - 1 do
         printfn $"{DateTime.Now:o} Parsing row {row}"
         for column = 0 to input[row].Length - 1 do
@@ -79,13 +79,13 @@ let parseRegions (input: char array array) : region seq =
             let numberOfAdjacentRegions = adjacentRegions |> Seq.length
             if numberOfAdjacentRegions = 0 then
                 let newRegion = { contentType = nextItemValue; memberCoordinates = Set.empty.Add(nextCoordinate) }
-                foundRegions <- Seq.append foundRegions (seq {newRegion})
+                foundRegions <- List.append foundRegions [newRegion]
             elif numberOfAdjacentRegions = 1 then
                 let updatedRegion = adjacentRegions |> Seq.head
-                foundRegions <- Seq.removeAt (fst updatedRegion) foundRegions
-                foundRegions <- Seq.append foundRegions (seq {
+                foundRegions <- List.removeAt (fst updatedRegion) foundRegions
+                foundRegions <- List.append foundRegions [
                     { contentType = nextItemValue; memberCoordinates = Set((snd updatedRegion).memberCoordinates).Add(nextCoordinate) }
-                })
+                ]
             else
                 // merge and join
                 let mergedRegion = {
@@ -100,8 +100,8 @@ let parseRegions (input: char array array) : region seq =
                     adjacentRegions
                     |> Seq.map (fun (i,x) -> i)
                     |> Seq.sortDescending
-                indexesToReplace |> Seq.iter (fun i -> foundRegions <- foundRegions |> Seq.removeAt i)
-                foundRegions <- Seq.append foundRegions (seq { mergedRegion })
+                indexesToReplace |> Seq.iter (fun i -> foundRegions <- foundRegions |> List.removeAt i)
+                foundRegions <- List.append foundRegions [ mergedRegion ]
     foundRegions
 
 let toArrayOfArraysOfChars input =
