@@ -83,92 +83,109 @@ type region with
         let numberOfCorners : int =
             r.memberCoordinates
             |> Seq.fold (fun aggregated mc ->
-                let otherCoordinates = r.memberCoordinates |> Set.remove mc
-                let noneAbove = otherCoordinates |> Seq.forall (fun o -> not (mc.isAbove o) )
-                let noneBelow = otherCoordinates |> Seq.forall (fun o -> not (mc.isBelow o) )
-                let noneLeft  = otherCoordinates |> Seq.forall (fun o -> not (mc.isToTheRightOf o) )
-                let noneRight = otherCoordinates |> Seq.forall (fun o -> not (mc.isToTheLeftOf o) )
-                let noneDiagonallyAboveLeft  = otherCoordinates |> Seq.forall (fun o -> not (mc.isDiagonallyLowerLeftOf o) )
-                let noneDiagonallyAboveRight = otherCoordinates |> Seq.forall (fun o -> not (mc.isDiagonallyLowerRightOf o) )
-                let noneDiagonallyBelowLeft  = otherCoordinates |> Seq.forall (fun o -> not (mc.isDiagonallyUpperLeftOf o) )
-                let noneDiagonallyBelowRight = otherCoordinates |> Seq.forall (fun o -> not (mc.isDiagonallyUpperRightOf o) )
-                raise (NotImplementedException())
-                // aggregated
-                // let isUpperLeftCorner = noneAbove && noneLeft
+                // let otherCoordinates = r.memberCoordinates |> Set.remove mc
+                let mutable partialSum = 0
+                let noneAbove = not (r.memberCoordinates.Contains({row = mc.row - 1; column = mc.column}))
+                let noneBelow = not (r.memberCoordinates.Contains({row = mc.row + 1; column = mc.column}))
+                let noneLeft  = not (r.memberCoordinates.Contains({row = mc.row; column = mc.column - 1}))
+                let noneRight = not (r.memberCoordinates.Contains({row = mc.row; column = mc.column + 1}))
+                let noneDiagonallyAboveLeft  = not(r.memberCoordinates.Contains({row = mc.row - 1; column = mc.column - 1}))
+                let noneDiagonallyAboveRight = not(r.memberCoordinates.Contains({row = mc.row - 1; column = mc.column + 1}))
+                let noneDiagonallyBelowLeft  = not(r.memberCoordinates.Contains({row = mc.row + 1; column = mc.column - 1}))
+                let noneDiagonallyBelowRight = not(r.memberCoordinates.Contains({row = mc.row + 1; column = mc.column + 1}))
+                let isUpperLeftCorner  = noneAbove && noneLeft
+                let isUpperRightCorner = noneAbove && noneRight
+                let isLowerLeftCorner  = noneBelow && noneLeft
+                let isLowerRightCorner = noneBelow && noneRight
+                let isInnerCornerUpperLeft  = noneDiagonallyAboveLeft  && not noneAbove && not noneLeft
+                let isInnerCornerUpperRight = noneDiagonallyAboveRight && not noneAbove && not noneRight
+                let isInnerCornerLoweLeft   = noneDiagonallyBelowLeft  && not noneBelow && not noneLeft
+                let isInnerCornerLowerRight = noneDiagonallyBelowRight && not noneBelow && not noneRight
+                if isUpperLeftCorner || isInnerCornerUpperLeft then
+                    partialSum <- partialSum + 1
+                if isUpperRightCorner || isInnerCornerUpperRight then
+                    partialSum <- partialSum + 1
+                if isLowerLeftCorner || isInnerCornerLoweLeft then
+                    partialSum <- partialSum + 1
+                if isLowerRightCorner || isInnerCornerLowerRight then
+                    partialSum <- partialSum + 1
+
+                aggregated + partialSum
                 // ┌ ┐
                 // └ ┘
                 ) 0
-        let outsidePoints : coordinate list =
-            r.memberCoordinates
-            |> Seq.map (fun c ->
-                let otherCoordinates = r.memberCoordinates |> Set.remove c
-                seq {
-                    if (otherCoordinates |> Seq.forall (fun o -> not (c.isAbove o) )) then
-                        yield { row = c.row - 1; column = c.column }
-                    if (otherCoordinates |> Seq.forall (fun o -> not (c.isBelow o) )) then
-                        yield { row = c.row + 1; column = c.column }
-                    if (otherCoordinates |> Seq.forall (fun o -> not (c.isToTheRightOf o) )) then
-                        yield { row = c.row; column = c.column + 1 }
-                    if (otherCoordinates |> Seq.forall (fun o -> not (c.isToTheLeftOf o) )) then
-                        yield { row = c.row; column = c.column - 1 }
-                })
-            |> Seq.collect id
-            |> Seq.distinct
-            |> Seq.toList
-        // for op in outsidePoints do
-        //
-        let sharesRows =
-            outsidePoints
-            |> Seq.groupBy (fun p -> p.row)
-        let sharesColumns =
-            outsidePoints
-            |> Seq.groupBy (fun p -> p.column)
-        let uniquePerRow =
-            sharesRows
-            |> Seq.map (fun (g,p) ->
-                p
-                |> Seq.pairwise
-                |> Seq.fold (fun (aggregate: Set<coordinate>) (first,second) ->
-                    let areNeighbours = first.isToTheLeftOf second || first.isToTheRightOf second
-                    if areNeighbours then
-                        aggregate
-                    else
-                        aggregate.Add(first).Add(second)
-                    ) Set.empty
-                )
-                // |> Seq.fold (fun (aggregate: Set<coordinate>) nextPoint ->
-                //     let isAdjacent =
-                //         p
-                //         |> Seq.exists (fun o -> nextPoint.isToTheLeftOf o || nextPoint.isToTheRightOf o)
-                //     if isAdjacent then
-                //         aggregate
-                //     else
-                //         aggregate.Add(nextPoint)
-                //     ) Set.empty
-                // )
-            |> Seq.collect id
-            |> (fun x -> Set(x))
-        let uniquePerCol =
-            sharesColumns
-            |> Seq.map (fun (g,p) ->
-                p
-                |> Seq.pairwise
-                |> Seq.fold (fun (aggregate: Set<coordinate>) (first,second) ->
-                    let areNeighbours = first.isAbove second || first.isBelow second
-                    if areNeighbours then
-                        aggregate
-                    else
-                        aggregate.Add(first).Add(second)
-                    ) Set.empty
-                )
-            |> Seq.collect id
-            |> Set
-        let rowAdjacentSides =
-            uniquePerRow
-            |> ignore
-        // Fold adjacents
-        // For each, check if above/below i row, or left/right if column, is in set. If yes, +1
-        raise (NotImplementedException())
+        numberOfCorners
+        // let outsidePoints : coordinate list =
+        //     r.memberCoordinates
+        //     |> Seq.map (fun c ->
+        //         let otherCoordinates = r.memberCoordinates |> Set.remove c
+        //         seq {
+        //             if (otherCoordinates |> Seq.forall (fun o -> not (c.isAbove o) )) then
+        //                 yield { row = c.row - 1; column = c.column }
+        //             if (otherCoordinates |> Seq.forall (fun o -> not (c.isBelow o) )) then
+        //                 yield { row = c.row + 1; column = c.column }
+        //             if (otherCoordinates |> Seq.forall (fun o -> not (c.isToTheRightOf o) )) then
+        //                 yield { row = c.row; column = c.column + 1 }
+        //             if (otherCoordinates |> Seq.forall (fun o -> not (c.isToTheLeftOf o) )) then
+        //                 yield { row = c.row; column = c.column - 1 }
+        //         })
+        //     |> Seq.collect id
+        //     |> Seq.distinct
+        //     |> Seq.toList
+        // // for op in outsidePoints do
+        // //
+        // let sharesRows =
+        //     outsidePoints
+        //     |> Seq.groupBy (fun p -> p.row)
+        // let sharesColumns =
+        //     outsidePoints
+        //     |> Seq.groupBy (fun p -> p.column)
+        // let uniquePerRow =
+        //     sharesRows
+        //     |> Seq.map (fun (g,p) ->
+        //         p
+        //         |> Seq.pairwise
+        //         |> Seq.fold (fun (aggregate: Set<coordinate>) (first,second) ->
+        //             let areNeighbours = first.isToTheLeftOf second || first.isToTheRightOf second
+        //             if areNeighbours then
+        //                 aggregate
+        //             else
+        //                 aggregate.Add(first).Add(second)
+        //             ) Set.empty
+        //         )
+        //         // |> Seq.fold (fun (aggregate: Set<coordinate>) nextPoint ->
+        //         //     let isAdjacent =
+        //         //         p
+        //         //         |> Seq.exists (fun o -> nextPoint.isToTheLeftOf o || nextPoint.isToTheRightOf o)
+        //         //     if isAdjacent then
+        //         //         aggregate
+        //         //     else
+        //         //         aggregate.Add(nextPoint)
+        //         //     ) Set.empty
+        //         // )
+        //     |> Seq.collect id
+        //     |> (fun x -> Set(x))
+        // let uniquePerCol =
+        //     sharesColumns
+        //     |> Seq.map (fun (g,p) ->
+        //         p
+        //         |> Seq.pairwise
+        //         |> Seq.fold (fun (aggregate: Set<coordinate>) (first,second) ->
+        //             let areNeighbours = first.isAbove second || first.isBelow second
+        //             if areNeighbours then
+        //                 aggregate
+        //             else
+        //                 aggregate.Add(first).Add(second)
+        //             ) Set.empty
+        //         )
+        //     |> Seq.collect id
+        //     |> Set
+        // let rowAdjacentSides =
+        //     uniquePerRow
+        //     |> ignore
+        // // Fold adjacents
+        // // For each, check if above/below i row, or left/right if column, is in set. If yes, +1
+        // raise (NotImplementedException())
     member r.bulkDiscountedFencingPrice = r.area * r.numberOfSides
 
 let parseRegions (input: char array array) : region seq =
