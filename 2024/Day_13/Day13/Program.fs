@@ -69,35 +69,41 @@ module simplifiedVectors =
         asInRemainingA
 
 open simplifiedVectors
-type button = {
+type button<'a> = {
     // movement: vec
-    xMovement: int
-    yMovement: int
+    xMovement: 'a
+    yMovement: 'a
 }
 
-type prizeLocation = {
-    X: int
-    Y: int
+type prizeLocation<'a> = {
+    X: 'a
+    Y: 'a
 }
 
-type clawMachine = {
-    A: button
-    B: button
+type clawMachine<'a> = {
+    A: button<'a>
+    B: button<'a>
     // targetPosition: Vector2
-    prize: prizeLocation
+    prize: prizeLocation<'a>
 }
 
-type solution = {
-    neededAs: int
-    neededBs: int
+type solution<'a> = {
+    neededAs: 'a
+    neededBs: 'a
 }
 
-let getNumber (input:string) : int = int (Regex.Replace(input, "[^0-9]", ""))
-let getNumbers (input:string) : int list =
+let getNumber<'a> (input:string) : 'a =
+    // raise (NotImplementedException())
+    let inputDigits = Regex.Replace(input, "[^0-9]", "")
+    // nameof<'a> inputDigits
+    let foo = System.ComponentModel.TypeDescriptor.GetConverter(typeof<'a>);
+    foo.ConvertFromInvariantString(inputDigits) :?> 'a
+    // parse (Regex.Replace(input, "[^0-9]", ""))
+let getNumbers<'a> (input:string) : 'a list =
     let stringPairs = input.Split(',')
     [getNumber stringPairs[0]; getNumber stringPairs[1]]
 
-let parseClawMachine (input:string) : clawMachine =
+let parseClawMachine<'a> (input:string) : clawMachine<'a> =
     let lines = input.Split("\n")
     let firstLine = getNumbers lines[0]
     let secondLine = getNumbers lines[1]
@@ -125,7 +131,7 @@ let parseClawMachine (input:string) : clawMachine =
 //     raise (NotImplementedException())
 //     // if
 
-let trySolveEquation a0 b0 c0 a1 b1 c1 =
+let inline trySolveEquation a0 b0 c0 a1 b1 c1 =
     let determinant = a0 * b1 - b0 * a1
     if determinant = LanguagePrimitives.GenericZero then
         printfn $"Equation determinant ≠ 0, none or many solutions"
@@ -140,7 +146,14 @@ let trySolveEquation a0 b0 c0 a1 b1 c1 =
     printfn $"The solution didn't solve our equation, probably due to integer division"
     None
 
-let findSolutions (input:clawMachine) : solution list =
+let inline findSolutions<'a when
+    'a: (static member Zero: 'a) and
+    'a: (static member (+): 'a * 'a -> 'a) and
+    'a: (static member (-): 'a * 'a -> 'a) and
+    'a: (static member (*): 'a * 'a -> 'a) and
+    'a: (static member (/): 'a * 'a -> 'a) and
+    'a: equality
+    > (input:clawMachine<'a>) : solution<'a> list =
     let maybeEquationSolution = trySolveEquation input.A.xMovement input.B.xMovement input.prize.X input.A.yMovement input.B.yMovement input.prize.Y
     if maybeEquationSolution = None then []
     else
@@ -161,12 +174,16 @@ let findSolutions (input:clawMachine) : solution list =
     //     //
     //     // if input.prize.X - a * input.A.xMovement %
     // result
-let priceSolution (input: solution) =
-    let costOfA = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
-    let costOfB = LanguagePrimitives.GenericOne
+let inline priceSolution<'a
+    when 'a: (static member One: 'a)
+    and  'a: (static member (*): 'a * 'a -> 'a)
+    and  'a: (static member (+): 'a * 'a -> 'a)
+    > (input: solution<'a>) =
+    let costOfA : 'a = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
+    let costOfB : 'a = LanguagePrimitives.GenericOne
     input.neededAs * costOfA + input.neededBs * costOfB
 
-let parseClawMachines (input: string) : clawMachine seq =
+let parseClawMachines<'a> (input: string) : clawMachine<'a> seq =
     input.Split("\n\n")
     |> Seq.map parseClawMachine
 
@@ -184,8 +201,17 @@ machines
 |> (fun x -> printfn $"{DateTime.Now:o} Part 1 solution: {x}")
 printfn $"{DateTime.Now:o} Part 1 done"
 
+printfn $"{DateTime.Now:o} Parsing part 2 claw machines"
 let part2Constant = 10_000_000_000_000L
 let part2ClawMachines =
     machines
     |> Seq.map (fun m ->
         {m with prize.X = m.prize.X + part2Constant; prize.Y = m.prize.Y + part2Constant})
+printfn $"{DateTime.Now:o} Part 2 claw machines parsed"
+part2ClawMachines
+|> Seq.map findSolutions
+|> Seq.collect id
+|> Seq.map priceSolution
+|> Seq.sum
+|> (fun x -> printfn $"{DateTime.Now:o} Part 2 solution: {x}")
+printfn $"{DateTime.Now:o} Part 2 done"
