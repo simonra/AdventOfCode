@@ -6,7 +6,7 @@ open System.Text.RegularExpressions
 printfn $"{DateTime.Now:o} Hello from F#"
 
 let mutable inputFileName = "Input/Example.txt"
-// inputFileName <- "Input/Input.txt"
+inputFileName <- "Input/Input.txt"
 
 let inputContent = System.IO.File.ReadAllText inputFileName
 
@@ -71,13 +71,13 @@ module simplifiedVectors =
 open simplifiedVectors
 type button = {
     // movement: vec
-    xMovement: float
-    yMovement: float
+    xMovement: int
+    yMovement: int
 }
 
 type prizeLocation = {
-    X: float
-    Y: float
+    X: int
+    Y: int
 }
 
 type clawMachine = {
@@ -92,8 +92,8 @@ type solution = {
     neededBs: int
 }
 
-let getNumber (input:string) : float = float (Regex.Replace(input, "[^0-9]", ""))
-let getNumbers (input:string) : float list =
+let getNumber (input:string) : int = int (Regex.Replace(input, "[^0-9]", ""))
+let getNumbers (input:string) : int list =
     let stringPairs = input.Split(',')
     [getNumber stringPairs[0]; getNumber stringPairs[1]]
 
@@ -109,38 +109,58 @@ let parseClawMachine (input:string) : clawMachine =
         prize = { X = thirdLine[0]; Y = thirdLine[1] }
     }
 
-let cost (input:clawMachine) : float option =
-    let costOfA = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
-    // let costOfB = LanguagePrimitives.GenericOne
-    let xBound = input.prize.X / input.B.xMovement
-    let yBound = input.prize.Y / input.B.yMovement
-    if xBound = yBound && xBound % LanguagePrimitives.GenericOne = LanguagePrimitives.GenericZero then
-        Some(xBound)
+// let cost (input:clawMachine) : float option =
+//     let costOfA = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
+//     // let costOfB = LanguagePrimitives.GenericOne
+//     let xBound = input.prize.X / input.B.xMovement
+//     let yBound = input.prize.Y / input.B.yMovement
+//     if xBound = yBound && xBound % LanguagePrimitives.GenericOne = LanguagePrimitives.GenericZero then
+//         Some(xBound)
+//     else
+//     let bCeiling = Math.Max(input.B.xMovement, input.B.yMovement)
+//     let mutable nextB = bCeiling
+//     // while
+//     // for b = bCeiling to 0 do
+//     //     raise (NotImplementedException())
+//     raise (NotImplementedException())
+//     // if
+
+let trySolveEquation a0 b0 c0 a1 b1 c1 =
+    let determinant = a0 * b1 - b0 * a1
+    if determinant = LanguagePrimitives.GenericZero then
+        printfn $"Equation determinant ≠ 0, none or many solutions"
+        None
     else
-    let bCeiling = Math.Max(input.B.xMovement, input.B.yMovement)
-    let mutable nextB = bCeiling
-    // while
-    // for b = bCeiling to 0 do
-    //     raise (NotImplementedException())
-    raise (NotImplementedException())
-    // if
+    let x0 = (c0 * b1 - b0 * c1) / determinant
+    let x1 = (c1 * a0 - c0 * a1) / determinant
+    // Handle integer derp
+    if a0 * x0 + b0 * x1 = c0 && a1 * x0 + b1 * x1 = c1 then
+        Some([|x0; x1|])
+    else
+    printfn $"The solution didn't solve our equation, probably due to integer division"
+    None
 
 let findSolutions (input:clawMachine) : solution list =
-    let xBoundB = input.prize.X / input.B.xMovement
-    let yBoundB = input.prize.Y / input.B.yMovement
-    let bMax = Seq.min (seq {xBoundB; yBoundB; 100.0})
-    let xBoundA = input.prize.X / input.A.xMovement
-    let yBoundA = input.prize.Y / input.A.yMovement
-    let aMax = Seq.min (seq {xBoundA; yBoundA; 100.0})
-    let mutable result : solution list = list.Empty
-    let aMap = {0.0 .. 1.0 .. aMax}
-    // for a in aMap do
-        // let nextBMax =
-        // let bMap = {0.0 .. 1.0 .. bMax}
-        // for b in bMap do
-        //
-        // if input.prize.X - a * input.A.xMovement %
-    result
+    let maybeEquationSolution = trySolveEquation input.A.xMovement input.B.xMovement input.prize.X input.A.yMovement input.B.yMovement input.prize.Y
+    if maybeEquationSolution = None then []
+    else
+    [ {neededAs = maybeEquationSolution.Value[0]; neededBs = maybeEquationSolution.Value[1]} ]
+    //
+    // let xBoundB = input.prize.X / input.B.xMovement
+    // let yBoundB = input.prize.Y / input.B.yMovement
+    // let bMax = Seq.min (seq {xBoundB; yBoundB; 100.0})
+    // let xBoundA = input.prize.X / input.A.xMovement
+    // let yBoundA = input.prize.Y / input.A.yMovement
+    // let aMax = Seq.min (seq {xBoundA; yBoundA; 100.0})
+    // let mutable result : solution list = list.Empty
+    // let aMap = {0.0 .. 1.0 .. aMax}
+    // // for a in aMap do
+    //     // let nextBMax =
+    //     // let bMap = {0.0 .. 1.0 .. bMax}
+    //     // for b in bMap do
+    //     //
+    //     // if input.prize.X - a * input.A.xMovement %
+    // result
 let priceSolution (input: solution) =
     let costOfA = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
     let costOfB = LanguagePrimitives.GenericOne
@@ -152,5 +172,20 @@ let parseClawMachines (input: string) : clawMachine seq =
 
 let machines = parseClawMachines inputContent
 
-printfn $"{DateTime.Now:o} Inputs are:"
-machines |> Seq.iter (fun x -> printfn $"%A{x}")
+// printfn $"{DateTime.Now:o} Inputs are:"
+// machines |> Seq.iter (fun x -> printfn $"%A{x}")
+
+printfn $"{DateTime.Now:o} Part 1:"
+machines
+|> Seq.map findSolutions
+|> Seq.collect id
+|> Seq.map priceSolution
+|> Seq.sum
+|> (fun x -> printfn $"{DateTime.Now:o} Part 1 solution: {x}")
+printfn $"{DateTime.Now:o} Part 1 done"
+
+let part2Constant = 10_000_000_000_000L
+let part2ClawMachines =
+    machines
+    |> Seq.map (fun m ->
+        {m with prize.X = m.prize.X + part2Constant; prize.Y = m.prize.Y + part2Constant})
