@@ -70,7 +70,6 @@ module simplifiedVectors =
 
 open simplifiedVectors
 type button<'a> = {
-    // movement: vec
     xMovement: 'a
     yMovement: 'a
 }
@@ -83,7 +82,6 @@ type prizeLocation<'a> = {
 type clawMachine<'a> = {
     A: button<'a>
     B: button<'a>
-    // targetPosition: Vector2
     prize: prizeLocation<'a>
 }
 
@@ -93,12 +91,10 @@ type solution<'a> = {
 }
 
 let getNumber<'a> (input:string) : 'a =
-    // raise (NotImplementedException())
     let inputDigits = Regex.Replace(input, "[^0-9]", "")
-    // nameof<'a> inputDigits
-    let foo = System.ComponentModel.TypeDescriptor.GetConverter(typeof<'a>);
-    foo.ConvertFromInvariantString(inputDigits) :?> 'a
-    // parse (Regex.Replace(input, "[^0-9]", ""))
+    let typeConverter = System.ComponentModel.TypeDescriptor.GetConverter(typeof<'a>);
+    typeConverter.ConvertFromInvariantString(inputDigits) :?> 'a
+
 let getNumbers<'a> (input:string) : 'a list =
     let stringPairs = input.Split(',')
     [getNumber stringPairs[0]; getNumber stringPairs[1]]
@@ -114,22 +110,6 @@ let parseClawMachine<'a> (input:string) : clawMachine<'a> =
         // targetPosition = Vector2(firstLine[0], firstLine[1])
         prize = { X = thirdLine[0]; Y = thirdLine[1] }
     }
-
-// let cost (input:clawMachine) : float option =
-//     let costOfA = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
-//     // let costOfB = LanguagePrimitives.GenericOne
-//     let xBound = input.prize.X / input.B.xMovement
-//     let yBound = input.prize.Y / input.B.yMovement
-//     if xBound = yBound && xBound % LanguagePrimitives.GenericOne = LanguagePrimitives.GenericZero then
-//         Some(xBound)
-//     else
-//     let bCeiling = Math.Max(input.B.xMovement, input.B.yMovement)
-//     let mutable nextB = bCeiling
-//     // while
-//     // for b = bCeiling to 0 do
-//     //     raise (NotImplementedException())
-//     raise (NotImplementedException())
-//     // if
 
 let inline trySolveEquation a0 b0 c0 a1 b1 c1 =
     let determinant = a0 * b1 - b0 * a1
@@ -158,22 +138,7 @@ let inline findSolutions<'a when
     if maybeEquationSolution = None then []
     else
     [ {neededAs = maybeEquationSolution.Value[0]; neededBs = maybeEquationSolution.Value[1]} ]
-    //
-    // let xBoundB = input.prize.X / input.B.xMovement
-    // let yBoundB = input.prize.Y / input.B.yMovement
-    // let bMax = Seq.min (seq {xBoundB; yBoundB; 100.0})
-    // let xBoundA = input.prize.X / input.A.xMovement
-    // let yBoundA = input.prize.Y / input.A.yMovement
-    // let aMax = Seq.min (seq {xBoundA; yBoundA; 100.0})
-    // let mutable result : solution list = list.Empty
-    // let aMap = {0.0 .. 1.0 .. aMax}
-    // // for a in aMap do
-    //     // let nextBMax =
-    //     // let bMap = {0.0 .. 1.0 .. bMax}
-    //     // for b in bMap do
-    //     //
-    //     // if input.prize.X - a * input.A.xMovement %
-    // result
+
 let inline priceSolution<'a
     when 'a: (static member One: 'a)
     and  'a: (static member (*): 'a * 'a -> 'a)
