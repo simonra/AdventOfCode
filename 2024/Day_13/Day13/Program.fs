@@ -1,4 +1,5 @@
 ﻿open System
+open System.Numerics
 open System.Text.RegularExpressions
 
 // For more information see https://aka.ms/fsharp-console-apps
@@ -9,24 +10,90 @@ let mutable inputFileName = "Input/Example.txt"
 
 let inputContent = System.IO.File.ReadAllText inputFileName
 
+// https://stackoverflow.com/a/65345593/2890086
+let iterate f n = Seq.init n (fun _ -> f) |> Seq.reduce (>>)
+
+let divideComplexNumber (numerator: 'a * 'a) (denominator: 'a * 'a) : 'a * 'a=
+    let a = fst numerator
+    let b = snd numerator
+    let c = fst denominator
+    let d = snd denominator
+    let real = (a*c + b*d)/(c*c + d*d)
+    let imaginary = (b*c - a*d)/(c*c + d*d)
+    (real,imaginary)
+
+module simplifiedVectors =
+    type vec<'a> = 'a array
+    let add (a:vec<'t>) (b:vec<'t>) : vec<'t> = (a, b) ||> Array.map2 (fun an bn -> an + bn)
+    let subtract (a:vec<'t>) (b:vec<'t>) : vec<'t> = (a, b) ||> Array.map2 (fun (an:'t) (bn:'t) -> an - bn)
+    let scale (k: 't) (a:vec<'t>) : vec<'t> = a |> Array.map (fun an -> k * an)
+    let product (a:vec<'t>) (b:vec<'t>) : vec<'t> = (a, b) ||> Array.map2 (fun an bn -> an * bn)
+    let dotProduct (a:vec<'t>) (b:vec<'t>) : 't = (product a b) |> Array.fold (fun aggregated next -> aggregated + next) LanguagePrimitives.GenericZero
+    // let magnitude (a:vec<'a>) = sqrt (dotProduct a a)
+    let areParallel (a:vec<'t>) (b:vec<'t>) : bool =
+        if a.Length <> b.Length then raise (NotSupportedException()) else
+        if a.Length = 1 then true
+        elif a.Length = 2 then
+            // https://math.stackexchange.com/a/1324023
+            a[0] * b[1] = a[1] * b[2]
+        else
+            // a · b = ‖a‖ ‖b‖ cos(θ)
+            // When parallel, θ = 0 or θ = π -> cos(θ) = 1 or cos(θ) = - 1
+            // Remember, ‖a‖ = √(a · a)
+            // (a · b)² = (‖a‖ ‖b‖ cos(θ))² -> (a · b)² = ‖a‖² ‖b‖² cos(θ)²
+            // (a · b)² = ‖a‖² ‖b‖² -> (a · b)² = (a · a) (b · b)
+            let ab = dotProduct a b
+            let aa = dotProduct a a
+            let bb = dotProduct b b
+            ab * ab = aa * bb
+    let arePerpendicular (a:vec<'t>) (b:vec<'t>) : bool =
+        if a.Length <> b.Length then raise (NotSupportedException()) else
+        (dotProduct a b) = LanguagePrimitives.GenericZero
+    let divide (a : vec<'t>) (b : vec<'t>) : 't option =
+        if not (areParallel a b) then None else
+        Seq.initInfinite (fun x -> LanguagePrimitives.GenericOne)
+        |> Seq.scan (fun (aggregate: 't) (next: 't) -> aggregate + next) (LanguagePrimitives.GenericZero)
+        |> Seq.takeWhile (fun (x: 't) -> x * a[0] < b[0])
+        |> Seq.last
+        |> Some
+    let modulo (a:vec<'a>) (b:vec<'a>) : 'a option =
+        if not (areParallel a b) then None else
+        let aa = dotProduct a a
+        let bb = dotProduct b b
+        if aa = bb then Some(LanguagePrimitives.GenericZero) else
+        if aa < bb then Some(LanguagePrimitives.GenericOne) else
+        let wholeAsInB = (a |> divide <| b).Value
+        let amountOfAToDiscard = wholeAsInB |> scale <| a
+        let remainingA = a |> subtract <| amountOfAToDiscard
+        let asInRemainingA = remainingA |> divide <| a
+        asInRemainingA
+
+open simplifiedVectors
 type button = {
-    xMovement: int
-    yMovement: int
+    // movement: vec
+    xMovement: float
+    yMovement: float
 }
 
 type prizeLocation = {
-    X: int
-    Y: int
+    X: float
+    Y: float
 }
 
 type clawMachine = {
     A: button
     B: button
+    // targetPosition: Vector2
     prize: prizeLocation
 }
 
-let getNumber (input:string) : int = int (Regex.Replace(input, "[^0-9]", ""))
-let getNumbers (input:string) : int list =
+type solution = {
+    neededAs: int
+    neededBs: int
+}
+
+let getNumber (input:string) : float = float (Regex.Replace(input, "[^0-9]", ""))
+let getNumbers (input:string) : float list =
     let stringPairs = input.Split(',')
     [getNumber stringPairs[0]; getNumber stringPairs[1]]
 
@@ -38,8 +105,46 @@ let parseClawMachine (input:string) : clawMachine =
     {
         A = { xMovement = firstLine[0]; yMovement = firstLine[1] }
         B = { xMovement = secondLine[0]; yMovement = secondLine[1] }
+        // targetPosition = Vector2(firstLine[0], firstLine[1])
         prize = { X = thirdLine[0]; Y = thirdLine[1] }
     }
+
+let cost (input:clawMachine) : float option =
+    let costOfA = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
+    // let costOfB = LanguagePrimitives.GenericOne
+    let xBound = input.prize.X / input.B.xMovement
+    let yBound = input.prize.Y / input.B.yMovement
+    if xBound = yBound && xBound % LanguagePrimitives.GenericOne = LanguagePrimitives.GenericZero then
+        Some(xBound)
+    else
+    let bCeiling = Math.Max(input.B.xMovement, input.B.yMovement)
+    let mutable nextB = bCeiling
+    // while
+    // for b = bCeiling to 0 do
+    //     raise (NotImplementedException())
+    raise (NotImplementedException())
+    // if
+
+let findSolutions (input:clawMachine) : solution list =
+    let xBoundB = input.prize.X / input.B.xMovement
+    let yBoundB = input.prize.Y / input.B.yMovement
+    let bMax = Seq.min (seq {xBoundB; yBoundB; 100.0})
+    let xBoundA = input.prize.X / input.A.xMovement
+    let yBoundA = input.prize.Y / input.A.yMovement
+    let aMax = Seq.min (seq {xBoundA; yBoundA; 100.0})
+    let mutable result : solution list = list.Empty
+    let aMap = {0.0 .. 1.0 .. aMax}
+    // for a in aMap do
+        // let nextBMax =
+        // let bMap = {0.0 .. 1.0 .. bMax}
+        // for b in bMap do
+        //
+        // if input.prize.X - a * input.A.xMovement %
+    result
+let priceSolution (input: solution) =
+    let costOfA = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
+    let costOfB = LanguagePrimitives.GenericOne
+    input.neededAs * costOfA + input.neededBs * costOfB
 
 let parseClawMachines (input: string) : clawMachine seq =
     input.Split("\n\n")
