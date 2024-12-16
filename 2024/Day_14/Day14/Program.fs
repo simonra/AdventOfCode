@@ -88,14 +88,6 @@ and  'a: (static member (/): 'a * 'a -> 'a)>
         robotsPerQuadrant
         |> Seq.fold (fun aggregated next -> aggregated * next) 1
     safetyScore
-    // mapSizeX
-// Part 1 example dimensions: x = 11; y = 7
-// let part1exampleSectors = [
-//     {xLower = 0; yLower = 0; xUpper = 4; yUpper = 2}
-//     {xLower = 6; yLower = 0; xUpper = 10; yUpper = 2}
-//     {xLower = 0; yLower = 4; xUpper = 4; yUpper = 6}
-//     {xLower = 6; yLower = 4; xUpper = 10; yUpper = 6}
-// ]
 
 let part1ExampleMapMaxX = 11
 let part1ExampleMapMaxY = 7
@@ -107,28 +99,6 @@ let moveForExample = move part1ExampleMapMaxX part1ExampleMapMaxY
 let part1ExampleRobotsAfter100Moves =
     part1ExampleRobots
     |> Seq.map (fun r -> iterate moveForExample 100 r)
-    // |> Seq.toArray
-// let part1ExampleRobotsInFirstQuadrant =
-//     part1ExampleRobotsAfter100Moves
-//     |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[0] r.position)
-//     |> Seq.length
-// let part1ExampleRobotsInSecondQuadrant =
-//     part1ExampleRobotsAfter100Moves
-//     |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[1] r.position)
-//     |> Seq.length
-// let part1ExampleRobotsInThirdQuadrant =
-//     part1ExampleRobotsAfter100Moves
-//     |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[2] r.position)
-//     |> Seq.length
-// let part1ExampleRobotsInFourthQuadrant =
-//     part1ExampleRobotsAfter100Moves
-//     |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[3] r.position)
-//     |> Seq.length
-//
-// let part1ExampleSafetyScore = part1ExampleRobotsInFirstQuadrant * part1ExampleRobotsInSecondQuadrant * part1ExampleRobotsInThirdQuadrant * part1ExampleRobotsInFourthQuadrant
-// printfn $"{DateTime.Now:o} Part 1 safety score components: %A{[part1ExampleRobotsInFirstQuadrant; part1ExampleRobotsInSecondQuadrant; part1ExampleRobotsInThirdQuadrant; part1ExampleRobotsInFourthQuadrant]}"
-// printfn $"{DateTime.Now:o} Part 1 example SafetyScore: '{part1ExampleSafetyScore}'"
-// printfn $"{DateTime.Now:o} Done with part 1 example"
 
 let alternativeSafetyScore = getSafetyScore part1ExampleMapMaxX part1ExampleMapMaxY part1ExampleRobotsAfter100Moves
 printfn $"{DateTime.Now:o} Part 1 example Alternative safety score: '{alternativeSafetyScore}'"
@@ -146,13 +116,3 @@ let part1RobotsAfter100Moves =
 let part1SafetyScore = getSafetyScore part1MapMaxX part1MapMaxY part1RobotsAfter100Moves
 printfn $"{DateTime.Now:o} Part 1 example safety score: '{part1SafetyScore}'"
 printfn $"{DateTime.Now:o} Part 1 done"
-
-// // // Part 1 actual dimensions: x = 101; y = 103
-// let part1sectors = [
-//     {xLower = 0; yLower = 0; xUpper = 49; yUpper = 50}
-//     {xLower = 51; yLower = 0; xUpper = 100; yUpper = 50}
-//     {xLower = 0; yLower = 52; xUpper = 49; yUpper = 102}
-//     {xLower = 51; yLower = 52; xUpper = 100; yUpper = 102}
-// ]
-//
-// // let parsedRobots =
