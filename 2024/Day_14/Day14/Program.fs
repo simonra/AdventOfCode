@@ -116,3 +116,52 @@ let part1RobotsAfter100Moves =
 let part1SafetyScore = getSafetyScore part1MapMaxX part1MapMaxY part1RobotsAfter100Moves
 printfn $"{DateTime.Now:o} Part 1 example safety score: '{part1SafetyScore}'"
 printfn $"{DateTime.Now:o} Part 1 done"
+
+let robotPositionsAreInteresting (positions:position<int> Set) =
+    let columns =
+        positions
+        |> Seq.groupBy _.py
+    let interestingColumns =
+        columns |> Seq.exists (fun (col, positions) ->
+                positions
+                |> Seq.sort
+                |> Seq.windowed 24
+                |> Seq.exists (fun window ->
+                    window
+                    |> Seq.pairwise
+                    |> Seq.fold (fun aggregate (nextPair0, nextPair1) ->
+                        aggregate && nextPair0.px + 1 = nextPair1.px
+                        ) true
+
+                    )
+            )
+    interestingColumns
+
+let printRobots (mapSizeX: int) (mapSizeY: int) (robots: robot<int> seq) =
+    let robotCoordinates =
+        robots
+        |> Seq.groupBy _.position
+        |> Seq.map fst
+        |> Set
+
+    if robotPositionsAreInteresting robotCoordinates then
+        for row = 0 to mapSizeX do
+            for col = 0 to mapSizeY do
+                if robotCoordinates.Contains({px = row; py = col}) then
+                    printf "+"
+                else
+                    printf "#"
+            printfn ""
+
+let mutable iteration = 0
+let part2moveAndPrint robots =
+    printfn $"\n{DateTime.Now:o} Iteration {iteration}\n"
+    iteration <- iteration + 1
+    printRobots part1MapMaxX part1MapMaxY robots
+    seq {
+        for robot in robots do
+            yield (move part1MapMaxX part1MapMaxY robot)
+    }
+part1Robots
+    |> iterate part2moveAndPrint 10000
+    |> ignore
