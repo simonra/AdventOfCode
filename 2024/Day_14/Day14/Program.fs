@@ -58,16 +58,47 @@ let parseRobot<'a> (input: string) : robot<'a>=
     let vel : velocity<'a> = { vx = parseA vNums[0] ; vy = parseA vNums[1] }
     {position = pos; velocity = vel}
 
+let inline getSafetyScore<'a
+when 'a: (static member One: 'a)
+and  'a: (static member Zero: 'a)
+and  'a: comparison
+and  'a: (static member (+): 'a * 'a -> 'a)
+and  'a: (static member (-): 'a * 'a -> 'a)
+and  'a: (static member (/): 'a * 'a -> 'a)>
+    (mapSizeX: 'a) (mapSizeY: 'a) (robots: robot<'a> seq) : int =
+    let zero = LanguagePrimitives.GenericZero
+    let one = LanguagePrimitives.GenericOne
+    let two = LanguagePrimitives.GenericOne + LanguagePrimitives.GenericOne
+    let halfX = (mapSizeX - one) / two
+    let halfY = (mapSizeY - one) / two
+    let quadrants = [
+        {xLower = zero;        yLower = zero;        xUpper = halfX - one;      yUpper = halfY - one}
+        {xLower = halfX + one; yLower = zero;        xUpper = (mapSizeX - one); yUpper = halfY - one}
+        {xLower = zero;        yLower = halfY + one; xUpper = halfX - one;      yUpper = (mapSizeY - one)}
+        {xLower = halfX + one; yLower = halfY + one; xUpper = (mapSizeX - one); yUpper = (mapSizeY - one)}
+    ]
+    let robotsPerQuadrant =
+        quadrants
+        |> Seq.map (fun q ->
+            robots
+            |> Seq.where (fun r -> positionIsWithinSector q r.position)
+            |> Seq.length
+            )
+    let safetyScore =
+        robotsPerQuadrant
+        |> Seq.fold (fun aggregated next -> aggregated * next) 1
+    safetyScore
+    // mapSizeX
 // Part 1 example dimensions: x = 11; y = 7
+// let part1exampleSectors = [
+//     {xLower = 0; yLower = 0; xUpper = 4; yUpper = 2}
+//     {xLower = 6; yLower = 0; xUpper = 10; yUpper = 2}
+//     {xLower = 0; yLower = 4; xUpper = 4; yUpper = 6}
+//     {xLower = 6; yLower = 4; xUpper = 10; yUpper = 6}
+// ]
+
 let part1ExampleMapMaxX = 11
 let part1ExampleMapMaxY = 7
-let part1exampleSectors = [
-    {xLower = 0; yLower = 0; xUpper = 4; yUpper = 2}
-    {xLower = 6; yLower = 0; xUpper = 10; yUpper = 2}
-    {xLower = 0; yLower = 4; xUpper = 4; yUpper = 6}
-    {xLower = 6; yLower = 4; xUpper = 10; yUpper = 6}
-]
-
 let part1ExampleRobotLines = seq { yield! System.IO.File.ReadLines "Input/Example.txt" }
 let part1ExampleRobots : robot<int> seq =
     part1ExampleRobotLines
@@ -77,34 +108,51 @@ let part1ExampleRobotsAfter100Moves =
     part1ExampleRobots
     |> Seq.map (fun r -> iterate moveForExample 100 r)
     // |> Seq.toArray
-let part1ExampleRobotsInFirstQuadrant =
-    part1ExampleRobotsAfter100Moves
-    |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[0] r.position)
-    |> Seq.length
-let part1ExampleRobotsInSecondQuadrant =
-    part1ExampleRobotsAfter100Moves
-    |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[1] r.position)
-    |> Seq.length
-let part1ExampleRobotsInThirdQuadrant =
-    part1ExampleRobotsAfter100Moves
-    |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[2] r.position)
-    |> Seq.length
-let part1ExampleRobotsInFourthQuadrant =
-    part1ExampleRobotsAfter100Moves
-    |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[3] r.position)
-    |> Seq.length
+// let part1ExampleRobotsInFirstQuadrant =
+//     part1ExampleRobotsAfter100Moves
+//     |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[0] r.position)
+//     |> Seq.length
+// let part1ExampleRobotsInSecondQuadrant =
+//     part1ExampleRobotsAfter100Moves
+//     |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[1] r.position)
+//     |> Seq.length
+// let part1ExampleRobotsInThirdQuadrant =
+//     part1ExampleRobotsAfter100Moves
+//     |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[2] r.position)
+//     |> Seq.length
+// let part1ExampleRobotsInFourthQuadrant =
+//     part1ExampleRobotsAfter100Moves
+//     |> Seq.where (fun r -> positionIsWithinSector part1exampleSectors[3] r.position)
+//     |> Seq.length
+//
+// let part1ExampleSafetyScore = part1ExampleRobotsInFirstQuadrant * part1ExampleRobotsInSecondQuadrant * part1ExampleRobotsInThirdQuadrant * part1ExampleRobotsInFourthQuadrant
+// printfn $"{DateTime.Now:o} Part 1 safety score components: %A{[part1ExampleRobotsInFirstQuadrant; part1ExampleRobotsInSecondQuadrant; part1ExampleRobotsInThirdQuadrant; part1ExampleRobotsInFourthQuadrant]}"
+// printfn $"{DateTime.Now:o} Part 1 example SafetyScore: '{part1ExampleSafetyScore}'"
+// printfn $"{DateTime.Now:o} Done with part 1 example"
 
-let part1ExampleSafetyScore = part1ExampleRobotsInFirstQuadrant * part1ExampleRobotsInSecondQuadrant * part1ExampleRobotsInThirdQuadrant * part1ExampleRobotsInFourthQuadrant
-printfn $"{DateTime.Now:o} Part 1 safety score components: %A{[part1ExampleRobotsInFirstQuadrant; part1ExampleRobotsInSecondQuadrant; part1ExampleRobotsInThirdQuadrant; part1ExampleRobotsInFourthQuadrant]}"
-printfn $"{DateTime.Now:o} Part 1 example SafetyScore: '{part1ExampleSafetyScore}'"
-printfn $"{DateTime.Now:o} Done with part 1 example"
+let alternativeSafetyScore = getSafetyScore part1ExampleMapMaxX part1ExampleMapMaxY part1ExampleRobotsAfter100Moves
+printfn $"{DateTime.Now:o} Part 1 example Alternative safety score: '{alternativeSafetyScore}'"
 
-// // Part 1 actual dimensions: x = 101; y = 103
-let part1sectors = [
-    {xLower = 0; yLower = 0; xUpper = 49; yUpper = 50}
-    {xLower = 51; yLower = 0; xUpper = 100; yUpper = 50}
-    {xLower = 0; yLower = 52; xUpper = 49; yUpper = 102}
-    {xLower = 51; yLower = 52; xUpper = 100; yUpper = 102}
-]
+let part1MapMaxX = 101
+let part1MapMaxY = 103
+let part1RobotLines = seq { yield! System.IO.File.ReadLines "Input/Input.txt" }
+let part1Robots : robot<int> seq =
+    part1RobotLines
+    |> Seq.map parseRobot
+let part1move = move part1MapMaxX part1MapMaxY
+let part1RobotsAfter100Moves =
+    part1Robots
+    |> Seq.map (fun r -> iterate part1move 100 r)
+let part1SafetyScore = getSafetyScore part1MapMaxX part1MapMaxY part1RobotsAfter100Moves
+printfn $"{DateTime.Now:o} Part 1 example safety score: '{part1SafetyScore}'"
+printfn $"{DateTime.Now:o} Part 1 done"
 
-// let parsedRobots =
+// // // Part 1 actual dimensions: x = 101; y = 103
+// let part1sectors = [
+//     {xLower = 0; yLower = 0; xUpper = 49; yUpper = 50}
+//     {xLower = 51; yLower = 0; xUpper = 100; yUpper = 50}
+//     {xLower = 0; yLower = 52; xUpper = 49; yUpper = 102}
+//     {xLower = 51; yLower = 52; xUpper = 100; yUpper = 102}
+// ]
+//
+// // let parsedRobots =
