@@ -1,3 +1,5 @@
 # Ignore actual input
 **/Input.txt
 
+# Ignore IDE stuff
+**/.idea/
