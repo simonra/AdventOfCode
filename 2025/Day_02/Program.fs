@@ -68,6 +68,7 @@ let exampleInputExpectedResult = "1227775554"
 let exampleInputIdRanges = parseIdRanges<int> exampleInputFileName
 let exampleInputInvalids = exampleInputIdRanges |> Seq.map invalidsInRange |> Seq.collect id
 printf $"""Example input invalids: {exampleInputInvalids |> Seq.iter (printf "%d, ")}{printf "\n"}"""
+printfn ""
 let exampleInputInvalidsSum = exampleInputInvalids |> Seq.sum
 if $"{exampleInputInvalidsSum}" = exampleInputExpectedResult then
     printfn $"Successfully processed example input for part 1!"
@@ -81,3 +82,67 @@ let part1InputInvalidIds = part1InputIdRanges |> Seq.map invalidsInRange |> Seq.
 let part1InvalidIdSums = part1InputInvalidIds |> Seq.sum
 
 printfn $"Part 1 result: {part1InvalidIdSums}"
+
+printfn "\n"
+printfn "Part 2:"
+
+let chunkStringIntoPiecesBySize (inputString: string) (chunkSize: int) : string seq =
+    if inputString.Length % chunkSize <> 0 then
+        Seq.empty
+    else
+        // let result = inputString |> Seq.chunkBySize chunkSize |> Seq.map System.String
+        // let concatenatedResult =  String.concat ", " result
+        // printfn $" Concatenated: %A{concatenatedResult}"
+        inputString |> Seq.chunkBySize chunkSize |> Seq.map System.String
+
+let allElementsEqual(input: 'a seq): bool =
+    let reIterableCollection = input |> Seq.toList
+    if reIterableCollection.IsEmpty then
+        false
+    else
+        reIterableCollection |> List.forall (fun elem -> elem = reIterableCollection[0])
+
+let isInvalidPart2<'a> (input: 'a) : bool =
+    // printfn $"\tChecking {input}"
+    let inputString = $"{input}"
+    let maxLengthToCheck = inputString.Length / 2
+    seq { 1 .. maxLengthToCheck } |> Seq.exists (fun chunkSize ->
+        let chunks = chunkStringIntoPiecesBySize inputString chunkSize |> Seq.toList
+        // let concatenated = chunks |> String.concat(",")
+        // printfn $"\t{inputString} chunksize {chunkSize} chunks: {new System.String(concatenated)}"
+        chunks |> allElementsEqual
+        )
+    // raise (System.NotImplementedException())
+
+let inline invalidsInRangePart2<'a
+    when 'a: comparison
+    and 'a: (static member One: 'a)
+    and 'a: (static member (+) : 'a * 'a -> 'a)
+>(input: idRange<'a>) : 'a seq =
+    let smallest = min input.first input.second
+    let largest = max input.second input.first
+    seq {smallest .. largest } |> Seq.filter isInvalidPart2
+    // raise (System.NotImplementedException())
+
+// let mutable exampleInputFileName = "Input/Example.txt"
+let exampleInputExpectedResultPart2 = "4174379265"
+// let exampleInputFileContent = seq { yield! System.IO.File.ReadLines exampleInputFileName }
+let exampleInputIdRangesPart2 = parseIdRanges<int64> exampleInputFileName
+let exampleInputInvalidsPart2 = exampleInputIdRangesPart2 |> Seq.map invalidsInRangePart2 |> Seq.collect id
+printf $"""Example input invalids part 2: {exampleInputInvalidsPart2 |> Seq.iter (printf "%d ")}{printf "\n"}"""
+printfn ""
+printfn $"Number of invalids part 2 example: %d{(exampleInputInvalidsPart2 |> Seq.toList).Length} (expected 13)"
+let exampleInputInvalidsSumPart2 = exampleInputInvalidsPart2 |> Seq.sum
+if $"{exampleInputInvalidsSumPart2}" = exampleInputExpectedResultPart2 then
+    printfn $"Successfully processed example input for part 2!"
+else
+    printfn $"Failed to process example input for part 2. Expected {exampleInputExpectedResultPart2}, but got {exampleInputInvalidsSumPart2}"
+printfn ""
+
+// let inputFileName = "Input/Input.txt"
+// let part1InputIdRanges = parseIdRanges<int64> inputFileName
+//
+let part2InputInvalidIds = part1InputIdRanges |> Seq.map invalidsInRangePart2 |> Seq.collect id
+let part2InvalidIdSums = part2InputInvalidIds |> Seq.sum
+
+printfn $"Part 2 result: {part2InvalidIdSums}"
