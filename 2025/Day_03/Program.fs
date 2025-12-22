@@ -1,61 +1,18 @@
-﻿type batteryBank = {
-    numberOfBatteries: int
-    positions9s: int seq
-    positions8s: int seq
-    positions7s: int seq
-    positions6s: int seq
-    positions5s: int seq
-    positions4s: int seq
-    positions3s: int seq
-    positions2s: int seq
-    positions1s: int seq
-    positions0s: int seq
-}
-
-/// <summary>
-/// Function to find indexes of all elements in a sequence mathcing the criteria specified by the supplied function.
-/// Example usage:
-/// <code>
-///let inputs = [ 1; 2; 3; 4; 5 ]
-///inputs |> indexesMatching (fun x -> x = 3)</code>
-/// </summary>
-/// Evaluates to <c>2</c>.
-/// <param name="filter">Filtering function. Example: <c>fun x -> 0 &lt; x &amp;&amp; x &lt; 2</c></param>
-/// <param name="xs">Sequence to filter. For instance: <c>[ 1; 2; 3; 4; 5 ]</c> </param>
-let indexesMatching (filter: 'a -> bool) (xs: 'a seq) : int seq =
-    xs
-    |> Seq.indexed
-    |> Seq.filter (snd >> filter)
-    |> Seq.map fst
-
-let parseBatteryBank (input: string) : batteryBank =
-    let nines = input |> indexesMatching (fun x -> x = '9')
-    raise (System.NotImplementedException())
-
-// let largestNumberAndIndex (input: string) : (string * int) =
-//     let mutable largest = -1
-//     let mutable indexOfLargest = -1
-//     for i in [0 .. input.Length - 1] do
-//         let nextAsNumber = input[i] |> int
-//         if nextAsNumber > largest then
-//             indexOfLargest <- i
-//             largest <- nextAsNumber
-//         else
-//             ()
-//     ($"{largest}", indexOfLargest)
-    // raise (System.NotImplementedException())
-// let largestNumberAndIndex (startingPosition: int) (input : string) : (string * int) =
-//     if startingPosition >= input.Length then raise(System.ArgumentException("Stating position cannot be greater than input length"))
-//     let mutable largest = -1
-//     let mutable indexOfLargest = -1
-//     for i in [startingPosition .. input.Length - 1] do
-//         let nextAsNumber = input[i] |> int
-//         if nextAsNumber > largest then
-//             indexOfLargest <- i
-//             largest <- nextAsNumber
-//         else
-//             ()
-//     ($"{largest}", indexOfLargest)
+﻿// /// <summary>
+// /// Function to find indexes of all elements in a sequence mathcing the criteria specified by the supplied function.
+// /// Example usage:
+// /// <code>
+// ///let inputs = [ 1; 2; 3; 4; 5 ]
+// ///inputs |> indexesMatching (fun x -> x = 3)</code>
+// /// </summary>
+// /// Evaluates to <c>2</c>.
+// /// <param name="filter">Filtering function. Example: <c>fun x -> 0 &lt; x &amp;&amp; x &lt; 2</c></param>
+// /// <param name="xs">Sequence to filter. For instance: <c>[ 1; 2; 3; 4; 5 ]</c> </param>
+// let indexesMatching (filter: 'a -> bool) (xs: 'a seq) : int seq =
+//     xs
+//     |> Seq.indexed
+//     |> Seq.filter (snd >> filter)
+//     |> Seq.map fst
 
 let batteryBankMaxCapacity (input: string) : int =
     let mutable largest = -1
